@@ -175,7 +175,7 @@
 
                     <div class="p-4 bg-gray-800 border border-accent-primary rounded-lg space-y-3">
                         <h4 class="text-lg font-semibold text-accent-secondary flex items-center">
-                            <i data-lucide="image" class="w-5 h-5 mr-2"></i> Image Uploader (Saves to `images/` folder)
+                            <i data-lucide="image" class="w-5 h-5 mr-2"></i> Image Uploader (Simulated)
                         </h4>
                         <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-end">
                             <div class="flex-grow w-full">
@@ -216,14 +216,34 @@
         let currentTab = 'dashboard';
         let dosAnimationInterval = null;
         let trafficChart = null;
+        let isSimulationMode = false; // New flag for simulation mode
         
         const BLOG_COLLECTION = 'blog_posts';
         const SITE_CONFIG_PATH = 'site_config/main_config';
         const IMAGE_PATH = 'images';
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // --- Firebase Configuration Check and Fallback ---
+        let firebaseConfig;
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                throw new Error("Missing configuration.");
+            }
+        } catch (e) {
+            isSimulationMode = true;
+            console.warn("WARNING: Firebase Configuration missing. Running in Simulation Mode. Data will NOT persist.", e);
+            // Provide a dummy config to prevent Firebase SDK initialization error
+            firebaseConfig = {
+                apiKey: "DUMMY_API_KEY", authDomain: "dummy.firebaseapp.com",
+                projectId: "dummy-project-id", storageBucket: "dummy.appspot.com",
+                messagingSenderId: "1234567890", appId: "1:1234567890:web:dummy"
+            };
+        }
+        // ------------------------------------------------
 
         const state = {
             isAuthenticated: false,
@@ -269,10 +289,31 @@
         }
 
         async function initFirebaseAndListeners() {
-            if (!firebaseConfig) {
-                dom.authMessage.innerHTML = '<span class="text-red-400">Error: Firebase Configuration missing.</span>';
+            if (isSimulationMode) {
+                // --- SIMULATION MODE START ---
+                dom.authMessage.innerHTML = '<span class="text-red-400">Error: Configuration missing. Running in **OFFLINE SIMULATION MODE**. Data will NOT persist.</span>';
+                state.isAuthenticated = true; 
+                userId = 'SIMULATED_USER';
+                
+                // Mock Data for Simulation
+                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATED)', siteOwner: 'System Admin', siteDescription: 'Offline mode active. No data persistence.' };
+                state.blogPosts = [
+                    { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
+                    { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
+                ];
+
+                // Skip Firebase initialization and listeners
+                setTimeout(() => {
+                    dom.loadingScreen.classList.add('hidden');
+                    dom.cmsPanel.classList.remove('hidden');
+                    dom.cmsUserId.textContent = `User ID: ${userId}`;
+                    renderContent('dashboard');
+                }, 1000); 
+                // --- SIMULATION MODE END ---
                 return;
             }
+
+            // --- LIVE MODE START ---
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -287,7 +328,6 @@
                             dom.authMessage.innerHTML = '<span class="text-green-400">Token authenticated. Loading CMS...</span>';
                             state.isAuthenticated = true;
                         } else if (initialAuthToken) {
-                            // Try to sign in with the secure token
                             try {
                                 const userCredential = await signInWithCustomToken(auth, initialAuthToken);
                                 userId = userCredential.user.uid;
@@ -295,13 +335,11 @@
                                 state.isAuthenticated = true;
                             } catch (error) {
                                 console.error("Custom Token failed, falling back to anonymous:", error);
-                                // Fallback to anonymous if token fails
                                 const userCredential = await signInAnonymously(auth);
                                 userId = userCredential.user.uid;
                                 dom.authMessage.innerHTML = '<span class="text-yellow-400">Token failed. Signed in anonymously.</span>';
                             }
                         } else {
-                            // Fallback to anonymous if no token is present
                             const userCredential = await signInAnonymously(auth);
                             userId = userCredential.user.uid;
                             dom.authMessage.innerHTML = '<span class="text-yellow-400">No token found. Signed in anonymously.</span>';
@@ -325,8 +363,9 @@
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
-                dom.authMessage.innerHTML = `<span class="text-red-400">Fatal Error: ${error.message}</span>`;
+                dom.authMessage.innerHTML = `<span class="text-red-400">Fatal Error: Initialization failed. ${error.message}</span>`;
             }
+            // --- LIVE MODE END ---
         }
 
         function setupSiteConfigListener() {
@@ -335,6 +374,8 @@
                 if (docSnap.exists()) {
                     state.siteConfig = docSnap.data();
                 } else {
+                    // Initialize with default if not found
+                    state.siteConfig = { siteTitle: 'Cracksoft Security', siteOwner: 'Admin', siteDescription: 'Cyber security education and news.' };
                 }
                 renderContent(currentTab);
             }, (error) => {
@@ -435,13 +476,20 @@
                     <i data-lucide="layout-dashboard" class="w-6 h-6 mr-3"></i> Dashboard Overview
                 </h2>
                 
+                ${isSimulationMode ? `
+                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
+                        <p class="text-sm mt-1">Firebase configuration is missing. Data displayed is mock data and changes will NOT be saved to the database.</p>
+                    </div>
+                ` : ''}
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-accent-primary">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400 font-mono">SITE TITLE</span>
                             <i data-lucide="globe" class="w-6 h-6 text-accent-primary"></i>
                         </div>
-                        <p class="text-2xl font-bold mt-2 text-white">${siteTitle}</p>
+                        <p class="text-2xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">${siteTitle}</p>
                         <p class="text-sm text-gray-500 mt-1">Owner: ${state.siteConfig.siteOwner || 'Unknown'}</p>
                     </div>
 
@@ -478,39 +526,50 @@
                         <p><span class="text-green-400">[20:48:05]</span> Traffic analysis module initialized.</p>
                         <p><span class="text-green-400">[20:48:33]</span> Site configuration validated.</p>
                         <p><span class="text-yellow-400">[20:49:01]</span> Next scheduled security scan in 1 hour.</p>
+                        ${isSimulationMode ? `<p><span class="text-red-400">[20:49:30]</span> <span class="font-bold">Database connection FAILED.</span> Using mock data.</p>` : ''}
                     </div>
                 </div>
             `;
         }
         
         function renderSiteSettings() {
+            const disabledAttr = isSimulationMode ? 'disabled' : '';
+            const saveBtnText = isSimulationMode ? 'Save (Simulation Mode)' : 'Save Settings';
+
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="settings" class="w-6 h-6 mr-3"></i> Global Site Settings
                 </h2>
                 
+                ${isSimulationMode ? `
+                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
+                        <p class="text-sm mt-1">Changes made here will NOT be saved to the database.</p>
+                    </div>
+                ` : ''}
+
                 <form id="siteSettingsForm" class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700 space-y-4">
                     <p id="settingsSaveMessage" class="text-sm h-6 text-center"></p>
                     <div>
                         <label for="siteTitle" class="block text-sm font-medium text-gray-400 mb-1">Site Title</label>
-                        <input type="text" id="siteTitle" value="${state.siteConfig.siteTitle || ''}" required maxlength="50"
-                            class="w-full p-3 rounded-lg input-style text-white">
+                        <input type="text" id="siteTitle" value="${state.siteConfig.siteTitle || ''}" required maxlength="50" ${disabledAttr}
+                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">
                     </div>
                     <div>
                         <label for="siteOwner" class="block text-sm font-medium text-gray-400 mb-1">Site Owner / Organization</label>
-                        <input type="text" id="siteOwner" value="${state.siteConfig.siteOwner || ''}" required maxlength="50"
-                            class="w-full p-3 rounded-lg input-style text-white">
+                        <input type="text" id="siteOwner" value="${state.siteConfig.siteOwner || ''}" required maxlength="50" ${disabledAttr}
+                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">
                     </div>
                     <div>
                         <label for="siteDescription" class="block text-sm font-medium text-gray-400 mb-1">Site Description (Short tagline)</label>
-                        <textarea id="siteDescription" rows="3" required maxlength="200"
-                            class="w-full p-3 rounded-lg input-style text-white">${state.siteConfig.siteDescription || ''}</textarea>
+                        <textarea id="siteDescription" rows="3" required maxlength="200" ${disabledAttr}
+                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">${state.siteConfig.siteDescription || ''}</textarea>
                     </div>
                     
                     <div class="pt-4 flex justify-end">
                         <button type="submit" id="saveSettingsBtn" disabled
                             class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 flex items-center">
-                            <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> Save Settings
+                            <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> ${saveBtnText}
                         </button>
                     </div>
                 </form>
@@ -522,7 +581,7 @@
             const saveBtn = document.getElementById('saveSettingsBtn');
             const message = document.getElementById('settingsSaveMessage');
 
-            if (form) {
+            if (form && !isSimulationMode) {
                 form.addEventListener('submit', handleSaveSiteSettings);
                 form.addEventListener('input', () => {
                     saveBtn.disabled = false;
@@ -530,13 +589,21 @@
                     message.classList.remove('text-green-400', 'text-red-400');
                     message.classList.add('text-yellow-400');
                 });
+            } else if (isSimulationMode) {
+                 saveBtn.disabled = false; // Enable button for visual consistency in sim mode
+                 form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    message.textContent = 'Data not saved (Simulation Mode).';
+                    message.className = 'text-yellow-400 mt-4 h-6 text-center';
+                 });
             }
         }
 
         async function handleSaveSiteSettings(e) {
             e.preventDefault();
-            if (!db) return;
-
+            if (!db || isSimulationMode) return;
+            // ... (rest of the handleSaveSiteSettings logic remains the same)
+            
             const title = document.getElementById('siteTitle').value.trim();
             const owner = document.getElementById('siteOwner').value.trim();
             const description = document.getElementById('siteDescription').value.trim();
@@ -577,20 +644,20 @@
 
         function renderBlogManager() {
             const postsHtml = state.blogPosts.map((post, index) => `
-                <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex items-center justify-between transition duration-200 hover:bg-gray-800" 
-                     draggable="true" data-post-id="${post.id}" data-post-order="${post.order || 0}" data-index="${index}">
+                <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex items-center justify-between transition duration-200 hover:bg-gray-800 ${isSimulationMode ? 'opacity-80' : ''}" 
+                     draggable="${!isSimulationMode}" data-post-id="${post.id}" data-post-order="${post.order || 0}" data-index="${index}">
                     <div class="flex items-center space-x-4 flex-1 min-w-0">
-                        <i data-lucide="grip-vertical" class="w-5 h-5 text-gray-500 flex-shrink-0 cursor-grab"></i>
+                        <i data-lucide="grip-vertical" class="w-5 h-5 ${isSimulationMode ? 'text-gray-700' : 'text-gray-500 cursor-grab'} flex-shrink-0"></i>
                         <div class="min-w-0">
                             <p class="text-white font-bold truncate">${post.title}</p>
                             <p class="text-xs text-gray-500">By ${post.author} - ${formatDate(post.createdAt)}</p>
                         </div>
                     </div>
                     <div class="flex space-x-2 flex-shrink-0">
-                        <button onclick="editBlogPost('${post.id}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition">
+                        <button onclick="editBlogPost('${post.id}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${isSimulationMode ? 'disabled' : ''}>
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteBlogPost('${post.id}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition">
+                        <button onclick="deleteBlogPost('${post.id}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${isSimulationMode ? 'disabled' : ''}>
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -601,11 +668,18 @@
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="newspaper" class="w-6 h-6 mr-3"></i> Blog Post Manager (${state.blogPosts.length} posts)
                 </h2>
+
+                ${isSimulationMode ? `
+                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
+                        <p class="text-sm mt-1">Editing, adding, deleting, and reordering are disabled because there is no database connection.</p>
+                    </div>
+                ` : ''}
                 
                 <div class="flex justify-between items-center mb-4">
                     <p class="text-gray-400 text-sm">Drag and drop posts to reorder them on your site.</p>
-                    <button onclick="showBlogModal('new')"
-                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 flex items-center">
+                    <button onclick="showBlogModal('new')" ${isSimulationMode ? 'disabled' : ''}
+                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 disabled:opacity-50 flex items-center">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Blog Post
                     </button>
                 </div>
@@ -617,6 +691,13 @@
         }
 
         window.handleImageUpload = async function() {
+            if (isSimulationMode) {
+                 dom.imageStatus.textContent = 'Image upload is disabled in Simulation Mode.';
+                 dom.imageStatus.className = 'text-red-500 mt-1';
+                 return;
+            }
+            // ... (rest of the handleImageUpload logic remains the same)
+
             const file = dom.imageFileInput.files[0];
             if (!file) {
                 dom.imageStatus.textContent = 'Please select an image file first.';
@@ -645,6 +726,8 @@
         }
 
         window.showBlogModal = function(mode) {
+            if (isSimulationMode) return; // Prevent modal opening in simulation mode
+            
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
             dom.imageStatus.textContent = '';
@@ -681,7 +764,8 @@
 
         async function handleBlogFormSubmit(e) {
             e.preventDefault();
-            if (!db) return;
+            if (!db || isSimulationMode) return;
+            // ... (rest of the handleBlogFormSubmit logic remains the same)
 
             const postData = {
                 title: dom.postTitle.value.trim(),
@@ -734,10 +818,14 @@
         }
         
         window.editBlogPost = function(postId) {
+            if (isSimulationMode) return;
             showBlogModal(postId);
         }
 
         window.deleteBlogPost = async function(postId) {
+            if (isSimulationMode) return;
+            // ... (rest of the deleteBlogPost logic remains the same)
+
             const confirmBox = document.createElement('div');
             confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
             confirmBox.innerHTML = `
@@ -774,8 +862,6 @@
                     }
                 } catch (error) {
                     console.error("Error deleting blog post:", error);
-                    // Use custom alert box instead of window.alert()
-                    // The onSnapshot listener will handle the UI update automatically
                 }
             };
         }
@@ -789,14 +875,20 @@
             const container = document.getElementById('blogListContainer');
             if (!container) return;
             
-            container.addEventListener('dragstart', handleDragStart);
-            container.addEventListener('dragover', handleDragOver);
-            container.addEventListener('dragleave', handleDragLeave);
-            container.addEventListener('drop', handleDrop);
-            container.addEventListener('dragend', handleDragEnd);
+            // Disable drag/drop listeners in simulation mode
+            if (!isSimulationMode) {
+                container.addEventListener('dragstart', handleDragStart);
+                container.addEventListener('dragover', handleDragOver);
+                container.addEventListener('dragleave', handleDragLeave);
+                container.addEventListener('drop', handleDrop);
+                container.addEventListener('dragend', handleDragEnd);
+            }
         }
 
         function handleDragStart(e) {
+            if (isSimulationMode) return;
+            // ... (rest of the handleDragStart logic remains the same)
+            
             const target = e.target.closest('.blog-item');
             if (!target) return;
             
@@ -810,6 +902,9 @@
         }
 
         function handleDragOver(e) {
+            if (isSimulationMode) return;
+            // ... (rest of the handleDragOver logic remains the same)
+            
             if (e.preventDefault) {
                 e.preventDefault();
             }
@@ -825,6 +920,9 @@
         }
 
         function handleDragLeave(e) {
+            if (isSimulationMode) return;
+            // ... (rest of the handleDragLeave logic remains the same)
+            
             const target = e.target.closest('.blog-item');
             if (target) {
                 target.classList.remove('drag-over');
@@ -832,6 +930,9 @@
         }
 
         async function handleDrop(e) {
+            if (isSimulationMode) return;
+            // ... (rest of the handleDrop logic remains the same)
+            
             e.stopPropagation();
             
             const targetEl = e.target.closest('.blog-item');
@@ -856,13 +957,15 @@
                 }
             } catch(error) {
                 console.error("Error updating post order:", error);
-                // Handle error without using alert()
             }
             
             return false;
         }
 
         function handleDragEnd(e) {
+            if (isSimulationMode) return;
+            // ... (rest of the handleDragEnd logic remains the same)
+            
             dragSrcEl.classList.remove('dragging');
             dragSrcEl = null;
 
@@ -870,10 +973,18 @@
         }
 
         function renderSecurityTools() {
-            return `
+            // ... (renderSecurityTools logic remains the same)
+             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="shield-half" class="w-6 h-6 mr-3"></i> Security & Traffic Tools
                 </h2>
+                
+                ${isSimulationMode ? `
+                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
+                        <p class="text-sm mt-1">These tools run simulated animations only.</p>
+                    </div>
+                ` : ''}
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
@@ -925,6 +1036,7 @@
         }
 
         function renderAnalyzerResults() {
+            // ... (renderAnalyzerResults logic remains the same)
             const scores = [
                 { label: 'Security Score', value: 92, color: 'text-green-400', icon: 'shield-check' },
                 { label: 'SEO Health', value: 85, color: 'text-yellow-400', icon: 'zap' },
@@ -944,6 +1056,7 @@
         }
         
         window.runAnalyzer = function() {
+            // ... (runAnalyzer logic remains the same)
             const results = document.getElementById('analyzer-results');
             if (results) {
                 results.innerHTML = `
@@ -973,6 +1086,7 @@
         }
 
         function setupTrafficChart() {
+            // ... (setupTrafficChart logic remains the same)
             const ctx = document.getElementById('trafficChart').getContext('2d');
             if (trafficChart) {
                 trafficChart.destroy();
@@ -1026,6 +1140,7 @@
         let simulationStartTime = 0;
 
         function setupDosAnimation() {
+            // ... (setupDosAnimation logic remains the same)
             const container = document.getElementById('dos-animation');
             if (!container) return;
             container.innerHTML = '';
@@ -1043,6 +1158,7 @@
         }
         
         function updateDosAnimation(timestamp) {
+            // ... (updateDosAnimation logic remains the same)
             if (!simulationStartTime) simulationStartTime = timestamp;
             const elapsed = timestamp - simulationStartTime;
             const duration = DOS_DURATION;
@@ -1100,6 +1216,7 @@
         }
 
         window.startDosSimulation = function() {
+            // ... (startDosSimulation logic remains the same)
             if (dosAnimationInterval) return;
 
             document.getElementById('dos-btn').disabled = true;
