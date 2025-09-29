@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com/"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- TinyMCE Rich Text Editor -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> 
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -76,13 +78,21 @@
             color: var(--color-bg-dark);
             font-weight: bold;
         }
-        /* Existing blog/animation styles */
-        .blog-item { transition: transform 0.2s, box-shadow 0.2s; }
-        .dragging { opacity: 0.5; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); transform: translateY(0); }
-        .drag-over { border-bottom: 2px solid var(--color-accent-secondary); }
-        #dos-animation { height: 150px; background-color: #111; border-radius: 8px; overflow: hidden; position: relative; }
-        .traffic-bar { position: absolute; bottom: 0; width: 5px; background-color: var(--color-accent-secondary); opacity: 0.7; transition: height 0.1s linear, background-color 0.1s; }
-        .attack-bar { background-color: #f04f4f; }
+        /* TinyMCE Dark Mode Styling */
+        .tox .tox-menubar, .tox .tox-toolbar, .tox .tox-statusbar, .tox .tox-toolbar__group, .tox .tox-edit-area, .tox .tox-dialog {
+            background-color: #1f2937 !important; /* Tailwind gray-800 */
+            color: #E9F0F4 !important; /* Light Text */
+        }
+        .tox .tox-tbtn, .tox .tox-icon, .tox .tox-label, .tox .tox-button {
+            color: #E9F0F4 !important;
+        }
+        .tox .tox-menu {
+             background-color: #1f2937 !important;
+             border-color: var(--color-accent-secondary) !important;
+        }
+        .tox .tox-collection__item--active {
+            background-color: #4f46e5 !important; /* Tailwind indigo-600 */
+        }
     </style>
 </head>
 <body class="p-4">
@@ -156,34 +166,54 @@
         
         <!-- Blog Modal -->
         <div id="blogModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 items-center justify-center p-4">
-            <div class="bg-gray-900 border border-accent-secondary rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="bg-gray-900 border border-accent-secondary rounded-lg w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
                 <div class="p-4 bg-gray-800 border-b border-accent-secondary flex justify-between items-center">
                     <h3 id="blogModalTitle" class="text-xl font-bold font-mono text-accent-secondary flex items-center">
-                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i> Blog Post
+                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i> Blog Post Editor
                     </h3>
                     <button class="text-gray-400 hover:text-white p-1" onclick="hideBlogModal()">
                         <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
                 <form id="blogForm" class="p-6 overflow-y-auto flex-grow space-y-4">
-                    <div class="bg-gray-700 p-3 rounded-lg text-xs text-gray-300 font-mono">
-                        File Path: <span id="currentFilePath"></span>
+                    <div class="bg-gray-700 p-3 rounded-lg text-xs text-gray-300 font-mono flex flex-wrap items-center">
+                        <span id="currentFilePathContainer">File Path: <span id="currentFilePath"></span></span>
+                        <span id="autoFilenameNotice" class="ml-auto text-yellow-400 hidden">
+                            <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i> Filename will be auto-generated.
+                        </span>
                     </div>
+
                     <div>
-                        <label for="postFilename" class="block text-sm font-medium text-gray-400 mb-1">Filename (e.g., 2024-09-20-post-title.md)</label>
-                        <input type="text" id="postFilename" required
-                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="YYYY-MM-DD-your-post-slug.md">
+                        <label for="postTitle" class="block text-sm font-medium text-gray-400 mb-1">Post Title</label>
+                        <input type="text" id="postTitle" required
+                            class="w-full p-3 rounded-lg input-style text-white text-lg font-bold" placeholder="Enter a compelling title">
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="postAuthor" class="block text-sm font-medium text-gray-400 mb-1">Author Name (Jekyll Front Matter)</label>
+                            <input type="text" id="postAuthor" required
+                                class="w-full p-3 rounded-lg input-style text-white" placeholder="e.g., John Doe">
+                        </div>
+                        <div>
+                            <label for="postTags" class="block text-sm font-medium text-gray-400 mb-1">Tags (Comma Separated)</label>
+                            <input type="text" id="postTags"
+                                class="w-full p-3 rounded-lg input-style text-white" placeholder="e.g., security, linux, tutorial">
+                        </div>
+                    </div>
+
                     <div>
-                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Markdown Content</label>
+                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Rich Content Editor (WYSIWYG)</label>
+                        <!-- TinyMCE will initialize on this textarea -->
                         <textarea id="postContent" rows="15" required
-                            class="w-full p-3 rounded-lg input-style text-white font-mono"></textarea>
+                            class="w-full p-3 rounded-lg input-style text-white"></textarea>
                     </div>
+
                     <p id="blogSaveMessage" class="text-sm h-6 text-center"></p>
                     <div class="flex justify-end pt-4">
                         <button type="submit" id="submitBlogBtn"
-                            class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-accent-primary text-white hover:bg-accent-primary/80 disabled:opacity-50 flex items-center">
-                            Save Post to GitHub
+                            class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-accent-primary text-white hover:bg-accent-primary/80 disabled:opacity-50 flex items-center shadow-glow-primary">
+                            Save & Commit Post to GitHub
                         </button>
                     </div>
                 </form>
@@ -203,12 +233,13 @@
 
         let githubUser = 'N/A';
         let currentTab = 'dashboard';
+        let tinymceInitialized = false;
 
         // State to hold application data and configuration
         const state = {
             isAuthenticated: false,
             githubPat: localStorage.getItem('githubPat') || '',
-            repoConfig: REPO_CONFIG, // Use the hardcoded config
+            repoConfig: REPO_CONFIG, 
             blogPosts: [],
             editingPost: null, // Holds the full post object including SHA
         };
@@ -223,9 +254,13 @@
             blogModal: document.getElementById('blogModal'),
             blogModalTitle: document.getElementById('blogModalTitle'),
             blogForm: document.getElementById('blogForm'),
-            postFilename: document.getElementById('postFilename'),
-            postContent: document.getElementById('postContent'),
+            postTitle: document.getElementById('postTitle'),
+            postAuthor: document.getElementById('postAuthor'),
+            postTags: document.getElementById('postTags'),
+            postContent: document.getElementById('postContent'), // The textarea where TinyMCE is attached
             currentFilePath: document.getElementById('currentFilePath'),
+            currentFilePathContainer: document.getElementById('currentFilePathContainer'),
+            autoFilenameNotice: document.getElementById('autoFilenameNotice'),
             blogSaveMessage: document.getElementById('blogSaveMessage'),
             submitBlogBtn: document.getElementById('submitBlogBtn'),
             tabButtons: document.querySelectorAll('.tab-button'),
@@ -245,6 +280,15 @@
             return new Date(ms).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
+        // Converts a string to a URL-friendly slug
+        function slugify(text) {
+            return text.toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '') // Remove all non-word chars except spaces/hyphens
+                .replace(/[\s_-]+/g, '-')  // Replace spaces/underscores/multiple hyphens with a single hyphen
+                .replace(/^-+|-+$/g, '');  // Remove leading/trailing hyphens
+        }
+
         function showCustomAlert(title, message, isError = false) {
             const confirmBox = document.createElement('div');
             confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
@@ -259,6 +303,56 @@
             `;
             document.body.appendChild(confirmBox);
             document.getElementById('closeAlert').onclick = () => document.body.removeChild(confirmBox);
+        }
+
+        // --- TinyMCE Initialization ---
+
+        function initializeTinyMCE(content) {
+            if (tinymceInitialized) {
+                // Editor already exists, just set content
+                const editor = tinymce.get('postContent');
+                if (editor) {
+                    editor.setContent(content || '');
+                    editor.focus();
+                }
+                return;
+            }
+
+            // Initialize editor for the first time
+            tinymce.init({
+                selector: '#postContent',
+                height: 500,
+                // Full featured toolbar for WordPress-like experience
+                plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media | code fullscreen help',
+                
+                // Content Style for Dark Mode
+                content_css: false,
+                content_style: `
+                    body { font-family: Inter, sans-serif; background-color: #1f2937; color: #E9F0F4; padding: 15px; }
+                    .mce-content-body { color: #E9F0F4; }
+                    /* Add Jekyll-specific styling if needed, e.g., for code blocks */
+                `,
+                skin: 'oxide-dark', // Dark theme for TinyMCE UI
+                theme: 'silver',
+
+                setup: function (editor) {
+                    editor.on('init', function (e) {
+                        tinymceInitialized = true;
+                        // Set content after initialization
+                        editor.setContent(content || '');
+                        editor.focus();
+                    });
+                }
+            });
+        }
+        
+        function destroyTinyMCE() {
+            const editor = tinymce.get('postContent');
+            if (editor) {
+                editor.remove();
+                tinymceInitialized = false;
+            }
         }
 
         // --- GitHub API Integration ---
@@ -291,7 +385,14 @@
                 if (response.status === 204) return {}; // No Content
                 if (response.status === 404) return null; // Not Found
                 
-                const json = await response.json();
+                // Try to parse JSON, handle cases where response is not JSON
+                let json = null;
+                try {
+                    json = await response.json();
+                } catch (e) {
+                    json = { message: "Non-JSON response received from GitHub." };
+                }
+
 
                 if (!response.ok) {
                     console.error("GitHub API Error:", json);
@@ -311,6 +412,8 @@
             const user = await githubApi('GET', '/user');
             if (user && user.login) {
                 githubUser = user.login;
+                // Set default author name
+                dom.postAuthor.value = githubUser;
                 return true;
             }
             return false;
@@ -318,10 +421,10 @@
 
         async function fetchBlogPostsFromGithub() {
             const { repoPath, branchName } = state.repoConfig;
-            if (!repoPath || !state.githubPat) {
-                state.blogPosts = [];
-                return;
-            }
+            
+            // Show loading message
+            document.getElementById('blogListContainer').innerHTML = '<p class="text-center py-10 text-yellow-400 flex items-center justify-center"><i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Fetching posts from GitHub...</p>';
+            lucide.createIcons();
 
             try {
                 // 1. Get the list of files in the _posts directory
@@ -331,17 +434,20 @@
                     state.blogPosts = [];
                     // This often means the folder doesn't exist or permissions are wrong
                     if (filesList && filesList.message) {
-                        showCustomAlert("Repo Error", `Failed to list files: ${filesList.message}. Check permissions or if the _posts folder exists.`, true);
+                         // Show error in the list area
+                        document.getElementById('blogListContainer').innerHTML = `<p class="text-center py-10 text-red-400">Error: ${filesList.message}. Check your PAT scope and ensure the **${GITHUB_POSTS_PATH}** directory exists in the repo.</p>`;
+                        console.error("Failed to list files:", filesList);
+                    } else if (filesList === null) {
+                        document.getElementById('blogListContainer').innerHTML = `<p class="text-center py-10 text-red-400">Error 404: The repository path **${repoPath}** or **${GITHUB_POSTS_PATH}** folder was not found.</p>`;
                     }
                     return;
                 }
 
-                // Filter for Markdown files (or whatever convention you use)
                 const markdownFiles = filesList.filter(file => 
                     file.type === 'file' && file.name.endsWith('.md')
                 );
 
-                // 2. Fetch the content for each file (optimistically, but can be slow)
+                // 2. Fetch the content for each file (up to 50, otherwise optimize with recursive content fetch)
                 const postsPromises = markdownFiles.map(file => 
                     githubApi('GET', `/repos/${repoPath}/contents/${file.path}?ref=${branchName}`)
                 );
@@ -350,46 +456,63 @@
 
                 state.blogPosts = postsData.map(post => {
                     if (post && post.content) {
-                        const content = base64Decode(post.content);
-                        // Simple Front Matter parser for display (not for full editing)
-                        const frontMatterMatch = content.match(/---\n([\s\S]*?)\n---/);
-                        let title = post.name;
-                        let author = githubUser; // Default author
+                        const rawContent = base64Decode(post.content);
                         
+                        // Use a more robust Front Matter parser
+                        const frontMatterMatch = rawContent.match(/^---\s*([\s\S]*?)\s*---/);
+                        let title = post.name;
+                        let author = githubUser;
+                        let tags = '';
+                        let content = rawContent;
+
                         if (frontMatterMatch) {
                             const frontMatter = frontMatterMatch[1];
-                            const titleMatch = frontMatter.match(/title:\s*(.*)/);
-                            const authorMatch = frontMatter.match(/author:\s*(.*)/);
-
+                            // Simple extraction of key/value pairs
+                            const titleMatch = frontMatter.match(/title:\s*['"]?([^'"]*)['"]?/);
+                            const authorMatch = frontMatter.match(/author:\s*['"]?([^'"]*)['"]?/);
+                            const tagsMatch = frontMatter.match(/tags:\s*\[(.*?)\]/);
+                            
                             if (titleMatch && titleMatch[1]) {
-                                title = titleMatch[1].replace(/['"]/g, '').trim();
+                                title = titleMatch[1].trim();
                             }
                             if (authorMatch && authorMatch[1]) {
-                                author = authorMatch[1].replace(/['"]/g, '').trim();
+                                author = authorMatch[1].trim();
                             }
+                            if (tagsMatch && tagsMatch[1]) {
+                                // Extract tags and convert to comma-separated string
+                                tags = tagsMatch[1].split(',').map(tag => tag.trim().replace(/['"]/g, '')).join(', ');
+                            }
+
+                            // Content is everything after the second '---'
+                            content = rawContent.substring(frontMatterMatch[0].length + 3).trim(); 
+                        } else {
+                            // If no front matter, the whole file is content
+                            content = rawContent;
                         }
 
-                        // Use a date extraction for sorting/display
-                        const dateMatch = post.name.match(/(\d{4}-\d{2}-\d{2})/);
-                        const createdAt = dateMatch ? new Date(dateMatch[1]).getTime() : Date.now();
+
+                        const dateMatch = post.name.match(/(\d{4}-\d{2}-\d{2})/) || post.name.match(/(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/);
+                        const createdAt = dateMatch ? new Date(dateMatch[1].replace(/-/g, '/')).getTime() : Date.now();
                         
                         return {
-                            id: post.sha, // Unique identifier is the SHA
+                            id: post.sha,
                             name: post.name,
                             path: post.path,
                             sha: post.sha,
                             content: content,
+                            rawContent: rawContent, // Store original raw content with front matter
                             title: title,
                             author: author,
+                            tags: tags,
                             createdAt: createdAt,
                         };
                     }
                     return null;
-                }).filter(p => p !== null).sort((a, b) => b.createdAt - a.createdAt); // Sort by date descending
+                }).filter(p => p !== null).sort((a, b) => b.createdAt - a.createdAt);
                 
             } catch (error) {
                 console.error("Error fetching blog posts from GitHub:", error);
-                showCustomAlert("GitHub Fetch Error", "Could not fetch posts. See console for details.", true);
+                showCustomAlert("GitHub Fetch Error", "Could not fetch posts. Check connection and console for details.", true);
                 state.blogPosts = [];
             }
             renderContent(currentTab);
@@ -464,6 +587,11 @@
                 trafficChart = null;
             }
             
+            // Ensure TinyMCE is removed when switching away from the blog tab
+            if (tabId !== 'blog-manager') {
+                destroyTinyMCE();
+            }
+
             renderContent(tabId);
         }
         
@@ -498,8 +626,7 @@
             const repoPath = state.repoConfig.repoPath;
             const branchName = state.repoConfig.branchName;
             
-            // Configuration is always considered 'configured' now since it's hardcoded
-            const isConfigured = true;
+            const isConfigured = true; // Always true now
 
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
@@ -571,7 +698,10 @@
                         <i data-lucide="file-text" class="w-5 h-5 text-gray-500 flex-shrink-0 mt-1 sm:mt-0"></i>
                         <div class="min-w-0">
                             <p class="text-white font-bold truncate">${post.title}</p>
-                            <p class="text-xs text-gray-500 font-mono truncate">${post.name}</p>
+                            <p class="text-xs text-gray-500 font-mono truncate">
+                                ${post.name} 
+                                <span class="text-gray-600 ml-2">| Tags: ${post.tags || 'None'}</span>
+                            </p>
                         </div>
                     </div>
                     <div class="flex space-x-2 flex-shrink-0 mt-2 sm:mt-0">
@@ -597,13 +727,13 @@
                 
                 <div class="flex justify-end items-center mb-4">
                     <button onclick="showBlogModal('new')"
-                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 flex items-center">
+                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 flex items-center shadow-glow-secondary">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Blog Post
                     </button>
                 </div>
 
                 <div id="blogListContainer" class="space-y-3">
-                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found in the configured repository and branch. Check permissions or create one!</p>'}
+                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found in the configured repository. Check API logs or create a new post.</p>'}
                 </div>
                 
                 <button onclick="fetchBlogPostsFromGithub()" class="mt-6 w-full px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
@@ -616,15 +746,21 @@
             
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
+            const repoPath = state.repoConfig.repoPath; 
             
-            const repoPath = state.repoConfig.repoPath; // Use hardcoded config
+            // Set default author if available
+            dom.postAuthor.value = githubUser || '';
 
             if (mode === 'new') {
                 state.editingPost = null;
                 dom.blogModalTitle.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i> Create New Post';
                 dom.submitBlogBtn.textContent = 'Create & Commit Post';
-                dom.postFilename.disabled = false;
-                dom.currentFilePath.textContent = `${repoPath}/${GITHUB_POSTS_PATH}/...`;
+                dom.currentFilePath.textContent = `${repoPath}/${GITHUB_POSTS_PATH}/[auto-generated-filename].md`;
+                dom.autoFilenameNotice.classList.remove('hidden');
+                dom.currentFilePathContainer.classList.add('flex-1');
+                
+                // Initialize TinyMCE with empty content
+                initializeTinyMCE('');
 
             } else { // Edit mode
                 state.editingPost = state.blogPosts.find(p => p.sha === mode);
@@ -633,15 +769,20 @@
                 dom.blogModalTitle.innerHTML = '<i data-lucide="pencil" class="w-5 h-5 mr-2"></i> Edit Post';
                 dom.submitBlogBtn.textContent = 'Update & Commit Changes';
                 
-                dom.postFilename.value = state.editingPost.name;
-                dom.postFilename.disabled = true; // Cannot change filename when editing
-                dom.postContent.value = state.editingPost.content;
+                dom.postTitle.value = state.editingPost.title;
+                dom.postAuthor.value = state.editingPost.author;
+                dom.postTags.value = state.editingPost.tags;
+
                 dom.currentFilePath.textContent = state.editingPost.path;
+                dom.autoFilenameNotice.classList.add('hidden');
+                dom.currentFilePathContainer.classList.remove('flex-1');
+                
+                // Initialize TinyMCE with post content (which is the HTML/Markdown content without front matter)
+                initializeTinyMCE(state.editingPost.content);
             }
             
             dom.blogModal.classList.remove('hidden');
             dom.blogModal.classList.add('flex');
-            dom.postContent.focus();
             lucide.createIcons();
         }
 
@@ -650,6 +791,8 @@
             dom.blogModal.classList.remove('flex');
             state.editingPost = null;
             dom.blogForm.reset();
+            // Destroy TinyMCE instance when modal closes to prevent conflicts
+            destroyTinyMCE(); 
         }
 
         async function handleBlogFormSubmit(e) {
@@ -657,33 +800,67 @@
             
             const { repoPath, branchName } = state.repoConfig;
             
-            const filename = dom.postFilename.value.trim();
-            const content = dom.postContent.value;
+            const editor = tinymce.get('postContent');
+            const htmlContent = editor ? editor.getContent() : dom.postContent.value;
+            
+            const title = dom.postTitle.value.trim();
+            const author = dom.postAuthor.value.trim();
+            const tagsInput = dom.postTags.value.trim();
             const isEditing = !!state.editingPost;
             
-            if (!filename || !content) {
-                dom.blogSaveMessage.textContent = 'All fields are required.';
+            if (!title || !htmlContent) {
+                dom.blogSaveMessage.textContent = 'Title and content cannot be empty.';
                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
                 return;
             }
 
-            // Filename validation for new post
-            if (!isEditing && !filename.match(/^\d{4}-\d{2}-\d{2}-.*\.md$/)) {
-                 dom.blogSaveMessage.textContent = 'Filename must be in the format YYYY-MM-DD-slug.md.';
-                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
-                 return;
+            // 1. Prepare Filename and Path
+            let filename;
+            let targetPath;
+            if (isEditing) {
+                // Editing: use existing filename
+                filename = state.editingPost.name;
+                targetPath = state.editingPost.path;
+            } else {
+                // New Post: generate filename with timestamp and slug
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+                const second = String(now.getSeconds()).padStart(2, '0');
+                
+                const datePrefix = `${year}-${month}-${day}-${hour}-${minute}-${second}`;
+                const slug = slugify(title);
+                filename = `${datePrefix}-${slug}.md`;
+                targetPath = `${GITHUB_POSTS_PATH}/${filename}`;
             }
+
+            // 2. Prepare Jekyll Front Matter (YAML)
+            const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            const tagsYaml = tagsArray.map(tag => `  - ${tag}`).join('\n');
+            
+            const frontMatter = `---
+layout: post
+title: "${title}"
+author: "${author}"
+tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
+---
+
+`;
+            
+            // 3. Combine Front Matter and Content
+            const finalContent = frontMatter + htmlContent;
 
             try {
                 dom.submitBlogBtn.disabled = true;
                 dom.blogSaveMessage.textContent = 'Committing to GitHub...';
                 dom.blogSaveMessage.className = 'text-yellow-400 mt-2 h-6 text-center';
 
-                const targetPath = `${GITHUB_POSTS_PATH}/${filename}`;
-                
                 const commitPayload = {
                     message: isEditing ? `Update: ${filename}` : `Create: ${filename}`,
-                    content: base64Encode(content),
+                    content: base64Encode(finalContent),
                     branch: branchName,
                 };
 
@@ -720,11 +897,6 @@
             const post = state.blogPosts.find(p => p.sha === sha);
             if (!post) {
                 showCustomAlert("Post Not Found", "The post data could not be retrieved.", true);
-                return;
-            }
-            // Ensure the content is available before showing the modal
-            if (!post.content) {
-                showCustomAlert("Content Missing", "The post content was not found. Try refreshing the list.", true);
                 return;
             }
             showBlogModal(sha);
