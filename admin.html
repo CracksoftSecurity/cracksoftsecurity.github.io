@@ -9,12 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
     <style>
-        @import url('https://fonts.fonts.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
         :root {
             --color-bg-dark: #00030A;
-            --color-accent-primary: #6C4EF0;
-            --color-accent-secondary: #4EF0E4;
+            --color-accent-primary: #6C4EF0; /* Deep Purple */
+            --color-accent-secondary: #4EF0E4; /* Electric Cyan/Teal */
+            --color-github-logo: #181717; /* GitHub Black */
             --color-card-bg: rgba(5, 5, 20, 0.95);
             --color-text-light: #E9F0F4;
         }
@@ -53,7 +54,14 @@
             background-color: var(--color-card-bg);
             border: 2px solid var(--color-accent-primary);
             box-shadow: 0 0 30px rgba(108, 78, 240, 0.4);
+            animation: pulse-border 2s infinite alternate;
         }
+        
+        @keyframes pulse-border {
+            from { border-color: var(--color-accent-primary); box-shadow: 0 0 20px rgba(108, 78, 240, 0.4); }
+            to { border-color: var(--color-accent-secondary); box-shadow: 0 0 30px rgba(78, 240, 228, 0.6); }
+        }
+
         .input-style {
             background-color: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(108, 78, 240, 0.4);
@@ -68,41 +76,14 @@
             color: var(--color-bg-dark);
             font-weight: bold;
         }
-
-        .blog-item {
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .blog-item:active {
-            cursor: grabbing;
-        }
-        .dragging {
-            opacity: 0.5;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            transform: translateY(0);
-        }
-        .drag-over {
-            border-bottom: 2px solid var(--color-accent-secondary);
-        }
-
-        #dos-animation {
-            height: 150px;
-            background-color: #111;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-        .traffic-bar {
-            position: absolute;
-            bottom: 0;
-            width: 5px;
-            background-color: var(--color-accent-secondary);
-            opacity: 0.7;
-            transition: height 0.1s linear, background-color 0.1s;
-        }
-        .attack-bar {
-            background-color: #f04f4f;
-        }
+        /* Existing blog/animation styles */
+        .blog-item { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; }
+        .blog-item:active { cursor: grabbing; }
+        .dragging { opacity: 0.5; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); transform: translateY(0); }
+        .drag-over { border-bottom: 2px solid var(--color-accent-secondary); }
+        #dos-animation { height: 150px; background-color: #111; border-radius: 8px; overflow: hidden; position: relative; }
+        .traffic-bar { position: absolute; bottom: 0; width: 5px; background-color: var(--color-accent-secondary); opacity: 0.7; transition: height 0.1s linear, background-color 0.1s; }
+        .attack-bar { background-color: #f04f4f; }
     </style>
 </head>
 <body class="p-4">
@@ -112,17 +93,43 @@
             Cracksoft Central Administration
         </h1>
 
-        <!-- NEW LOADING SCREEN - Replaces the Manual Login -->
-        <section id="loadingScreen" class="admin-card p-10 rounded-xl max-w-md mx-auto text-center flex flex-col items-center justify-center h-64">
-            <i data-lucide="loader" class="w-10 h-10 text-accent-secondary animate-spin mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2 text-yellow-400">
-                Secure Connection
-            </h2>
-            <p id="authMessage" class="text-gray-400 text-sm">
-                Authenticating with provided personal token...
+        <!-- Login Screen -->
+        <section id="loginScreen" class="admin-card p-8 rounded-xl max-w-md mx-auto h-auto">
+            <div class="text-center mb-6">
+                <!-- Inline GitHub Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto mb-2" fill="var(--color-github-logo)" viewBox="0 0 24 24" style="color: var(--color-accent-secondary);">
+                    <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.805 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.082-.742.082-.727.082-.727 1.205.084 1.839 1.237 1.839 1.237 1.07 1.838 2.809 1.305 3.492.998.108-.77.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.046.138 3.003.404 2.293-1.552 3.301-1.23 3.301-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.61.8.577 4.768-1.581 8.205-6.085 8.205-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <h2 class="text-2xl font-bold mb-1 text-white font-mono">
+                    GITHUB AUTHORIZATION
+                </h2>
+                <p class="text-sm text-gray-400">
+                    Input your **Personal Access Token (PAT)** for authentication.
+                </p>
+                <p id="loginStatus" class="text-sm mt-3 text-yellow-500 font-mono break-all">
+                    Awaiting Token Input...
+                </p>
+                <p class="text-xs mt-2 text-gray-500">
+                    Simulated PAT for Access: **ghp_CRACKSOFT_ADMIN_TOKEN_123**
+                </p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="accessToken" class="block text-sm font-medium text-gray-400 mb-1">GitHub Personal Access Token</label>
+                    <input type="password" id="accessToken" required
+                        class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="Enter full PAT (e.g., ghp_...)">
+                </div>
+                <button type="submit" id="loginBtn"
+                    class="w-full px-6 py-3 font-bold rounded-lg transition duration-200 bg-accent-primary text-white hover:bg-accent-primary/80 flex items-center justify-center shadow-glow-primary">
+                    <i data-lucide="key-round" class="w-5 h-5 mr-2"></i> Verify & Access CMS
+                </button>
+            </form>
+            <p class="text-xs text-center text-gray-600 mt-4">
+                *In a production environment, this token would be securely verified server-side against GitHub for required repository scope permissions.*
             </p>
         </section>
 
+        <!-- CMS Panel -->
         <section id="cmsPanel" class="admin-card flex-1 p-0 rounded-xl hidden flex-col overflow-hidden">
             <nav class="bg-gray-900 border-b border-accent-primary p-3 flex flex-wrap md:flex-nowrap justify-center md:justify-start space-x-2 md:space-x-4">
                 <button data-tab="dashboard" class="tab-button tab-active px-4 py-2 rounded-lg text-sm md:text-base transition duration-200 hover:bg-accent-primary/70 flex items-center">
@@ -209,22 +216,29 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         let app, db, auth;
         let userId = 'N/A';
         let currentTab = 'dashboard';
         let dosAnimationInterval = null;
         let trafficChart = null;
-        let isSimulationMode = false; // New flag for simulation mode
+        let isSimulationMode = false; 
         
         const BLOG_COLLECTION = 'blog_posts';
         const SITE_CONFIG_PATH = 'site_config/main_config';
         const IMAGE_PATH = 'images';
 
+        // Secure, simple mock PAT for environments without a real token
+        const MOCK_GITHUB_PAT = 'ghp_CRACKSOFT_ADMIN_TOKEN_123';
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
+        // The token to validate against: If environment token exists, use it, otherwise use the mock PAT.
+        const REQUIRED_PAT = initialAuthToken || MOCK_GITHUB_PAT;
+
+
         // --- Firebase Configuration Check and Fallback ---
         let firebaseConfig;
         try {
@@ -253,9 +267,10 @@
         };
 
         const dom = {
-            loadingScreen: document.getElementById('loadingScreen'),
+            loginScreen: document.getElementById('loginScreen'),
+            loginForm: document.getElementById('loginForm'),
+            loginStatus: document.getElementById('loginStatus'),
             cmsPanel: document.getElementById('cmsPanel'),
-            authMessage: document.getElementById('authMessage'),
             cmsUserId: document.getElementById('cms-user-id'),
             contentArea: document.getElementById('contentArea'),
             blogModal: document.getElementById('blogModal'),
@@ -288,28 +303,59 @@
                 .replace(/-+$/, '');
         }
 
-        async function initFirebaseAndListeners() {
+        async function attemptLogin(e) {
+            e.preventDefault();
+            
+            const tokenInput = document.getElementById('accessToken').value.trim();
+            
+            dom.loginStatus.textContent = 'Verifying GitHub PAT...';
+            dom.loginStatus.classList.remove('text-red-400', 'text-green-500');
+            dom.loginStatus.classList.add('text-yellow-500');
+
+            await new Promise(r => setTimeout(r, 700)); // Simulate network/GitHub verification delay
+
+            if (tokenInput === REQUIRED_PAT) {
+                // SUCCESS: Simulate PAT check and Permission Grant
+                dom.loginStatus.textContent = 'PAT accepted. GitHub Permissions check: GRANTED (Admin)';
+                dom.loginStatus.classList.remove('text-yellow-500');
+                dom.loginStatus.classList.add('text-green-500');
+
+                // Proceed to Firebase/Data Initialization
+                await initDataConnection();
+
+                // Show the CMS panel
+                setTimeout(() => {
+                    dom.loginScreen.classList.add('hidden');
+                    dom.cmsPanel.classList.remove('hidden');
+                    dom.cmsUserId.textContent = `Admin ID: ${userId.substring(0, 8)}...`;
+                    renderContent('dashboard');
+                }, 1000);
+
+            } else {
+                // FAILURE: Simulate Invalid Token or Insufficient Permissions
+                dom.loginStatus.textContent = 'ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient permissions.';
+                dom.loginStatus.classList.remove('text-yellow-500');
+                dom.loginStatus.classList.add('text-red-400');
+                document.getElementById('accessToken').value = '';
+            }
+        }
+
+
+        async function initDataConnection() {
             if (isSimulationMode) {
                 // --- SIMULATION MODE START ---
-                dom.authMessage.innerHTML = '<span class="text-red-400">Error: Configuration missing. Running in **OFFLINE SIMULATION MODE**. Data will NOT persist.</span>';
+                userId = 'SIMULATED_ADMIN';
                 state.isAuthenticated = true; 
-                userId = 'SIMULATED_USER';
                 
                 // Mock Data for Simulation
-                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATED)', siteOwner: 'System Admin', siteDescription: 'Offline mode active. No data persistence.' };
+                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
                 state.blogPosts = [
                     { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
                     { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
                 ];
-
-                // Skip Firebase initialization and listeners
-                setTimeout(() => {
-                    dom.loadingScreen.classList.add('hidden');
-                    dom.cmsPanel.classList.remove('hidden');
-                    dom.cmsUserId.textContent = `User ID: ${userId}`;
-                    renderContent('dashboard');
-                }, 1000); 
-                // --- SIMULATION MODE END ---
+                
+                // Show subtle status on the login status
+                dom.loginStatus.innerHTML += '<span class="text-sm block text-yellow-400 font-sans"> (Warning: Database Connection Failed. Using Mock Data.)</span>';
                 return;
             }
 
@@ -319,32 +365,28 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                dom.authMessage.textContent = 'Attempting secure login...';
+                dom.loginStatus.textContent = 'Establishing database connection...';
 
+                // Handle Firebase Authentication (Auto-sign-in using token or anonymously)
                 await new Promise(resolve => {
                     const unsubscribe = onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             userId = user.uid;
-                            dom.authMessage.innerHTML = '<span class="text-green-400">Token authenticated. Loading CMS...</span>';
-                            state.isAuthenticated = true;
                         } else if (initialAuthToken) {
+                            // Use the actual initialAuthToken to sign in
                             try {
                                 const userCredential = await signInWithCustomToken(auth, initialAuthToken);
                                 userId = userCredential.user.uid;
-                                dom.authMessage.innerHTML = '<span class="text-green-400">Token authenticated. Loading CMS...</span>';
-                                state.isAuthenticated = true;
                             } catch (error) {
                                 console.error("Custom Token failed, falling back to anonymous:", error);
                                 const userCredential = await signInAnonymously(auth);
                                 userId = userCredential.user.uid;
-                                dom.authMessage.innerHTML = '<span class="text-yellow-400">Token failed. Signed in anonymously.</span>';
                             }
                         } else {
                             const userCredential = await signInAnonymously(auth);
                             userId = userCredential.user.uid;
-                            dom.authMessage.innerHTML = '<span class="text-yellow-400">No token found. Signed in anonymously.</span>';
                         }
-                        
+                        state.isAuthenticated = true;
                         unsubscribe();
                         resolve();
                     });
@@ -352,20 +394,24 @@
 
                 setupSiteConfigListener();
                 setupBlogPostsListener();
-
-                // Wait a moment for UX before showing the panel
-                setTimeout(() => {
-                    dom.loadingScreen.classList.add('hidden');
-                    dom.cmsPanel.classList.remove('hidden');
-                    dom.cmsUserId.textContent = `User ID: ${userId}`;
-                    renderContent('dashboard');
-                }, 1500);
+                dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-green-400">Online.</span>';
 
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                dom.authMessage.innerHTML = `<span class="text-red-400">Fatal Error: Initialization failed. ${error.message}</span>`;
+                // If the connection fails for any reason even with config, fall back to simulation
+                console.error("Firebase initialization failed during login:", error);
+                isSimulationMode = true;
+                userId = 'SIMULATED_ADMIN';
+                state.isAuthenticated = true;
+                
+                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
+                state.blogPosts = [
+                    { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
+                    { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
+                ];
+
+                dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-red-400">Database Offline (Using Mock Data).</span>';
             }
-            // --- LIVE MODE END ---
+            // --- LIVE/FALLBACK MODE END ---
         }
 
         function setupSiteConfigListener() {
@@ -397,11 +443,8 @@
                 // Sort client-side by 'order' property for drag-and-drop
                 state.blogPosts = loadedPosts.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-                if (currentTab === 'blog-manager') {
-                    renderContent('blog-manager');
-                }
-                if (currentTab === 'dashboard') {
-                    renderContent('dashboard');
+                if (currentTab === 'blog-manager' || currentTab === 'dashboard') {
+                    renderContent(currentTab);
                 }
             }, (error) => {
                 console.error("Error setting up blog posts listener:", error);
@@ -476,12 +519,19 @@
                     <i data-lucide="layout-dashboard" class="w-6 h-6 mr-3"></i> Dashboard Overview
                 </h2>
                 
-                ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
-                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
-                        <p class="text-sm mt-1">Firebase configuration is missing. Data displayed is mock data and changes will NOT be saved to the database.</p>
-                    </div>
-                ` : ''}
+                <!-- Database Status Message -->
+                <div class="p-3 mb-6 ${isSimulationMode ? 'bg-yellow-900 border border-yellow-500' : 'bg-green-900 border border-green-500'} rounded-lg text-white">
+                    <p class="font-bold flex items-center">
+                        <i data-lucide="${isSimulationMode ? 'alert-triangle' : 'cloud-check'}" class="w-5 h-5 mr-2 ${isSimulationMode ? 'text-yellow-400' : 'text-green-400'}"></i> 
+                        CONNECTION STATUS: ${isSimulationMode ? 'OFFLINE (SIMULATION MODE)' : 'LIVE & SECURE'}
+                    </p>
+                    <p class="text-sm mt-1">
+                        ${isSimulationMode ? 
+                            'Database configuration is missing. Data shown is mock data and changes will NOT be saved.' : 
+                            'All changes will be instantly saved to the secure Firestore database.'
+                        }
+                    </p>
+                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-accent-primary">
@@ -542,7 +592,7 @@
                 </h2>
                 
                 ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
                         <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
                         <p class="text-sm mt-1">Changes made here will NOT be saved to the database.</p>
                     </div>
@@ -602,7 +652,6 @@
         async function handleSaveSiteSettings(e) {
             e.preventDefault();
             if (!db || isSimulationMode) return;
-            // ... (rest of the handleSaveSiteSettings logic remains the same)
             
             const title = document.getElementById('siteTitle').value.trim();
             const owner = document.getElementById('siteOwner').value.trim();
@@ -670,7 +719,7 @@
                 </h2>
 
                 ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
                         <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
                         <p class="text-sm mt-1">Editing, adding, deleting, and reordering are disabled because there is no database connection.</p>
                     </div>
@@ -696,7 +745,6 @@
                  dom.imageStatus.className = 'text-red-500 mt-1';
                  return;
             }
-            // ... (rest of the handleImageUpload logic remains the same)
 
             const file = dom.imageFileInput.files[0];
             if (!file) {
@@ -726,7 +774,7 @@
         }
 
         window.showBlogModal = function(mode) {
-            if (isSimulationMode) return; // Prevent modal opening in simulation mode
+            if (isSimulationMode && mode !== 'new') return; // Allow new post for simulation, but don't save
             
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
@@ -764,9 +812,7 @@
 
         async function handleBlogFormSubmit(e) {
             e.preventDefault();
-            if (!db || isSimulationMode) return;
-            // ... (rest of the handleBlogFormSubmit logic remains the same)
-
+            
             const postData = {
                 title: dom.postTitle.value.trim(),
                 author: dom.postAuthor.value.trim(),
@@ -776,6 +822,15 @@
             if (!postData.title || !postData.author || !postData.content) {
                 dom.blogSaveMessage.textContent = 'All fields are required.';
                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
+                return;
+            }
+
+            if (isSimulationMode) {
+                dom.blogSaveMessage.textContent = 'Post created/updated! (Not saved in offline mode)';
+                dom.blogSaveMessage.className = 'text-yellow-400 mt-2 h-6 text-center';
+                setTimeout(() => {
+                    hideBlogModal();
+                }, 1000);
                 return;
             }
 
@@ -793,7 +848,7 @@
                     dom.blogSaveMessage.textContent = 'Post updated successfully!';
                 } else {
                     // Determine the order for the new post (last in the array)
-                    const newOrder = state.blogPosts.length > 0 ? state.blogPosts[state.blogPosts.length - 1].order + 1 : 0;
+                    const newOrder = state.blogPosts.length > 0 ? (state.blogPosts[state.blogPosts.length - 1].order || 0) + 1 : 0;
                     const newPost = {
                         ...postData,
                         createdAt: Date.now(),
@@ -824,8 +879,7 @@
 
         window.deleteBlogPost = async function(postId) {
             if (isSimulationMode) return;
-            // ... (rest of the deleteBlogPost logic remains the same)
-
+            
             const confirmBox = document.createElement('div');
             confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
             confirmBox.innerHTML = `
@@ -858,6 +912,7 @@
                         .map((p, index) => ({ id: p.id, order: index }));
 
                     for (const post of remainingPosts) {
+                        // Use setDoc to update the order field
                         await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: post.order }, { merge: true });
                     }
                 } catch (error) {
@@ -887,7 +942,6 @@
 
         function handleDragStart(e) {
             if (isSimulationMode) return;
-            // ... (rest of the handleDragStart logic remains the same)
             
             const target = e.target.closest('.blog-item');
             if (!target) return;
@@ -903,7 +957,6 @@
 
         function handleDragOver(e) {
             if (isSimulationMode) return;
-            // ... (rest of the handleDragOver logic remains the same)
             
             if (e.preventDefault) {
                 e.preventDefault();
@@ -921,7 +974,6 @@
 
         function handleDragLeave(e) {
             if (isSimulationMode) return;
-            // ... (rest of the handleDragLeave logic remains the same)
             
             const target = e.target.closest('.blog-item');
             if (target) {
@@ -931,7 +983,6 @@
 
         async function handleDrop(e) {
             if (isSimulationMode) return;
-            // ... (rest of the handleDrop logic remains the same)
             
             e.stopPropagation();
             
@@ -951,6 +1002,7 @@
                 // Update the 'order' field for all affected posts
                 for (let i = 0; i < posts.length; i++) {
                     const post = posts[i];
+                    // Only update if the order has changed to minimize writes
                     if (post.order !== i) { 
                         await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: i }, { merge: true });
                     }
@@ -964,7 +1016,6 @@
 
         function handleDragEnd(e) {
             if (isSimulationMode) return;
-            // ... (rest of the handleDragEnd logic remains the same)
             
             dragSrcEl.classList.remove('dragging');
             dragSrcEl = null;
@@ -973,14 +1024,13 @@
         }
 
         function renderSecurityTools() {
-            // ... (renderSecurityTools logic remains the same)
              return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="shield-half" class="w-6 h-6 mr-3"></i> Security & Traffic Tools
                 </h2>
                 
                 ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-red-900 border border-red-500 rounded-lg text-white">
+                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
                         <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
                         <p class="text-sm mt-1">These tools run simulated animations only.</p>
                     </div>
@@ -1036,7 +1086,6 @@
         }
 
         function renderAnalyzerResults() {
-            // ... (renderAnalyzerResults logic remains the same)
             const scores = [
                 { label: 'Security Score', value: 92, color: 'text-green-400', icon: 'shield-check' },
                 { label: 'SEO Health', value: 85, color: 'text-yellow-400', icon: 'zap' },
@@ -1056,7 +1105,6 @@
         }
         
         window.runAnalyzer = function() {
-            // ... (runAnalyzer logic remains the same)
             const results = document.getElementById('analyzer-results');
             if (results) {
                 results.innerHTML = `
@@ -1086,7 +1134,6 @@
         }
 
         function setupTrafficChart() {
-            // ... (setupTrafficChart logic remains the same)
             const ctx = document.getElementById('trafficChart').getContext('2d');
             if (trafficChart) {
                 trafficChart.destroy();
@@ -1140,7 +1187,6 @@
         let simulationStartTime = 0;
 
         function setupDosAnimation() {
-            // ... (setupDosAnimation logic remains the same)
             const container = document.getElementById('dos-animation');
             if (!container) return;
             container.innerHTML = '';
@@ -1158,7 +1204,6 @@
         }
         
         function updateDosAnimation(timestamp) {
-            // ... (updateDosAnimation logic remains the same)
             if (!simulationStartTime) simulationStartTime = timestamp;
             const elapsed = timestamp - simulationStartTime;
             const duration = DOS_DURATION;
@@ -1216,7 +1261,6 @@
         }
 
         window.startDosSimulation = function() {
-            // ... (startDosSimulation logic remains the same)
             if (dosAnimationInterval) return;
 
             document.getElementById('dos-btn').disabled = true;
@@ -1228,8 +1272,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            initFirebaseAndListeners();
-            
+            dom.loginForm.addEventListener('submit', attemptLogin);
+
             dom.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     switchTab(button.getAttribute('data-tab'));
