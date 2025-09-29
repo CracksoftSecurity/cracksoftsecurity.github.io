@@ -216,14 +216,16 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, query, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
+        // setLogLevel('Debug'); // Uncomment this if you want to see detailed Firestore logs
+
         let app, db, auth;
         let userId = 'N/A';
         let currentTab = 'dashboard';
         let dosAnimationInterval = null;
         let trafficChart = null;
-        let isSimulationMode = false; 
+        let isSimulationMode = false; // Initial state is false
         
         const BLOG_COLLECTION = 'blog_posts';
         const SITE_CONFIG_PATH = 'site_config/main_config';
@@ -232,32 +234,10 @@
         // Secure, simple mock PAT for environments without a real token
         const MOCK_GITHUB_PAT = 'ghp_CRACKSOFT_ADMIN_TOKEN_123';
 
+        // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        // The token to validate against: If environment token exists, use it, otherwise use the mock PAT.
         const REQUIRED_PAT = initialAuthToken || MOCK_GITHUB_PAT;
-
-
-        // --- Firebase Configuration Check and Fallback ---
-        let firebaseConfig;
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                firebaseConfig = JSON.parse(__firebase_config);
-            } else {
-                throw new Error("Missing configuration.");
-            }
-        } catch (e) {
-            isSimulationMode = true;
-            console.warn("WARNING: Firebase Configuration missing. Running in Simulation Mode. Data will NOT persist.", e);
-            // Provide a dummy config to prevent Firebase SDK initialization error
-            firebaseConfig = {
-                apiKey: "DUMMY_API_KEY", authDomain: "dummy.firebaseapp.com",
-                projectId: "dummy-project-id", storageBucket: "dummy.appspot.com",
-                messagingSenderId: "1234567890", appId: "1:1234567890:web:dummy"
-            };
-        }
-        // ------------------------------------------------
 
         const state = {
             isAuthenticated: false,
@@ -305,10 +285,6 @@
         
         // --- NEW: Simulated External API Validation Function ---
         async function simulateGitHubValidation(token) {
-            // In a real scenario, the fetch would hit the GitHub API. 
-            // Here, we simulate the network delay and success/failure logic.
-            const apiUrl = `https://api.github.com/user?simulated_pat=${token.substring(0, 10)}`;
-            
             // Simulate network request delay (700ms)
             await new Promise(r => setTimeout(r, 700));
 
@@ -384,33 +360,53 @@
             }
         }
 
+        // Helper function to set up all simulation mode states
+        function setupSimulationMode() {
+            isSimulationMode = true;
+            userId = 'SIMULATED_ADMIN';
+            state.isAuthenticated = true; 
+            
+            // Mock Data for Simulation
+            state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
+            state.blogPosts = [
+                { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
+                { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
+            ].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-red-400">Database Offline (Using Mock Data).</span>';
+            console.warn("WARNING: Firebase Configuration missing or connection failed. Running in Simulation Mode. Data will NOT persist.");
+        }
+
 
         async function initDataConnection() {
-            if (isSimulationMode) {
-                // --- SIMULATION MODE START ---
-                userId = 'SIMULATED_ADMIN';
-                state.isAuthenticated = true; 
-                
-                // Mock Data for Simulation
-                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
-                state.blogPosts = [
-                    { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
-                    { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
-                ];
-                
-                // Show subtle status on the login status
-                dom.loginStatus.innerHTML += '<span class="text-sm block text-yellow-400 font-sans"> (Warning: Database Connection Failed. Using Mock Data.)</span>';
+            let configIsAvailable = false;
+            let finalFirebaseConfig = null;
+            
+            // 1. Check if the environment provided a valid Firebase configuration
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    finalFirebaseConfig = JSON.parse(__firebase_config);
+                    configIsAvailable = true;
+                }
+            } catch (e) {
+                console.error("Firebase Config JSON is malformed:", e);
+            }
+            
+            if (!configIsAvailable) {
+                // If no valid config is found, explicitly fall back to simulation
+                setupSimulationMode();
                 return;
             }
 
-            // --- LIVE MODE START ---
+            // --- LIVE MODE START (Config is available, attempt connection) ---
             try {
-                app = initializeApp(firebaseConfig);
+                dom.loginStatus.textContent = 'Establishing database connection...';
+
+                // Attempt Firebase initialization
+                app = initializeApp(finalFirebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                dom.loginStatus.textContent = 'Establishing database connection...';
-
                 // Handle Firebase Authentication (Auto-sign-in using token or anonymously)
                 await new Promise(resolve => {
                     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -441,24 +437,17 @@
                 dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-green-400">Online.</span>';
 
             } catch (error) {
-                // If the connection fails for any reason even with config, fall back to simulation
+                // 2. If the connection fails for any reason (e.g., API key revoked, network issue), fall back to simulation
                 console.error("Firebase initialization failed during login:", error);
-                isSimulationMode = true;
-                userId = 'SIMULATED_ADMIN';
-                state.isAuthenticated = true;
-                
-                state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
-                state.blogPosts = [
-                    { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
-                    { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
-                ];
-
-                dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-red-400">Database Offline (Using Mock Data).</span>';
+                setupSimulationMode(); // This will also update dom.loginStatus
             }
             // --- LIVE/FALLBACK MODE END ---
         }
 
         function setupSiteConfigListener() {
+             // Only run listeners if not in simulation mode
+             if (isSimulationMode || !db) return;
+
              const configRef = doc(db, `artifacts/${appId}/public/data/${SITE_CONFIG_PATH}`);
              onSnapshot(configRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -466,14 +455,19 @@
                 } else {
                     // Initialize with default if not found
                     state.siteConfig = { siteTitle: 'Cracksoft Security', siteOwner: 'Admin', siteDescription: 'Cyber security education and news.' };
+                    // Write default back to firestore if needed, but not required here as it's set in state
                 }
                 renderContent(currentTab);
             }, (error) => {
                 console.error("Error setting up site config listener:", error);
+                // Note: No fallback to simulation here, as auth/db connection succeeded earlier.
             });
         }
 
         function setupBlogPostsListener() {
+            // Only run listeners if not in simulation mode
+            if (isSimulationMode || !db) return;
+
             const postsQuery = query(
                 collection(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`),
                 // Sorting client-side to avoid index errors in Firestore
@@ -492,6 +486,7 @@
                 }
             }, (error) => {
                 console.error("Error setting up blog posts listener:", error);
+                // Note: No fallback to simulation here, as auth/db connection succeeded earlier.
             });
         }
 
@@ -661,7 +656,7 @@
                     </div>
                     
                     <div class="pt-4 flex justify-end">
-                        <button type="submit" id="saveSettingsBtn" disabled
+                        <button type="submit" id="saveSettingsBtn" ${disabledAttr}
                             class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 flex items-center">
                             <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> ${saveBtnText}
                         </button>
@@ -676,6 +671,9 @@
             const message = document.getElementById('settingsSaveMessage');
 
             if (form && !isSimulationMode) {
+                // Initial check for non-simulation mode to enable save button
+                saveBtn.disabled = false; 
+                
                 form.addEventListener('submit', handleSaveSiteSettings);
                 form.addEventListener('input', () => {
                     saveBtn.disabled = false;
@@ -695,7 +693,7 @@
 
         async function handleSaveSiteSettings(e) {
             e.preventDefault();
-            if (!db || isSimulationMode) return;
+            if (isSimulationMode || !db) return;
             
             const title = document.getElementById('siteTitle').value.trim();
             const owner = document.getElementById('siteOwner').value.trim();
@@ -725,7 +723,7 @@
                 
                 message.textContent = 'Configuration saved successfully!';
                 message.className = 'text-green-400 mt-4 h-6 text-center';
-                saveBtn.disabled = true;
+                saveBtn.disabled = true; // Disabled until next change
 
             } catch (error) {
                 console.error("Error saving site config:", error);
@@ -736,6 +734,7 @@
         }
 
         function renderBlogManager() {
+            const disabledAttr = isSimulationMode ? 'disabled' : '';
             const postsHtml = state.blogPosts.map((post, index) => `
                 <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex items-center justify-between transition duration-200 hover:bg-gray-800 ${isSimulationMode ? 'opacity-80' : ''}" 
                      draggable="${!isSimulationMode}" data-post-id="${post.id}" data-post-order="${post.order || 0}" data-index="${index}">
@@ -747,10 +746,10 @@
                         </div>
                     </div>
                     <div class="flex space-x-2 flex-shrink-0">
-                        <button onclick="editBlogPost('${post.id}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${isSimulationMode ? 'disabled' : ''}>
+                        <button onclick="editBlogPost('${post.id}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${disabledAttr}>
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteBlogPost('${post.id}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${isSimulationMode ? 'disabled' : ''}>
+                        <button onclick="deleteBlogPost('${post.id}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${disabledAttr}>
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -771,7 +770,7 @@
                 
                 <div class="flex justify-between items-center mb-4">
                     <p class="text-gray-400 text-sm">Drag and drop posts to reorder them on your site.</p>
-                    <button onclick="showBlogModal('new')" ${isSimulationMode ? 'disabled' : ''}
+                    <button onclick="showBlogModal('new')" ${disabledAttr}
                         class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 disabled:opacity-50 flex items-center">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Blog Post
                     </button>
@@ -818,7 +817,6 @@
         }
 
         window.showBlogModal = function(mode) {
-            if (isSimulationMode && mode !== 'new') return; // Allow new post for simulation, but don't save
             
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
