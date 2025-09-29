@@ -6,16 +6,11 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cracksoft Commit Console</title>
-    <!-- Load Tailwind CSS -->
+    <title>Advanced Cracksoft CMS Console</title>
     <script src="https://cdn.tailwindcss.com/"></script>
-    <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Rich Text Editor Library (Better UX for non-technical users) -->
     <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,100;1,700&display=swap');
         :root {
@@ -54,9 +49,14 @@ layout: null
         }
         .btn-primary {
              background-color: var(--color-accent-primary); 
-             box-shadow: 0 0 15px var(--color-accent-primary);
+             box-shadow: 0 0 15px var(--color-accent-primary)/70;
              color: black;
              font-weight: bold;
+        }
+        .btn-secondary {
+            background-color: var(--color-accent-secondary); 
+            color: black;
+            font-weight: bold;
         }
         .input-style {
             background-color: rgba(0, 0, 0, 0.5);
@@ -72,45 +72,47 @@ layout: null
 <body class="p-4 sm:p-10">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center">
-            Cracksoft <span class="neon-glow" style="color: var(--color-accent-primary);">Commit Console</span>
+            Cracksoft <span class="neon-glow" style="color: var(--color-accent-primary);">CMS Console</span>
         </h1>
-
-        <!-- Message Box for Feedback -->
         <div id="message-box" class="fixed top-4 right-4 z-50 transition-opacity duration-300 hidden">
-            <!-- Content set by JS -->
         </div>
-
-        <!-- Login Screen -->
+        <div id="confirm-modal" class="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center hidden">
+            <div class="bg-gray-900 p-8 rounded-xl shadow-2xl max-w-sm w-full border-2 border-red-600">
+                <h3 class="text-xl font-bold mb-4 text-red-400 flex items-center space-x-2"><i data-lucide="alert-triangle" class="w-6 h-6"></i> <span>Confirm Action</span></h3>
+                <p id="confirm-message" class="text-gray-300 mb-6">Are you sure you want to proceed?</p>
+                <div class="flex justify-end space-x-3">
+                    <button id="modal-cancel" class="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-medium">Cancel</button>
+                    <button id="modal-confirm" class="px-4 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-white font-medium">Confirm</button>
+                </div>
+            </div>
+        </div>
         <section id="login-screen" class="max-w-lg mx-auto p-6 sm:p-10 rounded-xl border-2" 
                  style="background-color: var(--color-card-bg); border-color: var(--color-accent-primary)/70; box-shadow: 0 0 30px rgba(108, 78, 240, 0.4);">
             <h2 class="text-2xl font-bold mb-4 flex items-center space-x-2">
                 <i data-lucide="shield-check" class="w-6 h-6 text-green-400"></i>
-                <span>Secure Login</span>
+                <span>Secure Access</span>
             </h2>
             <p class="text-sm text-gray-400 mb-6 border-l-4 pl-3 py-1 border-yellow-500">
-                **CRITICAL SECURITY STEP:** This console is self-hosted. You must paste your **GitHub Personal Access Token (PAT)** with **'repo'** permissions. **The token is never stored and remains in your browser's memory.**
+                Enter your access password and the GitHub repository name (Owner/Name) to begin editing.
             </p>
             <div class="space-y-4">
-                <input type="password" id="github-token" placeholder="Paste GitHub PAT here..." class="w-full p-3 rounded-lg input-style text-sm text-white">
-                <input type="text" id="repo-name" placeholder="Enter Repo Owner/Name (e.g., 'your-username/your-repo.github.io')" class="w-full p-3 rounded-lg input-style text-sm text-white">
+                <input type="password" id="github-token" placeholder="Enter your access password..." class="w-full p-3 rounded-lg input-style text-sm text-white">
+                <input type="text" id="repo-name" placeholder="Enter Repo Owner/Name (e.g., 'user/blog-repo')" class="w-full p-3 rounded-lg input-style text-sm text-white">
                 <button id="login-button" 
                         class="w-full px-4 py-3 text-lg font-bold rounded-lg transition transform hover:scale-[1.01] duration-300 btn-primary">
                     <i data-lucide="log-in" class="w-5 h-5 inline mr-2"></i> Log In & Verify
                 </button>
             </div>
         </section>
-
-        <!-- Editor Screen -->
-        <section id="editor-screen" class="hidden p-6 sm:p-10 rounded-xl"
-            style="background-color: var(--color-card-bg); border-color: var(--color-accent-secondary)/70; box-shadow: 0 0 30px rgba(78, 240, 228, 0.2);">
-
-            <!-- Top Header Bar -->
+        <section id="app-container" class="hidden">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b border-gray-700">
                 <h2 class="text-2xl font-bold flex items-center space-x-3 mb-4 sm:mb-0">
-                    <i data-lucide="edit" class="w-6 h-6" style="color: var(--color-accent-secondary);"></i>
-                    <span>New Cyber Post</span>
+                    <i data-lucide="layers" class="w-6 h-6" style="color: var(--color-accent-secondary);"></i>
+                    <span id="current-mode-title">Loading Dashboard...</span>
                 </h2>
-                <div class="flex items-center space-x-3 text-sm">
+                <div class="flex items-center space-x-4 text-sm">
+                    <button id="toggle-mode-button" class="px-4 py-2 rounded-lg text-black font-bold transition duration-300">
+                    </button>
                     <p class="text-gray-400 flex items-center space-x-1">
                         <i data-lucide="user" class="w-4 h-4"></i>
                         <span id="author-display">Loading Author...</span>
@@ -122,63 +124,78 @@ layout: null
                     </button>
                 </div>
             </div>
-            
-            <!-- Metadata Fields -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="md:col-span-2">
-                    <label for="post-title" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Post Title</label>
-                    <input type="text" id="post-title" placeholder="A descriptive title for your article" class="w-full p-3 rounded-lg input-style text-xl font-bold text-white">
+            <div id="dashboard-screen" class="p-6 sm:p-10 rounded-xl"
+                style="background-color: var(--color-card-bg); border-color: var(--color-accent-secondary)/70; box-shadow: 0 0 30px rgba(78, 240, 228, 0.2);">
+                <h3 class="text-xl font-bold mb-4 flex items-center space-x-2">
+                    <i data-lucide="list-checks" class="w-5 h-5 text-gray-400"></i>
+                    <span>Existing Blog Posts (<span id="post-count">0</span>)</span>
+                </h3>
+                <div id="post-list" class="space-y-3">
                 </div>
-                <div>
-                    <label for="post-tags" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Tags (e.g., hacking, tutorial, news)</label>
-                    <input type="text" id="post-tags" placeholder="comma, separated, tags" class="w-full p-3 rounded-lg input-style text-base text-gray-200">
+                <div id="loading-spinner" class="text-center p-8 hidden">
+                    <i data-lucide="loader-2" class="w-8 h-8 inline animate-spin" style="color: var(--color-accent-secondary);"></i>
+                    <p class="text-gray-400 mt-2">Fetching posts from GitHub...</p>
                 </div>
             </div>
-
-            <!-- Excerpt Field -->
-             <div class="mb-8">
-                <label for="post-excerpt" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Excerpt (Short Summary for the Listing Page)</label>
-                <textarea id="post-excerpt" rows="3" placeholder="A one or two-sentence summary of the post." class="w-full p-3 rounded-lg input-style text-base text-gray-200"></textarea>
-                <button id="generate-excerpt" class="text-xs mt-1 text-gray-400 hover:text-[--color-accent-secondary] transition duration-200">
-                    Auto-Generate from Content
-                </button>
-            </div>
-
-
-            <!-- Markdown Editor Area -->
-            <label class="block text-lg font-medium mb-3" style="color: var(--color-accent-secondary);">Article Body (Rich Text Editor)</label>
-            <textarea id="markdown-editor"></textarea>
-
-            <!-- Action Buttons -->
-            <div class="mt-10 flex flex-col sm:flex-row justify-end items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <div id="commit-status" class="text-sm text-gray-400 hidden"></div>
-                <button id="commit-button" 
-                        class="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 text-lg rounded-lg transition duration-300 btn-primary hover:scale-[1.02]">
-                    <i data-lucide="git-commit" class="w-5 h-5"></i>
-                    <span>Publish Post Now</span>
-                </button>
+            <div id="editor-screen" class="p-6 sm:p-10 rounded-xl hidden"
+                style="background-color: var(--color-card-bg); border-color: var(--color-accent-secondary)/70; box-shadow: 0 0 30px rgba(78, 240, 228, 0.2);">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="editor-title-status" class="text-xl font-bold" style="color: var(--color-accent-primary);">New Post Mode</h3>
+                    <button id="cancel-edit-button" class="px-3 py-1 text-sm rounded-lg border border-gray-600 text-gray-400 hover:bg-gray-800 transition duration-200 hidden">
+                        <i data-lucide="x" class="w-4 h-4 inline mr-1"></i> Cancel Edit
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="md:col-span-2">
+                        <label for="post-title" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Post Title</label>
+                        <input type="text" id="post-title" placeholder="A descriptive title for your article" class="w-full p-3 rounded-lg input-style text-xl font-bold text-white">
+                    </div>
+                    <div>
+                        <label for="post-tags" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Tags (e.g., hacking, tutorial, news)</label>
+                        <input type="text" id="post-tags" placeholder="comma, separated, tags" class="w-full p-3 rounded-lg input-style text-base text-gray-200">
+                    </div>
+                </div>
+                <div class="mb-8">
+                    <label for="post-excerpt" class="block text-sm font-medium mb-2" style="color: var(--color-accent-secondary);">Excerpt (Short Summary for the Listing Page)</label>
+                    <textarea id="post-excerpt" rows="3" placeholder="A one or two-sentence summary of the post." class="w-full p-3 rounded-lg input-style text-base text-gray-200"></textarea>
+                    <button id="generate-excerpt" class="text-xs mt-1 text-gray-400 hover:text-[--color-accent-secondary] transition duration-200">
+                        Auto-Generate from Content
+                    </button>
+                </div>
+                <label class="block text-lg font-medium mb-3" style="color: var(--color-accent-secondary);">Article Body (Rich Text Editor - Drag & Drop Image Uploads)</label>
+                <textarea id="markdown-editor"></textarea>
+                <div class="mt-10 flex flex-col sm:flex-row justify-end items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div id="commit-status" class="text-sm text-gray-400 hidden"></div>
+                    <button id="commit-button" 
+                            class="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 text-lg rounded-lg transition duration-300 btn-primary hover:scale-[1.02]">
+                        <i data-lucide="git-commit" class="w-5 h-5"></i>
+                        <span>Publish New Post Now</span>
+                    </button>
+                </div>
             </div>
         </section>
     </div>
-
     <script>
         lucide.createIcons();
-
-        // --- Core Variables ---
         let githubToken = '';
         let repoFullName = '';
         let easyMDE;
         let isCommitting = false;
         let verifiedUsername = '';
-
-        // --- DOM Elements ---
+        let editingPostSha = null;
+        let editingPostPath = null;
+        let currentMode = 'dashboard';
         const loginScreen = document.getElementById('login-screen');
+        const appContainer = document.getElementById('app-container');
+        const dashboardScreen = document.getElementById('dashboard-screen');
         const editorScreen = document.getElementById('editor-screen');
         const tokenInput = document.getElementById('github-token');
         const repoInput = document.getElementById('repo-name');
         const loginButton = document.getElementById('login-button');
         const commitButton = document.getElementById('commit-button');
         const logoutButton = document.getElementById('logout-button');
+        const toggleModeButton = document.getElementById('toggle-mode-button');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
         const titleInput = document.getElementById('post-title');
         const tagsInput = document.getElementById('post-tags');
         const excerptInput = document.getElementById('post-excerpt');
@@ -186,14 +203,15 @@ layout: null
         const authorDisplay = document.getElementById('author-display');
         const messageBox = document.getElementById('message-box');
         const commitStatus = document.getElementById('commit-status');
-
-        // --- Utility Functions ---
-
-        /**
-         * Simple message box for user feedback (replacing alert())
-         * @param {string} message - The message content
-         * @param {string} type - 'success', 'error', or 'info'
-         */
+        const postList = document.getElementById('post-list');
+        const postCount = document.getElementById('post-count');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const currentModeTitle = document.getElementById('current-mode-title');
+        const editorTitleStatus = document.getElementById('editor-title-status');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmMessage = document.getElementById('confirm-message');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalCancel = document.getElementById('modal-cancel');
         function showMessage(message, type) {
             const colors = {
                 success: { bg: 'bg-green-600', icon: 'check-circle' },
@@ -201,7 +219,6 @@ layout: null
                 info: { bg: 'bg-blue-600', icon: 'info' }
             };
             const style = colors[type] || colors.info;
-
             messageBox.innerHTML = `
                 <div class="${style.bg} text-white p-3 rounded-lg shadow-xl flex items-center space-x-2">
                     <i data-lucide="${style.icon}" class="w-5 h-5"></i>
@@ -211,7 +228,6 @@ layout: null
             lucide.createIcons();
             messageBox.classList.remove('hidden');
             messageBox.style.opacity = 1;
-
             setTimeout(() => {
                 messageBox.style.opacity = 0;
                 setTimeout(() => {
@@ -219,16 +235,33 @@ layout: null
                 }, 300);
             }, 5000);
         }
-
-        /**
-         * API call with exponential backoff for resilience
-         */
+        function showConfirmation(message) {
+            return new Promise(resolve => {
+                confirmMessage.textContent = message;
+                confirmModal.classList.remove('hidden');
+                lucide.createIcons();
+                const onConfirm = () => {
+                    confirmModal.classList.add('hidden');
+                    modalConfirm.removeEventListener('click', onConfirm);
+                    modalCancel.removeEventListener('click', onCancel);
+                    resolve(true);
+                };
+                const onCancel = () => {
+                    confirmModal.classList.add('hidden');
+                    modalConfirm.removeEventListener('click', onConfirm);
+                    modalCancel.removeEventListener('click', onCancel);
+                    resolve(false);
+                };
+                modalConfirm.addEventListener('click', onConfirm);
+                modalCancel.addEventListener('click', onCancel);
+            });
+        }
         async function fetchWithRetry(url, options, retries = 3) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, options);
                     if (response.status === 401) {
-                        throw new Error("Authentication failed. Check your PAT and ensure it has 'repo' permissions.");
+                        throw new Error("Authentication failed.");
                     }
                     if (!response.ok) {
                         const errorBody = await response.json().catch(() => ({ message: 'No detailed error message from API.' }));
@@ -243,77 +276,191 @@ layout: null
                 }
             }
         }
-
-        // --- Core CMS Functions ---
-
-        async function verifyAndLogin() {
-            const token = tokenInput.value.trim();
-            const repo = repoInput.value.trim();
-
-            if (!token || !repo) {
-                return showMessage("Please enter both the PAT and the repository owner/name.", 'error');
+        function parseJekyllPost(fileContent) {
+            const frontMatterRegex = /^---\s*([\s\S]*?)\s*---([\s\S]*)$/;
+            const match = fileContent.match(frontMatterRegex);
+            if (!match) {
+                return { metadata: { title: '', excerpt: '', tags: '' }, content: fileContent.trim() };
             }
-
-            try {
-                loginButton.disabled = true;
-                loginButton.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 inline mr-2 animate-spin"></i> Verifying...';
+            const yamlBlock = match[1].trim();
+            const content = match[2].trim();
+            const metadata = { title: '', excerpt: '', tags: '' };
+            const kvRegex = /^\s*([a-zA-Z_]+):\s*(.*)/;
+            yamlBlock.split('\n').forEach(line => {
+                const kvMatch = line.match(kvRegex);
+                if (kvMatch) {
+                    let key = kvMatch[1].toLowerCase();
+                    let value = kvMatch[2].trim().replace(/^['"](.*)['"]$/, '$1');
+                    if (key === 'title') {
+                        metadata.title = value;
+                    } else if (key === 'excerpt') {
+                        metadata.excerpt = value;
+                    }
+                }
+            });
+            const tagsMatch = yamlBlock.match(/tags:\s*(\[[\s\S]*?\]|\s*-[\s\S]*?)(?:\n[a-zA-Z]|$)/);
+            if (tagsMatch) {
+                const tagString = tagsMatch[1].replace(/[\s\n-]/g, '').replace(/,/g, ', ').trim();
+                metadata.tags = tagString.replace(/\]$/, '').replace(/^\[/, '');
+            }
+            return { metadata, content };
+        }
+        function toggleMode(mode) {
+            currentMode = mode;
+            if (mode === 'dashboard') {
+                dashboardScreen.classList.remove('hidden');
+                editorScreen.classList.add('hidden');
+                currentModeTitle.textContent = 'Post Dashboard';
+                toggleModeButton.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 inline mr-2"></i> New Post';
+                toggleModeButton.classList.add('btn-secondary');
+                toggleModeButton.classList.remove('btn-primary');
                 lucide.createIcons();
-                
-                // 1. Verify token validity and fetch user data
-                const response = await fetchWithRetry('https://api.github.com/user', {
-                    headers: { 'Authorization': `token ${token}` }
-                });
-                
-                const user = await response.json();
-                
-                // 2. Store user/repo info
-                githubToken = token;
-                repoFullName = repo;
-                verifiedUsername = user.login;
-
-                // 3. Set up Editor UI
-                easyMDE = new EasyMDE({ 
-                    element: document.getElementById('markdown-editor'),
-                    spellChecker: false,
-                    autofocus: true,
-                    placeholder: "Start writing your security insight here. Use the toolbar for images, links, and formatting.",
-                    toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "code", "horizontal-rule", "preview", "side-by-side", "fullscreen", "|", "guide"]
-                });
-
-                authorDisplay.textContent = verifiedUsername;
-                
-                loginScreen.classList.add('hidden');
+                listPosts();
+            } else {
+                dashboardScreen.classList.add('hidden');
                 editorScreen.classList.remove('hidden');
-                showMessage(`Welcome, ${verifiedUsername}! Successfully verified access to ${repo}.`, 'success');
-                
-            } catch (error) {
-                console.error("Login Error:", error);
-                showMessage(`Login Failed: ${error.message}`, 'error');
-            } finally {
-                loginButton.disabled = false;
-                loginButton.innerHTML = '<i data-lucide="log-in" class="w-5 h-5 inline mr-2"></i> Log In & Verify';
+                currentModeTitle.textContent = editingPostPath ? 'Editing Post' : 'New Post Creation';
+                toggleModeButton.innerHTML = '<i data-lucide="list" class="w-5 h-5 inline mr-2"></i> View Dashboard';
+                toggleModeButton.classList.add('btn-primary');
+                toggleModeButton.classList.remove('btn-secondary');
                 lucide.createIcons();
-                commitStatus.textContent = '';
             }
         }
-
+        function clearEditor() {
+            editingPostSha = null;
+            editingPostPath = null;
+            titleInput.value = '';
+            tagsInput.value = '';
+            excerptInput.value = '';
+            easyMDE.value('');
+            commitButton.innerHTML = '<i data-lucide="git-commit" class="w-5 h-5"></i> <span>Publish New Post Now</span>';
+            editorTitleStatus.textContent = 'New Post Mode';
+            cancelEditButton.classList.add('hidden');
+            lucide.createIcons();
+        }
+        async function listPosts() {
+            postList.innerHTML = '';
+            loadingSpinner.classList.remove('hidden');
+            try {
+                const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/_posts`;
+                const response = await fetchWithRetry(apiUrl, {
+                    headers: { 'Authorization': `token ${githubToken}` }
+                });
+                const files = await response.json();
+                if (files.message && files.message.includes('404')) {
+                    postList.innerHTML = `<p class="text-red-400 p-4 rounded-lg bg-gray-900 border border-red-700">The directory <code>_posts</code> was not found in your repository. Please ensure your repo path is correct and it contains a Jekyll <code>_posts</code> folder.</p>`;
+                    postCount.textContent = 0;
+                    return;
+                }
+                const postFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.md')).sort((a, b) => b.name.localeCompare(a.name));
+                postCount.textContent = postFiles.length;
+                if (postFiles.length === 0) {
+                    postList.innerHTML = `<p class="text-gray-400 p-4 rounded-lg bg-gray-900 border border-gray-700">No blog posts found in the <code>_posts</code> directory.</p>`;
+                    return;
+                }
+                postFiles.forEach(file => {
+                    const postName = file.name.substring(11).replace('.md', '').replace(/-/g, ' ');
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center p-4 rounded-lg bg-gray-900 hover:bg-gray-800 transition duration-150 border border-gray-700';
+                    item.innerHTML = `
+                        <span class="text-lg font-medium text-white max-w-[70%] truncate">${postName}</span>
+                        <div class="space-x-2 flex">
+                            <button data-path="${file.path}" data-sha="${file.sha}" class="edit-btn px-3 py-1 text-xs font-semibold rounded-lg btn-secondary hover:bg-cyan-500 transition duration-200">
+                                <i data-lucide="pencil" class="w-4 h-4 inline mr-1"></i> Edit
+                            </button>
+                            <button data-path="${file.path}" data-sha="${file.sha}" class="delete-btn px-3 py-1 text-xs font-semibold rounded-lg bg-red-700 text-white hover:bg-red-600 transition duration-200">
+                                <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    postList.appendChild(item);
+                });
+                lucide.createIcons();
+                document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => loadPost(e.currentTarget.dataset.path, e.currentTarget.dataset.sha)));
+                document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => deletePost(e.currentTarget.dataset.path, e.currentTarget.dataset.sha)));
+            } catch (error) {
+                console.error("List Posts Error:", error);
+                showMessage(`Could not load posts: ${error.message}. Check your repo name and permissions.`, 'error');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+        async function loadPost(path, sha) {
+            try {
+                const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/${path}`;
+                commitStatus.textContent = `Loading post: ${path}...`;
+                commitStatus.classList.remove('hidden');
+                const response = await fetchWithRetry(apiUrl, {
+                    headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3.raw' }
+                });
+                const rawContent = await response.text();
+                const { metadata, content } = parseJekyllPost(rawContent);
+                editingPostSha = sha;
+                editingPostPath = path;
+                titleInput.value = metadata.title;
+                tagsInput.value = metadata.tags;
+                excerptInput.value = metadata.excerpt;
+                easyMDE.value(content);
+                commitButton.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> <span>Update Post</span>`;
+                editorTitleStatus.textContent = `Editing: ${metadata.title}`;
+                cancelEditButton.classList.remove('hidden');
+                lucide.createIcons();
+                toggleMode('editor');
+                showMessage(`Post "${metadata.title}" loaded for editing.`, 'info');
+            } catch (error) {
+                console.error("Load Post Error:", error);
+                showMessage(`Failed to load post: ${error.message}`, 'error');
+            } finally {
+                commitStatus.classList.add('hidden');
+            }
+        }
+        async function deletePost(path, sha) {
+            const confirmed = await showConfirmation(`Are you ABSOLUTELY sure you want to delete the file: ${path}? This action is permanent.`);
+            if (!confirmed) return;
+            try {
+                commitStatus.textContent = `Deleting post: ${path}...`;
+                commitStatus.classList.remove('hidden');
+                const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/${path}`;
+                const options = {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `del(blog): Delete post: ${path}`,
+                        sha: sha,
+                        branch: 'main'
+                    })
+                };
+                await fetchWithRetry(apiUrl, options);
+                showMessage(`Success! Post "${path}" has been permanently deleted.`, 'success');
+                listPosts();
+            } catch (error) {
+                console.error("Delete Post Error:", error);
+                showMessage(`Deletion failed: ${error.message}`, 'error');
+            } finally {
+                commitStatus.classList.add('hidden');
+            }
+        }
         function createCommitData(content, title, excerpt, tags) {
-            // Generates file name in Jekyll format: YYYY-MM-DD-post-title.md
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '');
-            const filename = `_posts/${year}-${month}-${day}-${slug}.md`;
-            
+            let filename;
+            if (editingPostPath) {
+                filename = editingPostPath;
+            } else {
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '');
+                filename = `_posts/${year}-${month}-${day}-${slug}.md`;
+            }
             const tagList = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
             const tagsYaml = tagList.length > 0 ? tagList.map(t => `  - ${t}`).join('\n') : '';
-
-            // Generate the Jekyll Front Matter
             const frontMatter = `---
 layout: post
 title: "${title.replace(/"/g, '\\"')}"
-date: ${date.toISOString()}
+date: ${new Date().toISOString()}
 author: "${verifiedUsername}"
 excerpt: "${excerpt.replace(/"/g, '\\"')}"
 categories: [cybersecurity]
@@ -321,40 +468,34 @@ tags:
 ${tagsYaml}
 ---
 `;
-            // Base64 encode the final file content
             const fileContent = frontMatter + content;
-            // Use encodeURIComponent/unescape for proper handling of Unicode/special characters before btoa
             const contentBase64 = btoa(unescape(encodeURIComponent(fileContent)));
-
+            const commitAction = editingPostSha ? 'fix' : 'feat';
+            const commitMessage = `${commitAction}(blog): ${editingPostSha ? 'Update' : 'Add new'} post: ${title}`;
             return {
                 path: filename,
-                message: `feat(blog): Add new post: ${title}`,
-                content: contentBase64
+                message: commitMessage,
+                content: contentBase64,
+                sha: editingPostSha 
             };
         }
-
         async function publishPost() {
             if (isCommitting) return;
-
             const title = titleInput.value.trim();
             const content = easyMDE.value().trim();
             const excerpt = excerptInput.value.trim();
             const tags = tagsInput.value.trim();
-
             if (!title || !content || !excerpt) {
                 return showMessage("Title, Excerpt, and Post Body are required.", 'error');
             }
-
             try {
                 isCommitting = true;
                 commitButton.disabled = true;
                 commitStatus.classList.remove('hidden');
                 commitStatus.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 inline mr-2 animate-spin"></i> Preparing commit...';
                 lucide.createIcons();
-
                 const commitData = createCommitData(content, title, excerpt, tags);
                 const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/${commitData.path}`;
-
                 const options = {
                     method: 'PUT',
                     headers: {
@@ -364,78 +505,184 @@ ${tagsYaml}
                     body: JSON.stringify({
                         message: commitData.message,
                         content: commitData.content,
-                        branch: 'main' // Ensure commit is against the main branch
+                        sha: commitData.sha,
+                        branch: 'main'
                     })
                 };
-
                 commitStatus.innerHTML = '<i data-lucide="git-commit" class="w-4 h-4 inline mr-2"></i> Sending to GitHub...';
-
                 await fetchWithRetry(apiUrl, options);
-
-                showMessage(`Success! Post titled "${title}" has been published. Site will rebuild shortly.`, 'success');
-                
-                // Clear inputs after successful commit
-                titleInput.value = '';
-                tagsInput.value = '';
-                excerptInput.value = '';
-                easyMDE.value('');
-
+                showMessage(`Success! Post titled "${title}" has been ${editingPostSha ? 'updated' : 'published'}.`, 'success');
+                clearEditor();
+                toggleMode('dashboard');
             } catch (error) {
                 console.error("Commit Error:", error);
                 showMessage(`Publish failed: ${error.message}`, 'error');
             } finally {
                 isCommitting = false;
                 commitButton.disabled = false;
-                commitButton.innerHTML = '<i data-lucide="git-commit" class="w-5 h-5"></i> <span>Publish Post Now</span>';
-                commitStatus.classList.add('hidden');
                 lucide.createIcons();
             }
         }
-
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64Data = reader.result.split(',')[1];
+                    resolve(base64Data);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        async function uploadFileToGitHub(file) {
+            const commitMessage = `asset(image): Upload image: ${file.name}`;
+            const safeFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const filePath = `assets/images/posts/${safeFileName}`;
+            const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/${filePath}`;
+            try {
+                const contentBase64 = await fileToBase64(file);
+                const options = {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${githubToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: commitMessage,
+                        content: contentBase64,
+                        branch: 'main'
+                    })
+                };
+                await fetchWithRetry(apiUrl, options);
+                return `assets/images/posts/${safeFileName}`;
+            } catch (error) {
+                console.error("Image Upload Error:", error);
+                throw new Error(`Upload failed: ${error.message}`);
+            }
+        }
+        async function handleImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                showMessage(`Security Blocked: File type '${file.type}' is not an image. Only JPEG, PNG, GIF, and WebP are allowed.`, 'error');
+                return;
+            }
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showMessage(`Security Blocked: Detected MIME type '${file.type}'. Not an approved image format.`, 'error');
+                return;
+            }
+            try {
+                commitStatus.textContent = `<i data-lucide="upload-cloud" class="w-4 h-4 inline mr-2 animate-pulse"></i> Uploading ${file.name} securely...`;
+                commitStatus.classList.remove('hidden');
+                lucide.createIcons();
+                const imagePath = await uploadFileToGitHub(file);
+                const markdownLink = `![${file.name.split('.')[0]}](${imagePath})`;
+                easyMDE.codemirror.replaceSelection(markdownLink);
+                showMessage(`Image ${file.name} uploaded and link inserted!`, 'success');
+            } catch (error) {
+                showMessage(`Image upload failed: ${error.message}`, 'error');
+            } finally {
+                commitStatus.classList.add('hidden');
+            }
+        }
         function generateExcerpt() {
             const markdownContent = easyMDE.value().trim();
             if (!markdownContent) {
                 return showMessage("Please write some content first to generate an excerpt.", 'info');
             }
-            // Basic Markdown strip and truncation for excerpt
             const plainText = markdownContent
-                .replace(/([#*>`~-]|!\[.*?\]\s*\([^)]*\)|\[.*?\]\s*\([^)]*\))/g, '') // Remove markdown formatting
-                .replace(/\s+/g, ' ') // Collapse multiple spaces
+                .replace(/([#*>`~-]|!\[.*?\]\s*\([^)]*\)|\[.*?\]\s*\([^)]*\))/g, '')
+                .replace(/\s+/g, ' ')
                 .trim();
-            
-            // Truncate to about 25-30 words
             const excerptWords = plainText.split(' ').slice(0, 30).join(' ');
             excerptInput.value = excerptWords + (plainText.length > excerptWords.length ? '...' : '');
             showMessage("Excerpt generated successfully!", 'info');
         }
-
         function logout() {
             githubToken = '';
             repoFullName = '';
             verifiedUsername = '';
-            
-            // Clear sensitive input
+            clearEditor();
             tokenInput.value = ''; 
-            
-            // Destroy the editor instance
             if (easyMDE) {
                 easyMDE.toTextArea();
                 easyMDE = null;
             }
-            
-            editorScreen.classList.add('hidden');
+            appContainer.classList.add('hidden');
             loginScreen.classList.remove('hidden');
             showMessage("Logged out successfully.", 'info');
         }
-
-
-        // --- Event Listeners ---
+        async function verifyAndLogin() {
+            const token = tokenInput.value.trim();
+            const repo = repoInput.value.trim();
+            if (!token || !repo) {
+                return showMessage("Please enter both the password and the repository owner/name.", 'error');
+            }
+            if (!repo.includes('/')) {
+                return showMessage("Repository name must be in the format 'Owner/Name' (e.g., 'user/blog-repo').", 'error');
+            }
+            try {
+                loginButton.disabled = true;
+                loginButton.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 inline mr-2 animate-spin"></i> Verifying...';
+                lucide.createIcons();
+                const response = await fetchWithRetry('https://api.github.com/user', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                const user = await response.json();
+                githubToken = token;
+                repoFullName = repo;
+                verifiedUsername = user.login;
+                easyMDE = new EasyMDE({ 
+                    element: document.getElementById('markdown-editor'),
+                    spellChecker: false,
+                    autofocus: true,
+                    placeholder: "Start writing your security insight here. Drag and drop images directly into this area!",
+                    toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "code", "horizontal-rule", "preview", "side-by-side", "fullscreen", "|", "guide"]
+                });
+                const cm = easyMDE.codemirror;
+                cm.on('drop', (cm, e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.files.length > 0) {
+                        handleImageUpload(e.dataTransfer.files[0]);
+                    }
+                });
+                cm.on('paste', (cm, e) => {
+                    if (e.clipboardData.files.length > 0) {
+                        handleImageUpload(e.clipboardData.files[0]);
+                        e.preventDefault();
+                    }
+                });
+                authorDisplay.textContent = verifiedUsername;
+                loginScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                showMessage(`Welcome, ${verifiedUsername}! Successfully verified access to ${repo}.`, 'success');
+                toggleMode('dashboard');
+            } catch (error) {
+                console.error("Login Error:", error);
+                if (error.message.includes("Authentication failed.")) {
+                    showMessage(`Login Failed: Wrong password.`, 'error');
+                } else {
+                    showMessage(`Login Failed: ${error.message}`, 'error');
+                }
+            } finally {
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i data-lucide="log-in" class="w-5 h-5 inline mr-2"></i> Log In & Verify';
+                lucide.createIcons();
+                commitStatus.textContent = '';
+            }
+        }
         loginButton.addEventListener('click', verifyAndLogin);
         commitButton.addEventListener('click', publishPost);
         logoutButton.addEventListener('click', logout);
         generateExcerptButton.addEventListener('click', generateExcerpt);
-
-        // Allow pressing Enter in the token field to login
+        cancelEditButton.addEventListener('click', () => {
+            clearEditor();
+            toggleMode('dashboard');
+        });
+        toggleModeButton.addEventListener('click', () => {
+            if (currentMode === 'dashboard') {
+                clearEditor();
+                toggleMode('editor');
+            } else {
+                toggleMode('dashboard');
+            }
+        });
         tokenInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') verifyAndLogin();
         });
