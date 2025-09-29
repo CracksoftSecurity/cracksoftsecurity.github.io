@@ -103,13 +103,13 @@
                     GITHUB AUTHORIZATION
                 </h2>
                 <p class="text-sm text-gray-400">
-                    Input your **Personal Access Token (PAT)** for CMS access.
+                    Accessing **CracksoftSecurity/cracksoftsecurity.github.io**
                 </p>
                 <p id="loginStatus" class="text-sm mt-3 text-yellow-500 font-mono break-all">
                     Awaiting Token Input...
                 </p>
                 <p class="text-xs mt-2 text-gray-500">
-                    You must use a PAT with `repo` scope to manage content.
+                    Use a **Personal Access Token (PAT)** with `repo` scope to manage content.
                 </p>
             </div>
             <form id="loginForm" class="space-y-4">
@@ -124,7 +124,7 @@
                 </button>
             </form>
             <p class="text-xs text-center text-gray-600 mt-4">
-                *Verification is simulated to check basic validity, but the token is required for all data operations.*
+                *Verification checks token validity before granting access.*
             </p>
         </section>
 
@@ -133,9 +133,6 @@
             <nav class="bg-gray-900 border-b border-accent-primary p-3 flex flex-wrap md:flex-nowrap justify-center md:justify-start space-x-2 md:space-x-4">
                 <button data-tab="dashboard" class="tab-button tab-active px-4 py-2 rounded-lg text-sm md:text-base transition duration-200 hover:bg-accent-primary/70 flex items-center">
                     <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard
-                </button>
-                <button data-tab="site-settings" class="tab-button px-4 py-2 rounded-lg text-sm md:text-base text-white transition duration-200 hover:bg-accent-primary/70 flex items-center">
-                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Repository Config
                 </button>
                 <button data-tab="blog-manager" class="tab-button px-4 py-2 rounded-lg text-sm md:text-base text-white transition duration-200 hover:bg-accent-primary/70 flex items-center">
                     <i data-lucide="newspaper" class="w-4 h-4 mr-2"></i> Blog Manager
@@ -195,9 +192,15 @@
     </main>
 
     <script>
-        const API_BASE_URL = 'https://api.github.com';
+        // --- HARDCODED CONFIGURATION ---
+        const REPO_CONFIG = {
+            repoPath: 'CracksoftSecurity/cracksoftsecurity.github.io',
+            branchName: 'main',
+        };
         const GITHUB_POSTS_PATH = '_posts';
-        
+        const API_BASE_URL = 'https://api.github.com';
+        // --- END CONFIG ---
+
         let githubUser = 'N/A';
         let currentTab = 'dashboard';
 
@@ -205,10 +208,7 @@
         const state = {
             isAuthenticated: false,
             githubPat: localStorage.getItem('githubPat') || '',
-            repoConfig: { 
-                repoPath: localStorage.getItem('repoPath') || 'owner/repo-name',
-                branchName: localStorage.getItem('branchName') || 'main',
-            },
+            repoConfig: REPO_CONFIG, // Use the hardcoded config
             blogPosts: [],
             editingPost: null, // Holds the full post object including SHA
         };
@@ -318,7 +318,7 @@
 
         async function fetchBlogPostsFromGithub() {
             const { repoPath, branchName } = state.repoConfig;
-            if (repoPath === 'owner/repo-name' || !repoPath || !state.githubPat) {
+            if (!repoPath || !state.githubPat) {
                 state.blogPosts = [];
                 return;
             }
@@ -331,7 +331,7 @@
                     state.blogPosts = [];
                     // This often means the folder doesn't exist or permissions are wrong
                     if (filesList && filesList.message) {
-                        showCustomAlert("Repo Error", `Failed to list files: ${filesList.message}. Check Repo Path and Branch.`, true);
+                        showCustomAlert("Repo Error", `Failed to list files: ${filesList.message}. Check permissions or if the _posts folder exists.`, true);
                     }
                     return;
                 }
@@ -476,9 +476,6 @@
                 case 'dashboard':
                     html = renderDashboard();
                     break;
-                case 'site-settings':
-                    html = renderSiteSettings();
-                    break;
                 case 'blog-manager':
                     html = renderBlogManager();
                     break;
@@ -494,20 +491,15 @@
             
             dom.contentArea.innerHTML = html;
             lucide.createIcons();
-            
-            if (tabId === 'site-settings') {
-                attachSiteSettingsListeners();
-            } else if (tabId === 'blog-manager') {
-                 // Attach listener to new post button, but no drag/drop supported for GitHub API file list
-            }
         }
         
         function renderDashboard() {
             const postCount = state.blogPosts.length;
-            const lastPost = state.blogPosts[0];
             const repoPath = state.repoConfig.repoPath;
+            const branchName = state.repoConfig.branchName;
             
-            const isConfigured = repoPath !== 'owner/repo-name' && repoPath.split('/').length === 2;
+            // Configuration is always considered 'configured' now since it's hardcoded
+            const isConfigured = true;
 
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
@@ -515,16 +507,13 @@
                 </h2>
                 
                 <!-- Connection Status Message -->
-                <div class="p-3 mb-6 ${isConfigured ? 'bg-green-900 border border-green-500' : 'bg-yellow-900 border border-yellow-500'} rounded-lg text-white">
+                <div class="p-3 mb-6 bg-green-900 border border-green-500 rounded-lg text-white">
                     <p class="font-bold flex items-center">
-                        <i data-lucide="${isConfigured ? 'cloud-check' : 'alert-triangle'}" class="w-5 h-5 mr-2 ${isConfigured ? 'text-green-400' : 'text-yellow-400'}"></i> 
-                        GITHUB REPO STATUS: ${isConfigured ? 'CONFIGURED & CONNECTED' : 'AWAITING REPO PATH'}
+                        <i data-lucide="cloud-check" class="w-5 h-5 mr-2 text-green-400"></i> 
+                        GITHUB REPO STATUS: CONFIGURED & CONNECTED
                     </p>
                     <p class="text-sm mt-1">
-                        ${isConfigured ? 
-                            'Content is managed directly via GitHub API and will commit changes.' : 
-                            'Please set your **Repository Path** in the Repository Config tab to begin managing content.'
-                        }
+                        Content is managed directly via GitHub API for repository: <span class="font-bold">${repoPath}</span>.
                     </p>
                 </div>
 
@@ -555,7 +544,7 @@
                         <p class="text-xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">
                             ${repoPath}
                         </p>
-                        <p class="text-sm text-gray-500 mt-1">Branch: ${state.repoConfig.branchName}</p>
+                        <p class="text-sm text-gray-500 mt-1">Branch: ${branchName}</p>
                     </div>
                 </div>
 
@@ -574,95 +563,6 @@
             `;
         }
         
-        function renderSiteSettings() {
-            return `
-                <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
-                    <i data-lucide="settings" class="w-6 h-6 mr-3"></i> Repository Configuration
-                </h2>
-                
-                <div class="p-4 mb-6 bg-blue-900 border border-blue-500 rounded-lg text-white">
-                    <p class="font-bold flex items-center"><i data-lucide="info" class="w-5 h-5 mr-2 text-blue-400"></i> IMPORTANT</p>
-                    <p class="text-sm mt-1">
-                        Your changes to the blog posts will be committed to this repository. The PAT you used for login must have the **'repo' scope**.
-                    </p>
-                </div>
-
-                <form id="siteSettingsForm" class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700 space-y-4">
-                    <p id="settingsSaveMessage" class="text-sm h-6 text-center"></p>
-                    <div>
-                        <label for="repoPath" class="block text-sm font-medium text-gray-400 mb-1">GitHub Repository Path (e.g., username/repo-name)</label>
-                        <input type="text" id="repoPath" value="${state.repoConfig.repoPath || ''}" required 
-                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="cracksoft-user/my-blog">
-                    </div>
-                    <div>
-                        <label for="branchName" class="block text-sm font-medium text-gray-400 mb-1">Target Branch Name</label>
-                        <input type="text" id="branchName" value="${state.repoConfig.branchName || ''}" required
-                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="main or master">
-                    </div>
-                    
-                    <div class="pt-4 flex justify-end">
-                        <button type="submit" id="saveSettingsBtn"
-                            class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-green-600 text-white hover:bg-green-500 flex items-center">
-                            <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> Save Configuration
-                        </button>
-                    </div>
-                </form>
-            `;
-        }
-
-        function attachSiteSettingsListeners() {
-            const form = document.getElementById('siteSettingsForm');
-            const saveBtn = document.getElementById('saveSettingsBtn');
-            const message = document.getElementById('settingsSaveMessage');
-            
-            form.addEventListener('submit', handleSaveSiteSettings);
-            
-            form.addEventListener('input', () => {
-                message.textContent = 'Unsaved changes...';
-                message.classList.remove('text-green-400', 'text-red-400');
-                message.classList.add('text-yellow-400');
-            });
-        }
-
-        async function handleSaveSiteSettings(e) {
-            e.preventDefault();
-            
-            const repoPathInput = document.getElementById('repoPath').value.trim();
-            const branchName = document.getElementById('branchName').value.trim();
-            const message = document.getElementById('settingsSaveMessage');
-
-            if (!repoPathInput || repoPathInput.split('/').length !== 2 || !branchName) {
-                message.textContent = 'Repository path must be in "owner/repo-name" format and Branch is required.';
-                message.className = 'text-red-400 mt-4 h-6 text-center';
-                return;
-            }
-
-            try {
-                message.textContent = 'Saving...';
-                message.className = 'text-yellow-400 mt-4 h-6 text-center';
-
-                state.repoConfig.repoPath = repoPathInput;
-                state.repoConfig.branchName = branchName;
-                
-                // Simulate persistence using localStorage since we have no database
-                localStorage.setItem('repoPath', repoPathInput);
-                localStorage.setItem('branchName', branchName);
-
-                dom.cmsUserId.textContent = `User: ${githubUser} | Repo: ${state.repoConfig.repoPath}`;
-                
-                // Immediately attempt to fetch content with new config
-                await fetchBlogPostsFromGithub();
-
-                message.textContent = 'Configuration saved and content re-fetched!';
-                message.className = 'text-green-400 mt-4 h-6 text-center';
-
-            } catch (error) {
-                console.error("Error saving site config:", error);
-                message.textContent = `Error saving/fetching: ${error.message}`;
-                message.className = 'text-red-400 mt-4 h-6 text-center';
-            }
-        }
-
         function renderBlogManager() {
             const postsHtml = state.blogPosts.map((post) => `
                 <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex flex-col sm:flex-row items-start sm:items-center justify-between transition duration-200 hover:bg-gray-800" 
@@ -703,7 +603,7 @@
                 </div>
 
                 <div id="blogListContainer" class="space-y-3">
-                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found in the configured repository and branch. Check settings or create one!</p>'}
+                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found in the configured repository and branch. Check permissions or create one!</p>'}
                 </div>
                 
                 <button onclick="fetchBlogPostsFromGithub()" class="mt-6 w-full px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
@@ -717,12 +617,14 @@
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
             
+            const repoPath = state.repoConfig.repoPath; // Use hardcoded config
+
             if (mode === 'new') {
                 state.editingPost = null;
                 dom.blogModalTitle.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i> Create New Post';
                 dom.submitBlogBtn.textContent = 'Create & Commit Post';
                 dom.postFilename.disabled = false;
-                dom.currentFilePath.textContent = `${state.repoConfig.repoPath}/${GITHUB_POSTS_PATH}/...`;
+                dom.currentFilePath.textContent = `${repoPath}/${GITHUB_POSTS_PATH}/...`;
 
             } else { // Edit mode
                 state.editingPost = state.blogPosts.find(p => p.sha === mode);
@@ -754,10 +656,6 @@
             e.preventDefault();
             
             const { repoPath, branchName } = state.repoConfig;
-            if (repoPath === 'owner/repo-name') {
-                 showCustomAlert("Configuration Error", "Please set your Repository Path in Site Settings first.", true);
-                 return;
-            }
             
             const filename = dom.postFilename.value.trim();
             const content = dom.postContent.value;
@@ -1129,7 +1027,7 @@
                 });
             });
 
-            // If a PAT is already stored (from a previous session), skip the login screen
+            // If a PAT is already stored (from a previous session), attempt to verify and log in
             if (state.githubPat) {
                 document.getElementById('accessToken').value = state.githubPat;
                 const isVerified = await verifyGitHubToken(state.githubPat);
