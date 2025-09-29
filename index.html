@@ -113,7 +113,7 @@ layout: null
             <nav class="hidden md:flex space-x-6 lg:space-x-10 text-sm font-medium items-center">
                 <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Home</a>
                 <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">About Us</a>
-                <a href="#blogs-list" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Blogs</a> 
+                <a href="#blogs-list" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showBlogList(false);">Blogs</a> 
                 <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Heroes</a>
                 <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Partners</a>
                 
@@ -138,7 +138,7 @@ layout: null
                 <!-- Menu links duplicated for mobile -->
                 <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Home</a>
                 <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden')">About Us</a>
-                <a href="#blogs-list" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Blogs</a> 
+                <a href="#blogs-list" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showBlogList(false);">Blogs</a> 
                 <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Heroes</a>
                 <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Partners</a>
                 
@@ -183,7 +183,8 @@ layout: null
                         </a>
                         <!-- Blogs Link -->
                         <a href="#blogs-list" class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-sm font-semibold rounded-lg transition duration-300" 
-                           style="border: 2px solid var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;">
+                           style="border: 2px solid var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;"
+                           onclick="showBlogList(false);">
                             <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                             <span>Explore Free Training</span>
                         </a>
@@ -315,10 +316,7 @@ layout: null
             </div>
         </section>
 
-        <!-- ------------------------------------------------------------------ -->
         <!-- Blog Content Detail Viewer (Initially Hidden) -->
-        <!-- This section will be populated with a post's content when a card is clicked -->
-        <!-- ------------------------------------------------------------------ -->
         <section id="post-detail-view" class="hidden max-w-4xl mx-auto pt-16 pb-40">
             <button id="back-to-blogs-button" class="flex items-center space-x-2 text-sm font-semibold mb-8 transition hover:opacity-80" 
                     style="color: var(--color-accent-primary);">
@@ -328,16 +326,31 @@ layout: null
 
             <div class="p-6 sm:p-10 rounded-xl border-2 shadow-2xl" 
                  style="background-color: rgba(5, 5, 20, 0.95); border-color: var(--color-accent-primary)/50; box-shadow: 0 0 40px rgba(108, 78, 240, 0.2);">
+                
+                <!-- New Share Component -->
+                <div class="flex justify-between items-center mb-6 border-b pb-4 border-[#1A1A40]/50">
+                    <h3 class="text-xl font-bold text-white" id="post-title-header">Post Title Placeholder</h3>
+                    <button id="share-post-button" class="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition hover:bg-white/10" 
+                            style="color: var(--color-accent-secondary); border: 1px solid var(--color-accent-secondary);">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                        <span>Share Link</span>
+                    </button>
+                </div>
+                
+                <!-- Main Content Area -->
                 <div id="post-content-container" class="prose prose-invert max-w-none text-gray-300">
                     <!-- Post content will be injected here by JavaScript -->
                 </div>
             </div>
+            
+            <!-- Message box for share confirmation (replaces alert) -->
+            <div id="share-message-box" class="fixed bottom-5 right-5 z-50 bg-green-600 text-white p-4 rounded-lg shadow-xl hidden transition-opacity duration-300 opacity-0">
+                Link copied to clipboard! Share the URL.
+            </div>
         </section>
 
 
-        <!-- ------------------------------------------------------------------ -->
         <!-- Blog List Section: Updated to use In-Page Loading -->
-        <!-- ------------------------------------------------------------------ -->
         <section id="blogs-list" class="pt-16 sm:pt-20 pb-40">
             <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
                 Latest <span class="neon-glow" style="color: var(--color-accent-primary);">Cyber Insights</span>
@@ -349,9 +362,10 @@ layout: null
             <div class="grid md:grid-cols-3 gap-8" id="blog-cards-container">
                 {% assign posts_limit = 3 %}
                 {% for post in site.posts limit: posts_limit %}
-                <!-- Added data-post-url attribute and changed href to void(0) to trigger JS function -->
+                <!-- URL now passes the full post path in the data attribute -->
                 <a href="javascript:void(0);" 
                    data-post-url="{{ post.url | relative_url }}"
+                   data-post-title="{{ post.title | escape }}"
                    class="blog-card block p-6 rounded-xl border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_rgba(78,240,228,0.3)] hover:border-[--color-accent-secondary]" 
                    style="background-color: rgba(5, 5, 20, 0.95);">
                     <p class="text-xs uppercase font-mono mb-2" style="color: var(--color-accent-secondary);">
@@ -386,8 +400,11 @@ layout: null
         
     </main>
 
-    <!-- JavaScript for Terminal Functionality and Mobile Menu -->
+    <!-- JavaScript for Functionality -->
     <script>
+        // Global variables for blog state management
+        let currentPostUrl = null; 
+
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize Lucide Icons
             lucide.createIcons();
@@ -399,7 +416,192 @@ layout: null
             const blogsListSection = document.getElementById('blogs-list');
             const postDetailView = document.getElementById('post-detail-view');
             const postContentContainer = document.getElementById('post-content-container');
+            const postTitleHeader = document.getElementById('post-title-header');
             const backToBlogsButton = document.getElementById('back-to-blogs-button');
+            const sharePostButton = document.getElementById('share-post-button');
+            const shareMessageBox = document.getElementById('share-message-box');
+
+
+            // --- Core Display Functions ---
+
+            /** Shows the blog list and hides the post detail view. Optionally updates history. */
+            function showBlogList(updateHistory = true) {
+                postDetailView.classList.add('hidden');
+                blogsListSection.classList.remove('hidden');
+                blogsListSection.scrollIntoView({ behavior: 'smooth' });
+                currentPostUrl = null;
+
+                if (updateHistory) {
+                    // Update URL to the base index file without any hash fragment
+                    history.pushState(null, '', window.location.pathname);
+                }
+            }
+            
+            /** Shows the post detail view and hides the blog list. */
+            function showPostDetail() {
+                blogsListSection.classList.add('hidden');
+                postDetailView.classList.remove('hidden');
+                postDetailView.scrollIntoView({ behavior: 'smooth' });
+            }
+
+
+            // --- Blog In-Page Loading Logic (Updated for History API) ---
+
+            /**
+             * Fetches the content of a Jekyll post and injects it into the detail view.
+             */
+            async function loadPost(url, title, pushState = true) {
+                if (!url) return;
+
+                // 1. Set loading state
+                postContentContainer.innerHTML = `<p class="text-center text-gray-500 flex items-center justify-center space-x-2"><svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Loading Insight: ${title}...</span></p>`;
+                postTitleHeader.textContent = title || 'Loading...';
+                
+                showPostDetail();
+                currentPostUrl = url;
+
+                if (pushState) {
+                    // Update the URL bar so the link can be shared and respects history
+                    history.pushState({ postUrl: url }, title, window.location.pathname + '#' + url);
+                }
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const htmlText = await response.text();
+                    
+                    // Use DOMParser to safely parse the fetched HTML string
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    
+                    // Attempt to find the main content within Jekyll's generated HTML structure
+                    // This relies on the convention that the post content is within <article> or .post-content
+                    let contentElement = doc.querySelector('article') || doc.querySelector('.post-content');
+                    
+                    if (contentElement) {
+                        postContentContainer.innerHTML = contentElement.innerHTML;
+                        postTitleHeader.textContent = title; 
+                    } else {
+                        // Fallback if no specific wrapper is found
+                        const fallbackTitle = doc.querySelector('h1')?.textContent || title || 'Untitled Post';
+                        postTitleHeader.textContent = fallbackTitle; 
+                        postContentContainer.innerHTML = `<h1 class="text-3xl font-bold mb-4">${fallbackTitle}</h1><p class="text-red-500">Error: Could not find main post content. Displaying raw body attempt.</p>` + (doc.querySelector('body')?.innerHTML || '');
+                        console.warn("Could not find specific post content wrapper. Injecting best guess content.");
+                    }
+
+                    lucide.createIcons(); // Re-initialize icons in the new content
+                } catch (error) {
+                    postTitleHeader.textContent = title; 
+                    postContentContainer.innerHTML = `<p class="text-red-500 font-bold">Error loading post: ${error.message}</p>
+                        <p class="text-gray-400 text-sm mt-2">Check the console for details. Make sure the linked Jekyll post has been successfully compiled and deployed to the server at path: <code>${url}</code>.</p>`;
+                    console.error("Post loading failed:", error);
+                }
+            }
+
+            // Event listener delegation for blog cards
+            if (blogCardsContainer) {
+                blogCardsContainer.addEventListener('click', (e) => {
+                    const card = e.target.closest('.blog-card');
+                    if (card) {
+                        e.preventDefault();
+                        const url = card.getAttribute('data-post-url');
+                        const title = card.getAttribute('data-post-title');
+                        loadPost(url, title, true); // Push state to history
+                    }
+                });
+            }
+
+            // Back button functionality
+            if (backToBlogsButton) {
+                backToBlogsButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Using history.back() triggers the 'popstate' event handler below, which is cleaner
+                    if (currentPostUrl) {
+                        history.back(); 
+                    } else {
+                        showBlogList(true);
+                    }
+                });
+            }
+
+            // Share Button Functionality
+            if (sharePostButton) {
+                sharePostButton.addEventListener('click', () => {
+                    // The URL is already updated by loadPost via pushState
+                    const shareLink = window.location.href; 
+                    
+                    // Copy to clipboard logic
+                    try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = shareLink;
+                        textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+
+                        // Show custom message box (replaces alert)
+                        shareMessageBox.classList.remove('hidden');
+                        shareMessageBox.classList.add('opacity-100');
+                        setTimeout(() => {
+                            shareMessageBox.classList.remove('opacity-100');
+                            shareMessageBox.classList.add('opacity-0');
+                            setTimeout(() => shareMessageBox.classList.add('hidden'), 300); // Hide after transition
+                        }, 2500);
+
+                    } catch (err) {
+                        console.error('Could not copy text: ', err);
+                        // Fallback message
+                        shareMessageBox.textContent = "Copy failed. Link: " + shareLink;
+                        shareMessageBox.classList.remove('bg-green-600', 'hidden');
+                        shareMessageBox.classList.add('bg-red-600', 'opacity-100');
+                        setTimeout(() => {
+                            shareMessageBox.classList.remove('opacity-100');
+                            shareMessageBox.classList.add('opacity-0');
+                            setTimeout(() => shareMessageBox.classList.add('hidden'), 300);
+                        }, 5000);
+                    }
+                });
+            }
+
+            // --- History API Listener (Key for Shareability and Back/Forward Buttons) ---
+
+            window.addEventListener('popstate', (event) => {
+                // When the user hits the browser's back or forward button
+                handleInitialLoad();
+            });
+
+            // --- Initial Load Logic ---
+
+            function handleInitialLoad() {
+                // Check if a post URL is in the hash fragment (e.g., #/path/to/post)
+                const hash = window.location.hash;
+                if (hash.startsWith('#/')) {
+                    // Extract the post path from the hash
+                    const postPath = hash.substring(1); 
+                    
+                    // Find the corresponding card data to get the title
+                    const card = Array.from(document.querySelectorAll('.blog-card')).find(c => c.getAttribute('data-post-url') === postPath);
+                    
+                    if (card) {
+                        // Load the post without pushing a new state
+                        const title = card.getAttribute('data-post-title');
+                        loadPost(postPath, title, false); 
+                    } else {
+                        // If hash exists but post is not found, go to list
+                        showBlogList(false);
+                    }
+                } else {
+                    // Default view: show the list
+                    showBlogList(false); 
+                }
+            }
+
+            // Run the initial load check
+            handleInitialLoad();
+
 
             // --- Mobile Menu Toggle Logic ---
             if (mobileMenuButton && mobileMenu) {
@@ -414,100 +616,6 @@ layout: null
                         icon.setAttribute('data-lucide', 'x');
                     }
                     lucide.createIcons(); // Re-render the icon change
-                });
-            }
-
-            // --- Blog In-Page Loading Logic ---
-
-            /**
-             * Fetches the content of a Jekyll post (HTML file) and extracts the body.
-             * NOTE: This is a hacky but effective way to load content without a full page refresh.
-             * It relies on Jekyll compiling the post into an accessible HTML file.
-             */
-            async function loadPost(url) {
-                if (!url) return;
-
-                // 1. Show Loading/Clear previous content
-                postContentContainer.innerHTML = `<p class="text-center text-gray-500 flex items-center justify-center space-x-2"><svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Loading Insight...</span></p>`;
-                
-                // 2. Hide list, show detail view
-                blogsListSection.classList.add('hidden');
-                postDetailView.classList.remove('hidden');
-                
-                // Scroll to the top of the new content area
-                postDetailView.scrollIntoView({ behavior: 'smooth' });
-
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    
-                    const htmlText = await response.text();
-                    
-                    // Use DOMParser to safely parse the fetched HTML string
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, 'text/html');
-                    
-                    // Attempt to find the main content. We use the <body> as a fallback.
-                    // If you use a Jekyll layout that wraps content in <main id="post-content">...</main>, 
-                    // this selector can be made more specific for better results.
-                    const contentElement = doc.querySelector('article') || doc.querySelector('main') || doc.querySelector('body');
-                    
-                    if (contentElement) {
-                        // Extract content from a sensible wrapper. If 'article' is found, use its innerHTML.
-                        let contentToInject = contentElement.innerHTML;
-
-                        // A common Jekyll setup includes a header with title and date. 
-                        // To avoid injecting the entire page body (which contains the site header/footer), 
-                        // we'll try to refine the content.
-                        const article = doc.querySelector('article.post-content');
-                        if (article) {
-                           contentToInject = article.innerHTML;
-                        } else if (doc.querySelector('.post-content')) {
-                            // Try another common class
-                            contentToInject = doc.querySelector('.post-content').innerHTML;
-                        } else {
-                            // If no specific wrapper is found, we inject a generic wrapper and remind the user
-                            const title = doc.querySelector('h1')?.textContent || 'Untitled Post';
-                            contentToInject = `<h1 class="text-3xl font-bold mb-4">${title}</h1>` + doc.querySelector('body').innerHTML;
-                            
-                            // Since we can't reliably parse the remote post's HTML without knowing its layout, 
-                            // a more robust solution would require a dedicated Jekyll layout for JSON output.
-                            // For now, this is the best pure JS approach.
-                            console.warn("Could not find specific post content wrapper. Injecting best guess content.");
-                        }
-
-                        // Sanitize and inject (The 'prose' styling helps render markdown content better)
-                        postContentContainer.innerHTML = contentToInject;
-                    } else {
-                        postContentContainer.innerHTML = `<p class="text-red-500 font-bold">Error: Could not find main post content in the loaded page. Ensure your Jekyll post layout wraps the content in a recognizable tag like &lt;article&gt;.</p>`;
-                    }
-
-                    lucide.createIcons(); // Re-initialize icons in the new content
-                } catch (error) {
-                    postContentContainer.innerHTML = `<p class="text-red-500 font-bold">Error loading post: ${error.message}</p>
-                        <p class="text-gray-400 text-sm mt-2">Check the console for details. Make sure the linked Jekyll post has been successfully compiled and deployed to the server.</p>`;
-                    console.error("Post loading failed:", error);
-                }
-            }
-
-            // Event listener delegation for blog cards
-            if (blogCardsContainer) {
-                blogCardsContainer.addEventListener('click', (e) => {
-                    const card = e.target.closest('.blog-card');
-                    if (card) {
-                        e.preventDefault();
-                        const url = card.getAttribute('data-post-url');
-                        loadPost(url);
-                    }
-                });
-            }
-
-            // Back button functionality
-            if (backToBlogsButton) {
-                backToBlogsButton.addEventListener('click', () => {
-                    postDetailView.classList.add('hidden');
-                    blogsListSection.classList.remove('hidden');
-                    blogsListSection.scrollIntoView({ behavior: 'smooth' });
                 });
             }
 
@@ -531,7 +639,7 @@ layout: null
                 if (color !== 'white') {
                     p.style.color = color;
                 }
-                p.innerHTML = text; // Safe for hardcoded responses
+                p.innerHTML = text; 
                 output.appendChild(p);
                 output.scrollTop = output.scrollHeight;
             }
@@ -563,7 +671,6 @@ layout: null
                 // ... (Command logic remains the same, only the input display was sanitized)
                 if (trimmedCommand.startsWith('ping')) {
                     const parts = trimmedCommand.split(' ');
-                    // SECURITY NOTE: Target display is safe as it's just text
                     const target = parts[1] || '127.0.0.1'; 
                     response = `
                         <span style="color: ${primaryColor}; font-weight: bold;">[ NETWORK TRACE ]</span>
@@ -615,8 +722,6 @@ layout: null
                             response = 'Terminal session cleared.';
                             break;
                         default:
-                            // SECURITY NOTE: The variable `originalCommand` is only displayed via printLine, which uses innerHTML for the hardcoded HTML structure (like colors/links), 
-                            // but for the command name itself, it is included inside a controlled error message, mitigating risk.
                             response = `<span style="color: red;">ERROR: Invalid command: ${originalCommand}</span>
                                         <br>Type '<span style="color: ${secondaryColor};">help</span>' for command list.`;
                     }
@@ -662,7 +767,9 @@ layout: null
                 printLine(welcomeMessage);
             }
 
-            showWelcome();
+            if (!window.location.hash.startsWith('#/')) {
+                 showWelcome();
+            }
         });
     </script>
 </body>
