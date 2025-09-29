@@ -118,13 +118,11 @@
                 <p id="loginStatus" class="text-sm mt-3 text-yellow-500 font-mono break-all">
                     Awaiting Token Input...
                 </p>
-                <p class="text-xs mt-2 text-gray-500">
-                    Use a **Personal Access Token (PAT)** with `repo` scope to manage content.
-                </p>
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <label for="accessToken" class="block text-sm font-medium text-gray-400 mb-1">GitHub Personal Access Token</label>
+                    <!-- UPDATED TEXT -->
+                    <label for="accessToken" class="block text-sm font-medium text-gray-400 mb-1">Your GitHub Secret Token (PAT)</label>
                     <input type="password" id="accessToken" required
                         class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="Enter full PAT (e.g., ghp_...)">
                 </div>
@@ -133,8 +131,11 @@
                     <i data-lucide="key-round" class="w-5 h-5 mr-2"></i> Verify & Access CMS
                 </button>
             </form>
-            <p class="text-xs text-center text-gray-600 mt-4">
-                *Verification checks token validity before granting access.*
+            <p class="text-xs text-center text-gray-500 mt-4">
+                *This token is a secure credential used only to authorize **this app** to commit changes to your blog repository. It requires the `repo` scope.*
+            </p>
+            <p class="text-xs text-center text-gray-600 mt-1">
+                *The CMS cannot function without this access to save files.*
             </p>
         </section>
 
@@ -313,6 +314,7 @@
                 const editor = tinymce.get('postContent');
                 if (editor) {
                     editor.setContent(content || '');
+                    editor.setMode('design'); // Ensure editor is writable on re-use
                     editor.focus();
                 }
                 return;
@@ -322,6 +324,8 @@
             tinymce.init({
                 selector: '#postContent',
                 height: 500,
+                // FIX: Explicitly set readonly to false to prevent the [CONSOLE_ERROR] read-only error
+                readonly: false, 
                 // Full featured toolbar for WordPress-like experience
                 plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
                 toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media | code fullscreen help',
@@ -341,6 +345,8 @@
                         tinymceInitialized = true;
                         // Set content after initialization
                         editor.setContent(content || '');
+                        // **FIX: Explicitly set editor mode to writable 'design' to resolve read-only console error**
+                        editor.setMode('design'); 
                         editor.focus();
                     });
                 }
@@ -359,7 +365,7 @@
 
         async function githubApi(method, path, data = {}) {
             if (!state.githubPat) {
-                showCustomAlert("Authentication Error", "Missing GitHub Personal Access Token.", true);
+                showCustomAlert("Authentication Error", "Missing GitHub Secret Token (PAT).", true);
                 return null;
             }
             
@@ -388,9 +394,17 @@
                 // Try to parse JSON, handle cases where response is not JSON
                 let json = null;
                 try {
-                    json = await response.json();
+                    // Check if response has content type of application/json before parsing
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        json = await response.json();
+                    } else {
+                        // For non-JSON responses (like some 40x errors without JSON body), create a default message
+                        json = { message: `Non-JSON response received from GitHub (Status: ${response.status}).` };
+                    }
                 } catch (e) {
-                    json = { message: "Non-JSON response received from GitHub." };
+                    console.error("Error parsing GitHub response JSON:", e);
+                    json = { message: "Failed to parse JSON response from GitHub." };
                 }
 
 
@@ -422,8 +436,12 @@
         async function fetchBlogPostsFromGithub() {
             const { repoPath, branchName } = state.repoConfig;
             
+            // Get the list container element (only available in blog-manager tab)
+            const blogListContainer = document.getElementById('blogListContainer');
+            if (!blogListContainer) return;
+
             // Show loading message
-            document.getElementById('blogListContainer').innerHTML = '<p class="text-center py-10 text-yellow-400 flex items-center justify-center"><i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Fetching posts from GitHub...</p>';
+            blogListContainer.innerHTML = '<p class="text-center py-10 text-yellow-400 flex items-center justify-center"><i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Fetching posts from GitHub...</p>';
             lucide.createIcons();
 
             try {
@@ -432,13 +450,13 @@
                 
                 if (!Array.isArray(filesList)) {
                     state.blogPosts = [];
-                    // This often means the folder doesn't exist or permissions are wrong
+                    // Handle specific error cases
                     if (filesList && filesList.message) {
                          // Show error in the list area
-                        document.getElementById('blogListContainer').innerHTML = `<p class="text-center py-10 text-red-400">Error: ${filesList.message}. Check your PAT scope and ensure the **${GITHUB_POSTS_PATH}** directory exists in the repo.</p>`;
+                        blogListContainer.innerHTML = `<p class="text-center py-10 text-red-400">Error: ${filesList.message}. Check your PAT scope and ensure the **${GITHUB_POSTS_PATH}** directory exists in the repo.</p>`;
                         console.error("Failed to list files:", filesList);
                     } else if (filesList === null) {
-                        document.getElementById('blogListContainer').innerHTML = `<p class="text-center py-10 text-red-400">Error 404: The repository path **${repoPath}** or **${GITHUB_POSTS_PATH}** folder was not found.</p>`;
+                        blogListContainer.innerHTML = `<p class="text-center py-10 text-red-400">Error 404: The repository path **${repoPath}** or **${GITHUB_POSTS_PATH}** folder was not found.</p>`;
                     }
                     return;
                 }
@@ -538,7 +556,7 @@
                 state.isAuthenticated = true;
                 localStorage.setItem('githubPat', tokenInput); // Save PAT for session
                 
-                dom.loginStatus.innerHTML = `PAT accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
+                dom.loginStatus.innerHTML = `Token accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
                 
                 setTimeout(() => {
                     dom.loginScreen.classList.add('hidden');
@@ -550,7 +568,7 @@
 
             } else {
                 state.githubPat = '';
-                dom.loginStatus.textContent = `ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient scope (requires 'repo').`;
+                dom.loginStatus.textContent = `ACCESS DENIED: Invalid GitHub Secret Token or missing 'repo' scope.`;
                 dom.loginStatus.classList.remove('text-yellow-500');
                 dom.loginStatus.classList.add('text-red-400');
                 document.getElementById('accessToken').value = '';
@@ -573,10 +591,6 @@
                 }
             });
             
-            if (currentTab === 'blog-manager') {
-                 fetchBlogPostsFromGithub(); // Refresh on tab switch
-            }
-
             // Clear any animation/chart intervals
             if (dosAnimationInterval) {
                 cancelAnimationFrame(dosAnimationInterval);
@@ -590,6 +604,8 @@
             // Ensure TinyMCE is removed when switching away from the blog tab
             if (tabId !== 'blog-manager') {
                 destroyTinyMCE();
+            } else {
+                 fetchBlogPostsFromGithub(); // Refresh on tab switch to Blog Manager
             }
 
             renderContent(tabId);
@@ -609,11 +625,12 @@
                     break;
                 case 'security-tools':
                     html = renderSecurityTools();
+                    // Must run on next tick after HTML is injected
                     setTimeout(() => {
                         setupTrafficChart();
                         setupDosAnimation();
                         lucide.createIcons();
-                    }, 0);
+                    }, 0); 
                     break;
             }
             
@@ -626,8 +643,6 @@
             const repoPath = state.repoConfig.repoPath;
             const branchName = state.repoConfig.branchName;
             
-            const isConfigured = true; // Always true now
-
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="layout-dashboard" class="w-6 h-6 mr-3"></i> Dashboard Overview
@@ -659,13 +674,14 @@
                             <span class="text-gray-400 font-mono">TOTAL BLOG POSTS</span>
                             <i data-lucide="newspaper" class="w-6 h-6 text-green-500"></i>
                         </div>
-                        <p class="text-2xl font-bold mt-2 text-white">${postCount}</p>
+                        <p class="text-2xl font-bold mt-2 text-white">${state.blogPosts.length}</p>
                         <p class="text-sm text-gray-500 mt-1">Found in ${GITHUB_POSTS_PATH}/</p>
                     </div>
 
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-yellow-500">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400 font-mono">REPOSITORY</span>
+                            <p class="text-xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">
                             <i data-lucide="folder-git2" class="w-6 h-6 text-yellow-500"></i>
                         </div>
                         <p class="text-xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">
@@ -824,7 +840,7 @@
             } else {
                 // New Post: generate filename with timestamp and slug
                 const now = new Date();
-                const year = now.getFullYear();
+                const year = String(now.getFullYear());
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 const day = String(now.getDate()).padStart(2, '0');
                 const hour = String(now.getHours()).padStart(2, '0');
@@ -839,13 +855,15 @@
 
             // 2. Prepare Jekyll Front Matter (YAML)
             const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-            const tagsYaml = tagsArray.map(tag => `  - ${tag}`).join('\n');
             
+            // Format tags for Jekyll YAML array style: [ 'tag1', 'tag2' ]
+            const tagsFormatted = tagsArray.map(t => `'${t}'`).join(', ');
+
             const frontMatter = `---
 layout: post
 title: "${title}"
 author: "${author}"
-tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
+tags: [${tagsFormatted}]
 ---
 
 `;
@@ -1105,16 +1123,45 @@ tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
         function setupDosAnimation() {
             const container = document.getElementById('dos-animation');
             if (!container) return;
-            container.innerHTML = '';
+            container.innerHTML = `
+                <style>
+                    #dos-animation {
+                        width: 100%;
+                        height: 150px;
+                        background-color: rgba(0, 0, 0, 0.3);
+                        border: 1px solid rgba(78, 240, 228, 0.2);
+                        border-radius: 8px;
+                        overflow: hidden;
+                        display: flex;
+                        align-items: flex-end;
+                        justify-content: space-between;
+                        padding: 2px;
+                    }
+                    .traffic-bar {
+                        width: 4px;
+                        background-color: var(--color-accent-primary);
+                        margin: 0 1px;
+                        transition: height 0.05s linear;
+                        border-radius: 2px 2px 0 0;
+                    }
+                    .attack-bar {
+                        background-color: #ef4444; /* Tailwind red-500 */
+                        box-shadow: 0 0 5px #ef4444;
+                    }
+                </style>
+            `;
+            
+            // Re-select container after injecting style
+            const barContainer = document.getElementById('dos-animation');
             trafficBars = [];
             
-            const numBars = Math.floor(container.offsetWidth / 5);
+            // Calculate bars based on container width
+            const numBars = Math.floor(barContainer.offsetWidth / 5);
             for (let i = 0; i < numBars; i++) {
                 const bar = document.createElement('div');
                 bar.className = 'traffic-bar';
-                bar.style.left = `${i * 5}px`;
                 bar.style.height = `${Math.floor(Math.random() * 20) + 10}px`;
-                container.appendChild(bar);
+                barContainer.appendChild(bar);
                 trafficBars.push(bar);
             }
         }
@@ -1154,9 +1201,9 @@ tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
             }
 
             document.getElementById('traffic-status').textContent = statusText;
-            document.getElementById('traffic-status').className = statusColor;
+            document.getElementById('traffic-status').className = 'text-sm font-mono ' + statusColor;
             document.getElementById('mitigation-status').textContent = mitigationActive ? 'Engaged' : 'Active';
-            document.getElementById('mitigation-status').className = mitigationActive ? 'text-cyan-400' : 'text-gray-400';
+            document.getElementById('mitigation-status').className = 'text-sm font-mono ' + (mitigationActive ? 'text-cyan-400' : 'text-gray-400');
 
             for (let i = 0; i < trafficBars.length; i++) {
                 const bar = trafficBars[i];
@@ -1208,7 +1255,7 @@ tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
                     dom.loginScreen.classList.add('hidden');
                     dom.cmsPanel.classList.remove('hidden');
                     dom.cmsUserId.textContent = `User: ${githubUser} | Repo: ${state.repoConfig.repoPath}`;
-                    dom.loginStatus.innerHTML = `PAT accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
+                    dom.loginStatus.innerHTML = `Token accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
                     
                     fetchBlogPostsFromGithub(); // Initial fetch
                     renderContent('dashboard');
@@ -1216,7 +1263,7 @@ tags: [${tagsArray.map(t => `'${t}'`).join(', ')}]
                     // Stored PAT is invalid, force re-login
                     localStorage.removeItem('githubPat');
                     state.githubPat = '';
-                    dom.loginStatus.textContent = 'Stored PAT invalid. Please log in again.';
+                    dom.loginStatus.textContent = 'Stored token invalid. Please log in again.';
                     dom.loginStatus.classList.add('text-red-400');
                     document.getElementById('accessToken').value = '';
                 }
