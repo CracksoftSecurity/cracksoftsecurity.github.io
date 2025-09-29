@@ -1,0 +1,126 @@
+---
+layout: null
+---
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cracksoft Security Admin Console</title>
+  
+  <!-- Load Tailwind CSS for login page styling (Decap CMS uses its own editor styles) -->
+  <script src="https://cdn.tailwindcss.com/"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+    
+    /* Custom Colors based on your site */
+    :root {
+        --color-bg-dark: #00030A;
+        --color-accent-primary: #6C4EF0;
+        --color-accent-secondary: #4EF0E4;
+        --color-text-light: #E9F0F4;
+    }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--color-bg-dark);
+        color: var(--color-text-light);
+    }
+
+    .neon-glow-primary {
+        text-shadow: 0 0 8px var(--color-accent-primary);
+    }
+    .neon-glow-secondary {
+        text-shadow: 0 0 8px var(--color-accent-secondary);
+    }
+
+    /* Style the login wrapper to match your site aesthetic */
+    .Netlify-CMS-App-auth--login-wrapper {
+        background-color: #0d0d21 !important; /* Darker terminal background */
+        border: 2px solid var(--color-accent-primary) !important;
+        box-shadow: 0 0 30px rgba(108, 78, 240, 0.4) !important;
+        border-radius: 12px !important;
+    }
+
+    /* Style the login button */
+    .Netlify-CMS-App-auth--button {
+        background-color: var(--color-accent-primary) !important;
+        color: var(--color-bg-dark) !important;
+        font-weight: bold !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    .Netlify-CMS-App-auth--button:hover {
+        transform: scale(1.03) !important;
+        box-shadow: 0 0 15px var(--color-accent-primary) !important;
+    }
+    
+    /* Ensure the editor itself is loaded in full screen */
+    html {
+        height: 100%;
+    }
+    body {
+        min-height: 100vh;
+    }
+
+  </style>
+
+  <!-- Load Decap CMS library -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+</head>
+<body class="min-h-screen flex items-center justify-center">
+
+  <!-- Logo for Login Screen -->
+  <div class="fixed top-0 left-0 right-0 p-8 text-center">
+    <h1 class="text-3xl font-black tracking-widest text-[var(--color-accent-primary)] neon-glow-primary">
+        <span class="text-white">CRACKSOFT</span> <span class="text-[var(--color-accent-secondary)] neon-glow-secondary">CMS</span>
+    </h1>
+    <p class="text-gray-400 mt-2">Secured Content Administration</p>
+  </div>
+
+
+  <!-- Decap CMS Configuration in YAML -->
+  <script type="text/yaml" id="config">
+    # Backend Configuration: Connects to your GitHub repository
+    backend:
+      # Use Netlify's Git Gateway for secure authentication
+      # (Requires Netlify hosting setup for the best security experience)
+      name: git-gateway
+      branch: main # Change this to 'master' if your main branch is still named master
+      
+    # Authentication (required for Netlify's Git Gateway)
+    publish_mode: editorial_workflow
+    site_url: {{ site.url }} # Uses Jekyll's internal variable for site URL
+    display_url: {{ site.url }}
+
+    # Media Configuration: Where files (images) are stored
+    media_folder: "assets/images/uploads"
+    public_folder: "/assets/images/uploads"
+
+    # Collections: Defines the content types
+    collections:
+      - name: "blog" # Used internally
+        label: "Blog Posts" # Name shown in the CMS
+        folder: "_posts" # REQUIRED: Jekyll posts must go into the _posts folder
+        create: true # Allows users to create new posts
+        delete: true # Allows users to delete posts
+        slug: "{{year}}-{{month}}-{{day}}-{{slug}}" # Defines the Jekyll filename format
+        identifier_field: title # Used to generate the file name slug
+        
+        # Fields: Defines the input fields for the post editor
+        fields:
+          # --- Jekyll Front Matter Fields ---
+          - {label: "Layout", name: "layout", widget: "hidden", default: "post"}
+          - {label: "Title", name: "title", widget: "string", required: true}
+          - {label: "Publish Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: true}
+          - {label: "Author", name: "author", widget: "string", default: "Community Defender", hint: "The name of the post's author."}
+          - {label: "Tags (Comma-separated)", name: "tags", widget: "list", allow_add: true, required: false}
+          - {label: "Excerpt / Short Summary", name: "excerpt", widget: "text", required: true, hint: "A short paragraph used for previews on the main blog page."}
+          
+          # --- Body Content Field ---
+          - {label: "Post Body", name: "body", widget: "markdown", required: true, minimal: false, buttons: [bold, italic, code, link, heading, quote, bulletedlist, numberedlist]}
+          
+  </script>
+</body>
+</html>
