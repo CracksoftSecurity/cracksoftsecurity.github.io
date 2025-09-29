@@ -4,26 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cracksoft Security | Admin Control Panel</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com/"></script>
-    <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Load Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
     <style>
-        /* --- Custom Theme Variables --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
         :root {
             --color-bg-dark: #00030A;
-            --color-accent-primary: #6C4EF0; /* Deep Purple */
-            --color-accent-secondary: #4EF0E4; /* Electric Cyan */
+            --color-accent-primary: #6C4EF0;
+            --color-accent-secondary: #4EF0E4;
             --color-card-bg: rgba(5, 5, 20, 0.95);
             --color-text-light: #E9F0F4;
         }
 
-        /* --- Tailwind Configuration Override --- */
         tailwind.config = {
             theme: {
                 extend: {
@@ -45,7 +40,6 @@
             }
         }
 
-        /* --- Global Styles --- */
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--color-bg-dark);
@@ -69,14 +63,12 @@
             border-color: var(--color-accent-secondary);
             box-shadow: 0 0 0 2px rgba(78, 240, 228, 0.5);
         }
-        /* Style for the active tab */
         .tab-active {
             background-color: var(--color-accent-primary);
             color: var(--color-bg-dark);
             font-weight: bold;
         }
 
-        /* --- Blog Drag & Drop Styles --- */
         .blog-item {
             cursor: grab;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -93,7 +85,6 @@
             border-bottom: 2px solid var(--color-accent-secondary);
         }
 
-        /* --- DoS Check Animation --- */
         #dos-animation {
             height: 150px;
             background-color: #111;
@@ -110,7 +101,7 @@
             transition: height 0.1s linear, background-color 0.1s;
         }
         .attack-bar {
-            background-color: #f04f4f; /* Red */
+            background-color: #f04f4f;
         }
     </style>
 </head>
@@ -121,17 +112,16 @@
             Cracksoft Central Administration
         </h1>
 
-        <!-- Authentication Screen -->
         <section id="authScreen" class="admin-card p-6 sm:p-10 rounded-xl max-w-md mx-auto">
             <h2 class="text-2xl font-bold mb-4 flex items-center space-x-2 text-yellow-400">
                 <i data-lucide="lock" class="w-6 h-6"></i>
                 <span>Secure Login</span>
             </h2>
             <p class="text-sm text-gray-400 mb-6 border-l-4 pl-3 py-1 border-yellow-500">
-                Enter the administrative password to manage site configuration.
+                Enter the administrative password to manage your blog.
             </p>
             <form id="passwordForm" class="space-y-4">
-                <input type="password" id="cmsPasswordInput" placeholder="Enter Password" required
+                <input type="password" id="cmsPasswordInput" placeholder="Enter Password (admin)" required
                     class="w-full p-3 rounded-lg input-style text-sm text-white font-mono">
                 <button type="submit" id="loginButton"
                     class="w-full px-4 py-3 text-lg font-bold rounded-lg transition duration-300 bg-accent-primary text-white hover:bg-accent-secondary hover:text-bg-dark shadow-glow-primary">
@@ -141,9 +131,7 @@
             <p id="authMessage" class="text-red-400 mt-4 h-6 text-center"></p>
         </section>
 
-        <!-- CMS Main Panel -->
         <section id="cmsPanel" class="admin-card flex-1 p-0 rounded-xl hidden flex-col overflow-hidden">
-            <!-- Navigation Sidebar -->
             <nav class="bg-gray-900 border-b border-accent-primary p-3 flex flex-wrap md:flex-nowrap justify-center md:justify-start space-x-2 md:space-x-4">
                 <button data-tab="dashboard" class="tab-button tab-active px-4 py-2 rounded-lg text-sm md:text-base transition duration-200 hover:bg-accent-primary/70 flex items-center">
                     <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard
@@ -159,12 +147,9 @@
                 </button>
             </nav>
 
-            <!-- Content Area -->
             <div id="contentArea" class="flex-1 p-6 overflow-y-auto text-gray-300">
-                <!-- Tab content will be rendered here -->
             </div>
             
-            <!-- Footer -->
             <div class="p-3 bg-gray-900 border-t border-accent-primary flex justify-between items-center text-xs text-gray-500">
                 <span id="cms-user-id">User ID: N/A</span>
                 <button onclick="window.location.href = '../index.html'" type="button" 
@@ -174,7 +159,6 @@
             </div>
         </section>
         
-        <!-- Modal for Blog Post Editing -->
         <div id="blogModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 items-center justify-center p-4">
             <div class="bg-gray-900 border border-accent-secondary rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                 <div class="p-4 bg-gray-800 border-b border-accent-secondary flex justify-between items-center">
@@ -196,6 +180,23 @@
                         <input type="text" id="postAuthor" required maxlength="50"
                             class="w-full p-3 rounded-lg input-style text-white">
                     </div>
+
+                    <div class="p-4 bg-gray-800 border border-accent-primary rounded-lg space-y-3">
+                        <h4 class="text-lg font-semibold text-accent-secondary flex items-center">
+                            <i data-lucide="image" class="w-5 h-5 mr-2"></i> Image Uploader (Saves to `images/` folder)
+                        </h4>
+                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-end">
+                            <div class="flex-grow w-full">
+                                <input type="file" id="image-upload" accept="image/*" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white">
+                            </div>
+                            <button type="button" onclick="handleImageUpload()" id="uploadImageBtn"
+                                class="w-full sm:w-auto px-4 py-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-semibold transition duration-150 flex items-center justify-center">
+                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload & Insert Link
+                            </button>
+                        </div>
+                        <p id="image-status" class="text-sm h-6"></p>
+                    </div>
+
                     <div>
                         <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Content (Supports simple Markdown)</label>
                         <textarea id="postContent" rows="10" required
@@ -214,11 +215,9 @@
     </main>
 
     <script type="module">
-        // --- 1. Imports and Global Setup (Firebase, Constants, State) ---
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         let app, db, auth;
         let userId = 'N/A';
@@ -226,25 +225,21 @@
         let dosAnimationInterval = null;
         let trafficChart = null;
         
-        // --- Constants ---
         const CMS_PASSWORD = "admin";
         const BLOG_COLLECTION = 'blog_posts';
         const SITE_CONFIG_PATH = 'site_config/main_config';
+        const IMAGE_PATH = 'images';
 
-        // Canvas-provided variables
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- State Management ---
         const state = {
             isAuthenticated: false,
             siteConfig: { siteTitle: '', siteOwner: '', siteDescription: '' },
-            blogPosts: [], // Array of { id, title, author, content, order, createdAt }
-            editingPost: null, // The post object being edited, or null
+            blogPosts: [],
+            editingPost: null,
         };
-
-        // --- 2. DOM Elements & Utility Functions ---
 
         const dom = {
             authScreen: document.getElementById('authScreen'),
@@ -262,44 +257,27 @@
             blogSaveMessage: document.getElementById('blogSaveMessage'),
             submitBlogBtn: document.getElementById('submitBlogBtn'),
             tabButtons: document.querySelectorAll('.tab-button'),
+            imageFileInput: document.getElementById('image-upload'),
+            imageStatus: document.getElementById('image-status'),
         };
 
-        /**
-         * Converts milliseconds to a formatted date string.
-         * @param {number} ms - Milliseconds since epoch.
-         * @returns {string} Formatted date.
-         */
         function formatDate(ms) {
             return new Date(ms).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        /**
-         * Generates a unique ID (simple implementation).
-         * @returns {string} Unique ID.
-         */
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
         }
         
-        /**
-         * Simple function to debounce user input for performance.
-         * @param {Function} func - Function to execute.
-         * @param {number} delay - Delay in ms.
-         * @returns {Function} Debounced function.
-         */
-        function debounce(func, delay) {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => func.apply(this, args), delay);
-            };
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]+/g, '')
+                .replace(/\-\-+/g, '-')
+                .replace(/^-+/, '')
+                .replace(/-+$/, '');
         }
 
-        // --- 3. Authentication and Setup ---
-
-        /**
-         * Handles the administrative password submission.
-         */
         async function handlePasswordSubmit(e) {
             e.preventDefault();
             dom.authMessage.textContent = '';
@@ -313,7 +291,6 @@
                 state.isAuthenticated = true;
                 await initFirebaseAndListeners();
                 
-                // Wait for listeners to fetch initial data
                 setTimeout(() => {
                     dom.authScreen.classList.add('hidden');
                     dom.cmsPanel.classList.remove('hidden');
@@ -328,12 +305,8 @@
             }
         }
 
-        /**
-         * Initializes Firebase and sets up real-time listeners.
-         */
         async function initFirebaseAndListeners() {
             if (!firebaseConfig) {
-                console.error("Firebase config is missing.");
                 dom.authMessage.textContent = 'Fatal Error: Firebase Configuration missing.';
                 return;
             }
@@ -342,25 +315,22 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // 1. Auth setup
                 await new Promise(resolve => {
                     const unsubscribe = onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             userId = user.uid;
                         } else if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                                console.error("Custom token sign in failed:", e);
+                            await signInWithCustomToken(auth, initialAuthToken).catch(() => {
                                 signInAnonymously(auth);
                             });
                         } else {
                             await signInAnonymously(auth);
                         }
-                        unsubscribe(); // Stop listening after first state change
+                        unsubscribe();
                         resolve();
                     });
                 });
 
-                // 2. Set up Firestore listeners
                 setupSiteConfigListener();
                 setupBlogPostsListener();
 
@@ -369,31 +339,22 @@
             }
         }
 
-        /**
-         * Sets up a real-time listener for the site configuration.
-         */
         function setupSiteConfigListener() {
              const configRef = doc(db, `artifacts/${appId}/public/data/${SITE_CONFIG_PATH}`);
              onSnapshot(configRef, (docSnap) => {
                 if (docSnap.exists()) {
                     state.siteConfig = docSnap.data();
                 } else {
-                    console.log("No site config found, using defaults.");
                 }
-                // Re-render the current content to ensure dashboard/settings reflect changes
                 renderContent(currentTab);
             }, (error) => {
                 console.error("Error setting up site config listener:", error);
             });
         }
 
-        /**
-         * Sets up a real-time listener for blog posts, ordered by the 'order' field.
-         */
         function setupBlogPostsListener() {
             const postsQuery = query(
                 collection(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`),
-                // Sorting by 'order' is critical for the drag-and-drop feature
                 orderBy('order', 'asc') 
             );
 
@@ -402,11 +363,9 @@
                     id: doc.id,
                     ...doc.data()
                 }));
-                // Re-render the Blog Manager if it's the current tab
                 if (currentTab === 'blog-manager') {
                     renderContent('blog-manager');
                 }
-                // Update dashboard counts
                 if (currentTab === 'dashboard') {
                     renderContent('dashboard');
                 }
@@ -415,17 +374,9 @@
             });
         }
 
-
-        // --- 4. Tab Navigation and Content Rendering ---
-
-        /**
-         * Switches the active tab and renders the corresponding content.
-         * @param {string} tabId - The ID of the tab to switch to.
-         */
         function switchTab(tabId) {
             currentTab = tabId;
 
-            // Update button styles
             dom.tabButtons.forEach(btn => {
                 if (btn.getAttribute('data-tab') === tabId) {
                     btn.classList.add('tab-active');
@@ -436,9 +387,8 @@
                 }
             });
             
-            // Cleanup any running intervals before rendering new content
             if (dosAnimationInterval) {
-                clearInterval(dosAnimationInterval);
+                cancelAnimationFrame(dosAnimationInterval);
                 dosAnimationInterval = null;
             }
             if (trafficChart) {
@@ -449,10 +399,6 @@
             renderContent(tabId);
         }
         
-        /**
-         * Main function to render the content for the selected tab.
-         * @param {string} tabId - The ID of the content to render.
-         */
         function renderContent(tabId) {
             let html = '';
             
@@ -468,7 +414,6 @@
                     break;
                 case 'security-tools':
                     html = renderSecurityTools();
-                    // Needs post-render setup for simulations
                     setTimeout(() => {
                         setupTrafficChart();
                         setupDosAnimation();
@@ -480,7 +425,6 @@
             dom.contentArea.innerHTML = html;
             lucide.createIcons();
             
-            // Attach specific listeners after rendering
             if (tabId === 'site-settings') {
                 attachSiteSettingsListeners();
             } else if (tabId === 'blog-manager') {
@@ -488,7 +432,6 @@
             }
         }
         
-        // --- Tab 1: Dashboard Renderer ---
         function renderDashboard() {
             const postCount = state.blogPosts.length;
             const lastPost = state.blogPosts[0];
@@ -500,7 +443,6 @@
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Site Status Card -->
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-accent-primary">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400 font-mono">SITE TITLE</span>
@@ -510,7 +452,6 @@
                         <p class="text-sm text-gray-500 mt-1">Owner: ${state.siteConfig.siteOwner || 'Unknown'}</p>
                     </div>
 
-                    <!-- Blog Post Count Card -->
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-green-500">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400 font-mono">TOTAL BLOG POSTS</span>
@@ -520,7 +461,6 @@
                         <p class="text-sm text-gray-500 mt-1">Live and searchable</p>
                     </div>
 
-                    <!-- Last Activity Card -->
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-yellow-500">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-400 font-mono">LAST POST</span>
@@ -533,7 +473,6 @@
                     </div>
                 </div>
 
-                <!-- Latest Log/Notifications -->
                 <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                     <h3 class="text-xl font-bold mb-4 flex items-center text-accent-secondary">
                         <i data-lucide="monitor" class="w-5 h-5 mr-2"></i> System Logs (Simulated)
@@ -551,7 +490,6 @@
             `;
         }
         
-        // --- Tab 2: Site Settings Renderer & Logic ---
         function renderSiteSettings() {
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
@@ -586,9 +524,6 @@
             `;
         }
 
-        /**
-         * Attaches listeners to the site settings form after rendering.
-         */
         function attachSiteSettingsListeners() {
             const form = document.getElementById('siteSettingsForm');
             const saveBtn = document.getElementById('saveSettingsBtn');
@@ -605,9 +540,6 @@
             }
         }
 
-        /**
-         * Handles saving the site configuration to Firestore.
-         */
         async function handleSaveSiteSettings(e) {
             e.preventDefault();
             if (!db) return;
@@ -640,7 +572,7 @@
                 
                 message.textContent = 'Configuration saved successfully!';
                 message.className = 'text-green-400 mt-4 h-6 text-center';
-                saveBtn.disabled = true; // Disable until new changes are made
+                saveBtn.disabled = true;
 
             } catch (error) {
                 console.error("Error saving site config:", error);
@@ -650,8 +582,6 @@
             }
         }
 
-        // --- Tab 3: Blog Manager Renderer & Logic (CRUD + Drag & Drop) ---
-        
         function renderBlogManager() {
             const postsHtml = state.blogPosts.map((post, index) => `
                 <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex items-center justify-between transition duration-200 hover:bg-gray-800" 
@@ -693,15 +623,37 @@
             `;
         }
 
-        // --- Blog Modal Functions ---
+        window.handleImageUpload = async function() {
+            const file = dom.imageFileInput.files[0];
+            if (!file) {
+                dom.imageStatus.textContent = 'Please select an image file first.';
+                dom.imageStatus.className = 'text-red-500 mt-1';
+                return;
+            }
 
-        /**
-         * Displays the blog post creation/editing modal.
-         * @param {string} mode - 'new' or post ID string.
-         */
+            dom.imageStatus.textContent = `Uploading "${file.name}" to /${IMAGE_PATH}/... (Simulated)`;
+            dom.imageStatus.className = 'text-yellow-600 mt-1';
+            document.getElementById('uploadImageBtn').disabled = true;
+
+            await new Promise(r => setTimeout(r, 1500)); 
+
+            const uniqueId = generateId().substring(0, 8); 
+            const fileName = `${uniqueId}-${slugify(file.name)}`;
+            const imageUrl = `https://your.blog.com/${IMAGE_PATH}/${fileName}`; 
+
+            dom.imageStatus.textContent = `Image uploaded successfully! Path: /${IMAGE_PATH}/${fileName}. Link inserted.`;
+            dom.imageStatus.className = 'text-green-400 mt-1';
+
+            const imageMarkdown = `\n![${file.name.replace(/\.[^/.]+$/, "")}](${imageUrl})\n`;
+            dom.postContent.value += imageMarkdown;
+            dom.imageFileInput.value = '';
+            document.getElementById('uploadImageBtn').disabled = false;
+        }
+
         window.showBlogModal = function(mode) {
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
+            dom.imageStatus.textContent = '';
             
             if (mode === 'new') {
                 state.editingPost = null;
@@ -710,7 +662,6 @@
             } else {
                 state.editingPost = state.blogPosts.find(p => p.id === mode);
                 if (!state.editingPost) {
-                    console.error("Post not found for editing:", mode);
                     return;
                 }
                 dom.blogModalTitle.innerHTML = '<i data-lucide="pencil" class="w-5 h-5 mr-2"></i> Edit Post';
@@ -734,9 +685,6 @@
             dom.blogForm.reset();
         }
 
-        /**
-         * Handles submission of the blog post form (New or Edit).
-         */
         async function handleBlogFormSubmit(e) {
             e.preventDefault();
             if (!db) return;
@@ -759,7 +707,6 @@
                 dom.blogSaveMessage.className = 'text-yellow-400 mt-2 h-6 text-center';
 
                 if (state.editingPost) {
-                    // EDIT existing post
                     const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, state.editingPost.id);
                     await setDoc(postRef, {
                         ...postData,
@@ -767,7 +714,6 @@
                     }, { merge: true });
                     dom.blogSaveMessage.textContent = 'Post updated successfully!';
                 } else {
-                    // NEW post
                     const newOrder = state.blogPosts.length > 0 ? state.blogPosts[state.blogPosts.length - 1].order + 1 : 0;
                     const newPost = {
                         ...postData,
@@ -786,7 +732,6 @@
                 }, 1000);
 
             } catch (error) {
-                console.error("Error saving blog post:", error);
                 dom.blogSaveMessage.textContent = `Error: ${error.message}`;
                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
                 dom.submitBlogBtn.disabled = false;
@@ -798,46 +743,58 @@
         }
 
         window.deleteBlogPost = async function(postId) {
-            if (!confirm("Are you sure you want to permanently delete this blog post?")) {
-                return;
-            }
-            if (!db) return;
+            const confirmBox = document.createElement('div');
+            confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+            confirmBox.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg border border-red-500 shadow-xl max-w-sm w-full">
+                    <p class="text-lg font-bold text-red-400 mb-4">Confirm Deletion</p>
+                    <p class="text-gray-300 mb-6">Are you sure you want to permanently delete this blog post? This action cannot be undone.</p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancelDelete" class="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button id="confirmDelete" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmBox);
 
-            try {
-                // Find post to delete its order
-                const postToDelete = state.blogPosts.find(p => p.id === postId);
-                if (!postToDelete) return;
+            document.getElementById('cancelDelete').onclick = () => {
+                document.body.removeChild(confirmBox);
+            };
 
-                const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, postId);
-                await deleteDoc(postRef);
+            document.getElementById('confirmDelete').onclick = async () => {
+                document.body.removeChild(confirmBox);
 
-                // Update orders of all remaining posts to maintain sequence
-                const remainingPosts = state.blogPosts.filter(p => p.id !== postId)
-                    .map((p, index) => ({ id: p.id, order: index }));
+                if (!db) return;
 
-                // Batch updates are better, but for single-file, we do simple sequential updates
-                for (const post of remainingPosts) {
-                    await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: post.order }, { merge: true });
+                try {
+                    const postToDelete = state.blogPosts.find(p => p.id === postId);
+                    if (!postToDelete) return;
+
+                    const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, postId);
+                    await deleteDoc(postRef);
+
+                    const remainingPosts = state.blogPosts.filter(p => p.id !== postId)
+                        .map((p, index) => ({ id: p.id, order: index }));
+
+                    for (const post of remainingPosts) {
+                        await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: post.order }, { merge: true });
+                    }
+                } catch (error) {
+                    console.error("Error deleting blog post:", error);
+                    alert(`Error deleting post: ${error.message}`);
                 }
-
-                // UI will update automatically via onSnapshot
-            } catch (error) {
-                console.error("Error deleting blog post:", error);
-                alert(`Error deleting post: ${error.message}`);
-            }
+            };
         }
         
-        // --- Drag and Drop Logic ---
         let dragSrcEl = null;
 
         function attachBlogManagerListeners() {
-            dom.blogForm.removeEventListener('submit', handleBlogFormSubmit); // Prevent duplicate submission listeners
+            dom.blogForm.removeEventListener('submit', handleBlogFormSubmit);
             dom.blogForm.addEventListener('submit', handleBlogFormSubmit);
             
             const container = document.getElementById('blogListContainer');
             if (!container) return;
             
-            // Event Handlers for Drag & Drop
             container.addEventListener('dragstart', handleDragStart);
             container.addEventListener('dragover', handleDragOver);
             container.addEventListener('dragleave', handleDragLeave);
@@ -860,15 +817,13 @@
 
         function handleDragOver(e) {
             if (e.preventDefault) {
-                e.preventDefault(); // Necessary to allow drop
+                e.preventDefault();
             }
             const target = e.target.closest('.blog-item');
             if (!target || target === dragSrcEl) return;
 
-            // Remove drag-over class from siblings
             Array.from(target.parentNode.children).forEach(item => item.classList.remove('drag-over'));
             
-            // Add drag-over class to the target element
             target.classList.add('drag-over');
 
             e.dataTransfer.dropEffect = 'move';
@@ -883,50 +838,53 @@
         }
 
         async function handleDrop(e) {
-            e.stopPropagation(); // Stops some browsers from redirecting
+            e.stopPropagation();
             
             const targetEl = e.target.closest('.blog-item');
             if (!dragSrcEl || !targetEl || dragSrcEl === targetEl) return false;
 
-            // Remove drag-over class from all elements
             Array.from(targetEl.parentNode.children).forEach(item => item.classList.remove('drag-over'));
             
             const sourceIndex = parseInt(dragSrcEl.dataset.index);
             const targetIndex = parseInt(targetEl.dataset.index);
 
-            // Reorder the local array first
             const posts = [...state.blogPosts];
             const [movedPost] = posts.splice(sourceIndex, 1);
             posts.splice(targetIndex, 0, movedPost);
             
-            // Update the 'order' field for all affected posts in Firestore
             try {
                 for (let i = 0; i < posts.length; i++) {
                     const post = posts[i];
-                    // Only update if the order value has actually changed
                     if (post.order !== i) { 
                         await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: i }, { merge: true });
                     }
                 }
-                // The onSnapshot listener will handle the final UI update
             } catch(error) {
                 console.error("Error updating post order:", error);
-                alert("Failed to save new post order. See console for details.");
+                const errorBox = document.createElement('div');
+                errorBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+                errorBox.innerHTML = `
+                    <div class="bg-gray-800 p-6 rounded-lg border border-red-500 shadow-xl max-w-sm w-full">
+                        <p class="text-lg font-bold text-red-400 mb-4">Error</p>
+                        <p class="text-gray-300 mb-6">Failed to save new post order. Please try refreshing.</p>
+                        <div class="flex justify-end">
+                            <button id="closeError" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Close</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(errorBox);
+                document.getElementById('closeError').onclick = () => document.body.removeChild(errorBox);
             }
             
             return false;
         }
 
         function handleDragEnd(e) {
-            // Cleanup on the element being dragged
             dragSrcEl.classList.remove('dragging');
             dragSrcEl = null;
 
-            // Ensure no drag-over state remains on any element
             document.querySelectorAll('.blog-item').forEach(item => item.classList.remove('drag-over'));
         }
-
-        // --- Tab 4: Security & Traffic Tools Renderer & Logic ---
 
         function renderSecurityTools() {
             return `
@@ -935,7 +893,6 @@
                 </h2>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Website Analyzer -->
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-green-400">
                             <i data-lucide="activity" class="w-5 h-5 mr-2"></i> Website Analyzer (Simulated)
@@ -951,7 +908,6 @@
                         </button>
                     </div>
 
-                    <!-- DoS Check -->
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-red-400">
                             <i data-lucide="zap" class="w-5 h-5 mr-2"></i> DoS/DDoS Simulation Check
@@ -959,7 +915,6 @@
                         <p class="text-sm text-gray-500 mb-4">Simulates a high-volume traffic spike to test mitigation.</p>
                         
                         <div id="dos-animation" class="relative">
-                            <!-- Animated traffic bars go here -->
                         </div>
 
                         <div class="mt-4 space-y-2 font-mono text-sm">
@@ -973,7 +928,6 @@
                         </button>
                     </div>
 
-                    <!-- Traffic Check -->
                     <div class="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-cyan-400">
                             <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2"></i> Traffic Analyzer (Simulated)
@@ -988,7 +942,6 @@
         }
 
         function renderAnalyzerResults() {
-            // Simulated scores
             const scores = [
                 { label: 'Security Score', value: 92, color: 'text-green-400', icon: 'shield-check' },
                 { label: 'SEO Health', value: 85, color: 'text-yellow-400', icon: 'zap' },
@@ -1019,19 +972,29 @@
                 setTimeout(() => {
                     results.innerHTML = renderAnalyzerResults();
                     lucide.createIcons();
-                    alert("Analysis complete! Simulated results updated.");
+                    const alertBox = document.createElement('div');
+                    alertBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+                    alertBox.innerHTML = `
+                        <div class="bg-gray-800 p-6 rounded-lg border border-green-500 shadow-xl max-w-sm w-full">
+                            <p class="text-lg font-bold text-green-400 mb-4">Analysis Complete</p>
+                            <p class="text-gray-300 mb-6">Simulated analysis finished. Results updated on dashboard.</p>
+                            <div class="flex justify-end">
+                                <button id="closeAlert" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">OK</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(alertBox);
+                    document.getElementById('closeAlert').onclick = () => document.body.removeChild(alertBox);
                 }, 2000);
             }
         }
 
-        // --- Traffic Chart Logic ---
         function setupTrafficChart() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
             if (trafficChart) {
                 trafficChart.destroy();
             }
 
-            // Simulated data
             const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const data = [120, 190, 150, 250, 220, 300, 280].map(d => d + Math.floor(Math.random() * 50));
 
@@ -1072,8 +1035,7 @@
             });
         }
         
-        // --- DoS Simulation Logic ---
-        const DOS_DURATION = 8000; // 8 seconds
+        const DOS_DURATION = 8000;
         const NORMAL_TRAFFIC_RATE = 50;
         const ATTACK_TRAFFIC_RATE = 200;
         const MITIGATION_THRESHOLD = 150;
@@ -1091,7 +1053,7 @@
                 const bar = document.createElement('div');
                 bar.className = 'traffic-bar';
                 bar.style.left = `${i * 5}px`;
-                bar.style.height = `${Math.floor(Math.random() * 20) + 10}px`; // Initial small height
+                bar.style.height = `${Math.floor(Math.random() * 20) + 10}px`;
                 container.appendChild(bar);
                 trafficBars.push(bar);
             }
@@ -1110,29 +1072,25 @@
             let mitigationActive = false;
 
             if (elapsed < attackTime) {
-                // Phase 1: Normal Traffic
                 currentRate = NORMAL_TRAFFIC_RATE;
             } else if (elapsed < mitigateTime) {
-                // Phase 2: Attack Detected
                 currentRate = ATTACK_TRAFFIC_RATE;
                 statusText = 'Under Attack!';
                 statusColor = 'text-red-400';
             } else if (elapsed < duration) {
-                // Phase 3: Mitigation Active
-                currentRate = MITIGATION_THRESHOLD + Math.sin(elapsed / 100) * 10; // Controlled spike
+                currentRate = MITIGATION_THRESHOLD + Math.sin(elapsed / 100) * 10;
                 statusText = 'Mitigating...';
                 statusColor = 'text-yellow-400';
                 mitigationActive = true;
             } else {
-                // Phase 4: Recovery
-                currentRate = NORMAL_TRAFFIC_RATE + Math.sin(elapsed / 500) * 5; // Slow return to normal
+                currentRate = NORMAL_TRAFFIC_RATE + Math.sin(elapsed / 500) * 5;
                 statusText = 'Recovery Complete';
                 statusColor = 'text-green-400';
-                clearInterval(dosAnimationInterval);
+                cancelAnimationFrame(dosAnimationInterval);
                 dosAnimationInterval = null;
                 document.getElementById('dos-btn').disabled = false;
-                document.getElementById('dos-btn').textContent = 'Start Simulation';
-                
+                document.getElementById('dos-btn').innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Start Simulation';
+                lucide.createIcons();
             }
 
             document.getElementById('traffic-status').textContent = statusText;
@@ -1140,11 +1098,10 @@
             document.getElementById('mitigation-status').textContent = mitigationActive ? 'Engaged' : 'Active';
             document.getElementById('mitigation-status').className = mitigationActive ? 'text-cyan-400' : 'text-gray-400';
 
-            // Animate bars
             for (let i = 0; i < trafficBars.length; i++) {
                 const bar = trafficBars[i];
                 let height = Math.random() * (currentRate / 2) + (currentRate / 3);
-                height = Math.min(height, 140); // Max height limit
+                height = Math.min(height, 140);
                 bar.style.height = `${height}px`;
 
                 if (currentRate > MITIGATION_THRESHOLD) {
@@ -1163,26 +1120,22 @@
             if (dosAnimationInterval) return;
 
             document.getElementById('dos-btn').disabled = true;
-            document.getElementById('dos-btn').textContent = 'Running...';
+            document.getElementById('dos-btn').innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Running...';
+            lucide.createIcons();
             
             simulationStartTime = 0;
             dosAnimationInterval = requestAnimationFrame(updateDosAnimation);
         }
 
-        // --- 5. Main Document Ready & Event Attachments ---
-
         document.addEventListener('DOMContentLoaded', async () => {
-            // Attach password form listener
             document.getElementById('passwordForm').addEventListener('submit', handlePasswordSubmit);
             
-            // Attach tab click listeners
             dom.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     switchTab(button.getAttribute('data-tab'));
                 });
             });
 
-            // Initial focus
             dom.passwordInput.focus();
             lucide.createIcons();
         });
