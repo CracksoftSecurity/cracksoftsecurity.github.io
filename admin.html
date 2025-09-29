@@ -77,8 +77,7 @@
             font-weight: bold;
         }
         /* Existing blog/animation styles */
-        .blog-item { cursor: grab; transition: transform 0.2s, box-shadow 0.2s; }
-        .blog-item:active { cursor: grabbing; }
+        .blog-item { transition: transform 0.2s, box-shadow 0.2s; }
         .dragging { opacity: 0.5; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); transform: translateY(0); }
         .drag-over { border-bottom: 2px solid var(--color-accent-secondary); }
         #dos-animation { height: 150px; background-color: #111; border-radius: 8px; overflow: hidden; position: relative; }
@@ -104,13 +103,13 @@
                     GITHUB AUTHORIZATION
                 </h2>
                 <p class="text-sm text-gray-400">
-                    Input your **Personal Access Token (PAT)** for authentication.
+                    Input your **Personal Access Token (PAT)** for CMS access.
                 </p>
                 <p id="loginStatus" class="text-sm mt-3 text-yellow-500 font-mono break-all">
                     Awaiting Token Input...
                 </p>
                 <p class="text-xs mt-2 text-gray-500">
-                    Use your own PAT for enhanced security, or the fallback key: **ghp_CRACKSOFT_ADMIN_TOKEN_123**
+                    You must use a PAT with `repo` scope to manage content.
                 </p>
             </div>
             <form id="loginForm" class="space-y-4">
@@ -125,7 +124,7 @@
                 </button>
             </form>
             <p class="text-xs text-center text-gray-600 mt-4">
-                *Token verification is simulated using an external API structure to enhance security.*
+                *Verification is simulated to check basic validity, but the token is required for all data operations.*
             </p>
         </section>
 
@@ -136,7 +135,7 @@
                     <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard
                 </button>
                 <button data-tab="site-settings" class="tab-button px-4 py-2 rounded-lg text-sm md:text-base text-white transition duration-200 hover:bg-accent-primary/70 flex items-center">
-                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Site Settings
+                    <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Repository Config
                 </button>
                 <button data-tab="blog-manager" class="tab-button px-4 py-2 rounded-lg text-sm md:text-base text-white transition duration-200 hover:bg-accent-primary/70 flex items-center">
                     <i data-lucide="newspaper" class="w-4 h-4 mr-2"></i> Blog Manager
@@ -150,7 +149,7 @@
             </div>
             
             <div class="p-3 bg-gray-900 border-t border-accent-primary flex justify-between items-center text-xs text-gray-500">
-                <span id="cms-user-id">User ID: N/A</span>
+                <span id="cms-user-id">User: N/A</span>
                 <button onclick="window.location.href = '../index.html'" type="button" 
                     class="px-3 py-1 text-xs font-semibold rounded-md text-gray-400 border border-gray-700 hover:bg-gray-800 transition duration-200 flex items-center">
                     <i data-lucide="arrow-left" class="w-3 h-3 inline mr-1"></i> Back to Terminal
@@ -158,54 +157,36 @@
             </div>
         </section>
         
+        <!-- Blog Modal -->
         <div id="blogModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 items-center justify-center p-4">
             <div class="bg-gray-900 border border-accent-secondary rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                 <div class="p-4 bg-gray-800 border-b border-accent-secondary flex justify-between items-center">
                     <h3 id="blogModalTitle" class="text-xl font-bold font-mono text-accent-secondary flex items-center">
-                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i> New Blog Post
+                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i> Blog Post
                     </h3>
                     <button class="text-gray-400 hover:text-white p-1" onclick="hideBlogModal()">
                         <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
                 <form id="blogForm" class="p-6 overflow-y-auto flex-grow space-y-4">
-                    <div>
-                        <label for="postTitle" class="block text-sm font-medium text-gray-400 mb-1">Title</label>
-                        <input type="text" id="postTitle" required maxlength="100"
-                            class="w-full p-3 rounded-lg input-style text-white">
+                    <div class="bg-gray-700 p-3 rounded-lg text-xs text-gray-300 font-mono">
+                        File Path: <span id="currentFilePath"></span>
                     </div>
                     <div>
-                        <label for="postAuthor" class="block text-sm font-medium text-gray-400 mb-1">Author</label>
-                        <input type="text" id="postAuthor" required maxlength="50"
-                            class="w-full p-3 rounded-lg input-style text-white">
+                        <label for="postFilename" class="block text-sm font-medium text-gray-400 mb-1">Filename (e.g., 2024-09-20-post-title.md)</label>
+                        <input type="text" id="postFilename" required
+                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="YYYY-MM-DD-your-post-slug.md">
                     </div>
-
-                    <div class="p-4 bg-gray-800 border border-accent-primary rounded-lg space-y-3">
-                        <h4 class="text-lg font-semibold text-accent-secondary flex items-center">
-                            <i data-lucide="image" class="w-5 h-5 mr-2"></i> Image Uploader (Simulated)
-                        </h4>
-                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-end">
-                            <div class="flex-grow w-full">
-                                <input type="file" id="image-upload" accept="image/*" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white">
-                            </div>
-                            <button type="button" onclick="handleImageUpload()" id="uploadImageBtn"
-                                class="w-full sm:w-auto px-4 py-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-semibold transition duration-150 flex items-center justify-center">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload & Insert Link
-                            </button>
-                        </div>
-                        <p id="image-status" class="text-sm h-6"></p>
-                    </div>
-
                     <div>
-                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Content (Supports simple Markdown)</label>
-                        <textarea id="postContent" rows="10" required
+                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Markdown Content</label>
+                        <textarea id="postContent" rows="15" required
                             class="w-full p-3 rounded-lg input-style text-white font-mono"></textarea>
                     </div>
                     <p id="blogSaveMessage" class="text-sm h-6 text-center"></p>
                     <div class="flex justify-end pt-4">
                         <button type="submit" id="submitBlogBtn"
                             class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-accent-primary text-white hover:bg-accent-primary/80 disabled:opacity-50 flex items-center">
-                            Save Post
+                            Save Post to GitHub
                         </button>
                     </div>
                 </form>
@@ -213,37 +194,23 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, query, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        const API_BASE_URL = 'https://api.github.com';
+        const GITHUB_POSTS_PATH = '_posts';
         
-        // setLogLevel('Debug'); // Uncomment this if you want to see detailed Firestore logs
-
-        let app, db, auth;
-        let userId = 'N/A';
+        let githubUser = 'N/A';
         let currentTab = 'dashboard';
-        let dosAnimationInterval = null;
-        let trafficChart = null;
-        let isSimulationMode = false; // Initial state is false
-        
-        const BLOG_COLLECTION = 'blog_posts';
-        const SITE_CONFIG_PATH = 'site_config/main_config';
-        const IMAGE_PATH = 'images';
 
-        // Secure, simple mock PAT for environments without a real token
-        const MOCK_GITHUB_PAT = 'ghp_CRACKSOFT_ADMIN_TOKEN_123';
-
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const REQUIRED_PAT = initialAuthToken || MOCK_GITHUB_PAT;
-
+        // State to hold application data and configuration
         const state = {
             isAuthenticated: false,
-            siteConfig: { siteTitle: '', siteOwner: '', siteDescription: '' },
+            githubPat: localStorage.getItem('githubPat') || '',
+            repoConfig: { 
+                repoPath: localStorage.getItem('repoPath') || 'owner/repo-name',
+                branchName: localStorage.getItem('branchName') || 'main',
+            },
             blogPosts: [],
-            editingPost: null,
+            editingPost: null, // Holds the full post object including SHA
         };
 
         const dom = {
@@ -256,59 +223,179 @@
             blogModal: document.getElementById('blogModal'),
             blogModalTitle: document.getElementById('blogModalTitle'),
             blogForm: document.getElementById('blogForm'),
-            postTitle: document.getElementById('postTitle'),
-            postAuthor: document.getElementById('postAuthor'),
+            postFilename: document.getElementById('postFilename'),
             postContent: document.getElementById('postContent'),
+            currentFilePath: document.getElementById('currentFilePath'),
             blogSaveMessage: document.getElementById('blogSaveMessage'),
             submitBlogBtn: document.getElementById('submitBlogBtn'),
             tabButtons: document.querySelectorAll('.tab-button'),
-            imageFileInput: document.getElementById('image-upload'),
-            imageStatus: document.getElementById('image-status'),
         };
+        
+        // --- Utility Functions ---
+
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64Decode(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
 
         function formatDate(ms) {
             return new Date(ms).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+        function showCustomAlert(title, message, isError = false) {
+            const confirmBox = document.createElement('div');
+            confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
+            confirmBox.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg border ${isError ? 'border-red-500' : 'border-green-500'} shadow-xl max-w-sm w-full">
+                    <p class="text-lg font-bold ${isError ? 'text-red-400' : 'text-green-400'} mb-4">${title}</p>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end">
+                        <button id="closeAlert" class="px-4 py-2 text-white ${isError ? 'bg-red-600' : 'bg-green-600'} rounded-lg hover:opacity-80">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmBox);
+            document.getElementById('closeAlert').onclick = () => document.body.removeChild(confirmBox);
         }
-        
-        function slugify(text) {
-            return text.toString().toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
-                .replace(/\-\-+/g, '-')
-                .replace(/-+/, '')
-                .replace(/-+$/, '');
-        }
-        
-        // --- NEW: Simulated External API Validation Function ---
-        async function simulateGitHubValidation(token) {
-            // Simulate network request delay (700ms)
-            await new Promise(r => setTimeout(r, 700));
 
-            // Determine if the token passes the simulated security check
-            const isMockToken = token === REQUIRED_PAT;
-            const isValidFormat = token.startsWith('ghp_') && token.length >= 20;
+        // --- GitHub API Integration ---
 
-            if (isMockToken || isValidFormat) {
-                // Simulate a successful 200 OK response from GitHub
-                return { 
-                    ok: true, 
-                    status: 200, 
-                    json: async () => ({ login: 'github-user', id: 12345 }) 
-                };
-            } else {
-                // Simulate a 401 Unauthorized response
-                return { 
-                    ok: false, 
-                    status: 401, 
-                    json: async () => ({ message: "Bad credentials or insufficient scope" }) 
-                };
+        async function githubApi(method, path, data = {}) {
+            if (!state.githubPat) {
+                showCustomAlert("Authentication Error", "Missing GitHub Personal Access Token.", true);
+                return null;
+            }
+            
+            const url = `${API_BASE_URL}${path}`;
+            const headers = {
+                'Authorization': `token ${state.githubPat}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            };
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                
+                if (response.status === 204) return {}; // No Content
+                if (response.status === 404) return null; // Not Found
+                
+                const json = await response.json();
+
+                if (!response.ok) {
+                    console.error("GitHub API Error:", json);
+                    showCustomAlert(`GitHub API Error (${response.status})`, `Failed to ${method} ${path}. Message: ${json.message || 'Unknown error.'}`, true);
+                    return null;
+                }
+                return json;
+            } catch (error) {
+                console.error("Network Error during GitHub API call:", error);
+                showCustomAlert("Network Error", `Could not connect to GitHub API: ${error.message}`, true);
+                return null;
             }
         }
-        // ------------------------------------------------------
+
+        async function verifyGitHubToken(token) {
+            state.githubPat = token; // Temporarily store PAT for verification
+            const user = await githubApi('GET', '/user');
+            if (user && user.login) {
+                githubUser = user.login;
+                return true;
+            }
+            return false;
+        }
+
+        async function fetchBlogPostsFromGithub() {
+            const { repoPath, branchName } = state.repoConfig;
+            if (repoPath === 'owner/repo-name' || !repoPath || !state.githubPat) {
+                state.blogPosts = [];
+                return;
+            }
+
+            try {
+                // 1. Get the list of files in the _posts directory
+                const filesList = await githubApi('GET', `/repos/${repoPath}/contents/${GITHUB_POSTS_PATH}?ref=${branchName}`);
+                
+                if (!Array.isArray(filesList)) {
+                    state.blogPosts = [];
+                    // This often means the folder doesn't exist or permissions are wrong
+                    if (filesList && filesList.message) {
+                        showCustomAlert("Repo Error", `Failed to list files: ${filesList.message}. Check Repo Path and Branch.`, true);
+                    }
+                    return;
+                }
+
+                // Filter for Markdown files (or whatever convention you use)
+                const markdownFiles = filesList.filter(file => 
+                    file.type === 'file' && file.name.endsWith('.md')
+                );
+
+                // 2. Fetch the content for each file (optimistically, but can be slow)
+                const postsPromises = markdownFiles.map(file => 
+                    githubApi('GET', `/repos/${repoPath}/contents/${file.path}?ref=${branchName}`)
+                );
+
+                const postsData = await Promise.all(postsPromises);
+
+                state.blogPosts = postsData.map(post => {
+                    if (post && post.content) {
+                        const content = base64Decode(post.content);
+                        // Simple Front Matter parser for display (not for full editing)
+                        const frontMatterMatch = content.match(/---\n([\s\S]*?)\n---/);
+                        let title = post.name;
+                        let author = githubUser; // Default author
+                        
+                        if (frontMatterMatch) {
+                            const frontMatter = frontMatterMatch[1];
+                            const titleMatch = frontMatter.match(/title:\s*(.*)/);
+                            const authorMatch = frontMatter.match(/author:\s*(.*)/);
+
+                            if (titleMatch && titleMatch[1]) {
+                                title = titleMatch[1].replace(/['"]/g, '').trim();
+                            }
+                            if (authorMatch && authorMatch[1]) {
+                                author = authorMatch[1].replace(/['"]/g, '').trim();
+                            }
+                        }
+
+                        // Use a date extraction for sorting/display
+                        const dateMatch = post.name.match(/(\d{4}-\d{2}-\d{2})/);
+                        const createdAt = dateMatch ? new Date(dateMatch[1]).getTime() : Date.now();
+                        
+                        return {
+                            id: post.sha, // Unique identifier is the SHA
+                            name: post.name,
+                            path: post.path,
+                            sha: post.sha,
+                            content: content,
+                            title: title,
+                            author: author,
+                            createdAt: createdAt,
+                        };
+                    }
+                    return null;
+                }).filter(p => p !== null).sort((a, b) => b.createdAt - a.createdAt); // Sort by date descending
+                
+            } catch (error) {
+                console.error("Error fetching blog posts from GitHub:", error);
+                showCustomAlert("GitHub Fetch Error", "Could not fetch posts. See console for details.", true);
+                state.blogPosts = [];
+            }
+            renderContent(currentTab);
+        }
+
+        // --- Event Handlers & Initializers ---
 
         async function attemptLogin(e) {
             e.preventDefault();
@@ -320,174 +407,34 @@
             dom.loginStatus.classList.remove('text-red-400', 'text-green-500');
             dom.loginStatus.classList.add('text-yellow-500');
             loginBtn.disabled = true;
+            document.getElementById('accessToken').disabled = true;
 
-            try {
-                // Perform the simulated external API call
-                const response = await simulateGitHubValidation(tokenInput);
+            const isVerified = await verifyGitHubToken(tokenInput);
+            
+            if (isVerified) {
+                state.isAuthenticated = true;
+                localStorage.setItem('githubPat', tokenInput); // Save PAT for session
                 
-                if (response.ok) {
-                    // SUCCESS: Simulate PAT check and Permission Grant
-                    dom.loginStatus.textContent = 'PAT accepted. GitHub Permissions check: GRANTED (Admin)';
-                    dom.loginStatus.classList.remove('text-yellow-500');
-                    dom.loginStatus.classList.add('text-green-500');
+                dom.loginStatus.innerHTML = `PAT accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
+                
+                setTimeout(() => {
+                    dom.loginScreen.classList.add('hidden');
+                    dom.cmsPanel.classList.remove('hidden');
+                    dom.cmsUserId.textContent = `User: ${githubUser} | Repo: ${state.repoConfig.repoPath}`;
+                    fetchBlogPostsFromGithub(); // Initial fetch
+                    renderContent('dashboard');
+                }, 1000);
 
-                    // Proceed to Firebase/Data Initialization
-                    await initDataConnection();
-
-                    // Show the CMS panel
-                    setTimeout(() => {
-                        dom.loginScreen.classList.add('hidden');
-                        dom.cmsPanel.classList.remove('hidden');
-                        dom.cmsUserId.textContent = `Admin ID: ${userId.substring(0, 8)}...`;
-                        renderContent('dashboard');
-                    }, 1000);
-
-                } else {
-                    // FAILURE: Simulate Invalid Token or Insufficient Permissions
-                    const errorData = await response.json();
-                    dom.loginStatus.textContent = `ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient permissions. Status ${response.status} (${errorData.message || 'Unauthorized'})`;
-                    dom.loginStatus.classList.remove('text-yellow-500');
-                    dom.loginStatus.classList.add('text-red-400');
-                    document.getElementById('accessToken').value = '';
-                }
-            } catch (error) {
-                // Catch network or simulation errors
-                dom.loginStatus.textContent = 'ERROR: Could not complete verification due to network issue.';
+            } else {
+                state.githubPat = '';
+                dom.loginStatus.textContent = `ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient scope (requires 'repo').`;
                 dom.loginStatus.classList.remove('text-yellow-500');
                 dom.loginStatus.classList.add('text-red-400');
-            } finally {
-                loginBtn.disabled = false;
-            }
-        }
-
-        // Helper function to set up all simulation mode states
-        function setupSimulationMode() {
-            isSimulationMode = true;
-            userId = 'SIMULATED_ADMIN';
-            state.isAuthenticated = true; 
-            
-            // Mock Data for Simulation
-            state.siteConfig = { siteTitle: 'Cracksoft (SIMULATION)', siteOwner: 'System Admin', siteDescription: 'No database connection. Data shown is mock data.' };
-            state.blogPosts = [
-                { id: 'mock1', title: 'Welcome to Simulation Mode', author: 'System', createdAt: Date.now(), order: 0, content: 'This is a mock post because the database connection failed.' },
-                { id: 'mock2', title: 'Data Will Not Persist', author: 'System', createdAt: Date.now() - 86400000, order: 1, content: 'Any changes you make here will be lost when you reload the page.' }
-            ].sort((a, b) => (a.order || 0) - (b.order || 0));
-
-            dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-red-400">Database Offline (Using Mock Data).</span>';
-            console.warn("WARNING: Firebase Configuration missing or connection failed. Running in Simulation Mode. Data will NOT persist.");
-        }
-
-
-        async function initDataConnection() {
-            let configIsAvailable = false;
-            let finalFirebaseConfig = null;
-            
-            // 1. Check if the environment provided a valid Firebase configuration
-            try {
-                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    finalFirebaseConfig = JSON.parse(__firebase_config);
-                    configIsAvailable = true;
-                }
-            } catch (e) {
-                console.error("Firebase Config JSON is malformed:", e);
+                document.getElementById('accessToken').value = '';
+                document.getElementById('accessToken').disabled = false;
             }
             
-            if (!configIsAvailable) {
-                // If no valid config is found, explicitly fall back to simulation
-                setupSimulationMode();
-                return;
-            }
-
-            // --- LIVE MODE START (Config is available, attempt connection) ---
-            try {
-                dom.loginStatus.textContent = 'Establishing database connection...';
-
-                // Attempt Firebase initialization
-                app = initializeApp(finalFirebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Handle Firebase Authentication (Auto-sign-in using token or anonymously)
-                await new Promise(resolve => {
-                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            userId = user.uid;
-                        } else if (initialAuthToken) {
-                            // Use the actual initialAuthToken to sign in
-                            try {
-                                const userCredential = await signInWithCustomToken(auth, initialAuthToken);
-                                userId = userCredential.user.uid;
-                            } catch (error) {
-                                console.error("Custom Token failed, falling back to anonymous:", error);
-                                const userCredential = await signInAnonymously(auth);
-                                userId = userCredential.user.uid;
-                            }
-                        } else {
-                            const userCredential = await signInAnonymously(auth);
-                            userId = userCredential.user.uid;
-                        }
-                        state.isAuthenticated = true;
-                        unsubscribe();
-                        resolve();
-                    });
-                });
-
-                setupSiteConfigListener();
-                setupBlogPostsListener();
-                dom.loginStatus.innerHTML = 'Secure connection established. <span class="text-green-400">Online.</span>';
-
-            } catch (error) {
-                // 2. If the connection fails for any reason (e.g., API key revoked, network issue), fall back to simulation
-                console.error("Firebase initialization failed during login:", error);
-                setupSimulationMode(); // This will also update dom.loginStatus
-            }
-            // --- LIVE/FALLBACK MODE END ---
-        }
-
-        function setupSiteConfigListener() {
-             // Only run listeners if not in simulation mode
-             if (isSimulationMode || !db) return;
-
-             const configRef = doc(db, `artifacts/${appId}/public/data/${SITE_CONFIG_PATH}`);
-             onSnapshot(configRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    state.siteConfig = docSnap.data();
-                } else {
-                    // Initialize with default if not found
-                    state.siteConfig = { siteTitle: 'Cracksoft Security', siteOwner: 'Admin', siteDescription: 'Cyber security education and news.' };
-                    // Write default back to firestore if needed, but not required here as it's set in state
-                }
-                renderContent(currentTab);
-            }, (error) => {
-                console.error("Error setting up site config listener:", error);
-                // Note: No fallback to simulation here, as auth/db connection succeeded earlier.
-            });
-        }
-
-        function setupBlogPostsListener() {
-            // Only run listeners if not in simulation mode
-            if (isSimulationMode || !db) return;
-
-            const postsQuery = query(
-                collection(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`),
-                // Sorting client-side to avoid index errors in Firestore
-            );
-
-            onSnapshot(postsQuery, (snapshot) => {
-                const loadedPosts = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                // Sort client-side by 'order' property for drag-and-drop
-                state.blogPosts = loadedPosts.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-                if (currentTab === 'blog-manager' || currentTab === 'dashboard') {
-                    renderContent(currentTab);
-                }
-            }, (error) => {
-                console.error("Error setting up blog posts listener:", error);
-                // Note: No fallback to simulation here, as auth/db connection succeeded earlier.
-            });
+            loginBtn.disabled = false;
         }
 
         function switchTab(tabId) {
@@ -503,6 +450,11 @@
                 }
             });
             
+            if (currentTab === 'blog-manager') {
+                 fetchBlogPostsFromGithub(); // Refresh on tab switch
+            }
+
+            // Clear any animation/chart intervals
             if (dosAnimationInterval) {
                 cancelAnimationFrame(dosAnimationInterval);
                 dosAnimationInterval = null;
@@ -515,6 +467,8 @@
             renderContent(tabId);
         }
         
+        // --- Render Functions ---
+
         function renderContent(tabId) {
             let html = '';
             
@@ -544,30 +498,32 @@
             if (tabId === 'site-settings') {
                 attachSiteSettingsListeners();
             } else if (tabId === 'blog-manager') {
-                attachBlogManagerListeners();
+                 // Attach listener to new post button, but no drag/drop supported for GitHub API file list
             }
         }
         
         function renderDashboard() {
             const postCount = state.blogPosts.length;
             const lastPost = state.blogPosts[0];
-            const siteTitle = state.siteConfig.siteTitle || 'Not Set';
+            const repoPath = state.repoConfig.repoPath;
             
+            const isConfigured = repoPath !== 'owner/repo-name' && repoPath.split('/').length === 2;
+
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="layout-dashboard" class="w-6 h-6 mr-3"></i> Dashboard Overview
                 </h2>
                 
-                <!-- Database Status Message -->
-                <div class="p-3 mb-6 ${isSimulationMode ? 'bg-yellow-900 border border-yellow-500' : 'bg-green-900 border border-green-500'} rounded-lg text-white">
+                <!-- Connection Status Message -->
+                <div class="p-3 mb-6 ${isConfigured ? 'bg-green-900 border border-green-500' : 'bg-yellow-900 border border-yellow-500'} rounded-lg text-white">
                     <p class="font-bold flex items-center">
-                        <i data-lucide="${isSimulationMode ? 'alert-triangle' : 'cloud-check'}" class="w-5 h-5 mr-2 ${isSimulationMode ? 'text-yellow-400' : 'text-green-400'}"></i> 
-                        CONNECTION STATUS: ${isSimulationMode ? 'OFFLINE (SIMULATION MODE)' : 'LIVE & SECURE'}
+                        <i data-lucide="${isConfigured ? 'cloud-check' : 'alert-triangle'}" class="w-5 h-5 mr-2 ${isConfigured ? 'text-green-400' : 'text-yellow-400'}"></i> 
+                        GITHUB REPO STATUS: ${isConfigured ? 'CONFIGURED & CONNECTED' : 'AWAITING REPO PATH'}
                     </p>
                     <p class="text-sm mt-1">
-                        ${isSimulationMode ? 
-                            'Database configuration is missing. Data shown is mock data and changes will NOT be saved.' : 
-                            'All changes will be instantly saved to the secure Firestore database.'
+                        ${isConfigured ? 
+                            'Content is managed directly via GitHub API and will commit changes.' : 
+                            'Please set your **Repository Path** in the Repository Config tab to begin managing content.'
                         }
                     </p>
                 </div>
@@ -575,11 +531,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-accent-primary">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-400 font-mono">SITE TITLE</span>
-                            <i data-lucide="globe" class="w-6 h-6 text-accent-primary"></i>
+                            <span class="text-gray-400 font-mono">CMS TYPE</span>
+                            <i data-lucide="github" class="w-6 h-6 text-accent-primary"></i>
                         </div>
-                        <p class="text-2xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">${siteTitle}</p>
-                        <p class="text-sm text-gray-500 mt-1">Owner: ${state.siteConfig.siteOwner || 'Unknown'}</p>
+                        <p class="text-2xl font-bold mt-2 text-white">GITHUB CMS</p>
+                        <p class="text-sm text-gray-500 mt-1">Managed by: ${githubUser}</p>
                     </div>
 
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-green-500">
@@ -588,18 +544,18 @@
                             <i data-lucide="newspaper" class="w-6 h-6 text-green-500"></i>
                         </div>
                         <p class="text-2xl font-bold mt-2 text-white">${postCount}</p>
-                        <p class="text-sm text-gray-500 mt-1">Live and searchable</p>
+                        <p class="text-sm text-gray-500 mt-1">Found in ${GITHUB_POSTS_PATH}/</p>
                     </div>
 
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border-t-4 border-yellow-500">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-400 font-mono">LAST POST</span>
-                            <i data-lucide="history" class="w-6 h-6 text-yellow-500"></i>
+                            <span class="text-gray-400 font-mono">REPOSITORY</span>
+                            <i data-lucide="folder-git2" class="w-6 h-6 text-yellow-500"></i>
                         </div>
                         <p class="text-xl font-bold mt-2 text-white overflow-hidden whitespace-nowrap text-ellipsis">
-                            ${lastPost ? lastPost.title : 'None'}
+                            ${repoPath}
                         </p>
-                        <p class="text-sm text-gray-500 mt-1">${lastPost ? `By ${lastPost.author} on ${formatDate(lastPost.createdAt)}` : 'N/A'}</p>
+                        <p class="text-sm text-gray-500 mt-1">Branch: ${state.repoConfig.branchName}</p>
                     </div>
                 </div>
 
@@ -608,57 +564,46 @@
                         <i data-lucide="monitor" class="w-5 h-5 mr-2"></i> System Logs (Simulated)
                     </h3>
                     <div class="space-y-2 text-sm font-mono text-gray-400 max-h-48 overflow-y-auto">
-                        <p><span class="text-green-400">[20:45:12]</span> Core services check: OK</p>
-                        <p><span class="text-yellow-400">[20:46:01]</span> Admin login detected: User ${userId.substring(0, 8)}...</p>
-                        <p><span class="text-green-400">[20:46:15]</span> Blog post data sync complete.</p>
-                        <p><span class="text-red-400">[20:47:30]</span> Minor brute force attempt detected and blocked (Source: 103.2.1.X)</p>
-                        <p><span class="text-green-400">[20:48:05]</span> Traffic analysis module initialized.</p>
-                        <p><span class="text-green-400">[20:48:33]</span> Site configuration validated.</p>
-                        <p><span class="text-yellow-400">[20:49:01]</span> Next scheduled security scan in 1 hour.</p>
-                        ${isSimulationMode ? `<p><span class="text-red-400">[20:49:30]</span> <span class="font-bold">Database connection FAILED.</span> Using mock data.</p>` : ''}
+                        <p><span class="text-green-400">[${(new Date()).toLocaleTimeString()}]</span> GitHub connection established for user: ${githubUser}</p>
+                        <p><span class="text-green-400">[${(new Date()).toLocaleTimeString()}]</span> Blog repository set to: ${repoPath}</p>
+                        <p><span class="text-green-400">[${(new Date()).toLocaleTimeString()}]</span> Content list sync complete. Found ${postCount} posts.</p>
+                        <p><span class="text-yellow-400">[${(new Date()).toLocaleTimeString()}]</span> Next scheduled GitHub push check in 5 minutes.</p>
+                        <p><span class="text-gray-400">[${(new Date()).toLocaleTimeString()}]</span> System ready.</p>
                     </div>
                 </div>
             `;
         }
         
         function renderSiteSettings() {
-            const disabledAttr = isSimulationMode ? 'disabled' : '';
-            const saveBtnText = isSimulationMode ? 'Save (Simulation Mode)' : 'Save Settings';
-
             return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
-                    <i data-lucide="settings" class="w-6 h-6 mr-3"></i> Global Site Settings
+                    <i data-lucide="settings" class="w-6 h-6 mr-3"></i> Repository Configuration
                 </h2>
                 
-                ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
-                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
-                        <p class="text-sm mt-1">Changes made here will NOT be saved to the database.</p>
-                    </div>
-                ` : ''}
+                <div class="p-4 mb-6 bg-blue-900 border border-blue-500 rounded-lg text-white">
+                    <p class="font-bold flex items-center"><i data-lucide="info" class="w-5 h-5 mr-2 text-blue-400"></i> IMPORTANT</p>
+                    <p class="text-sm mt-1">
+                        Your changes to the blog posts will be committed to this repository. The PAT you used for login must have the **'repo' scope**.
+                    </p>
+                </div>
 
                 <form id="siteSettingsForm" class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700 space-y-4">
                     <p id="settingsSaveMessage" class="text-sm h-6 text-center"></p>
                     <div>
-                        <label for="siteTitle" class="block text-sm font-medium text-gray-400 mb-1">Site Title</label>
-                        <input type="text" id="siteTitle" value="${state.siteConfig.siteTitle || ''}" required maxlength="50" ${disabledAttr}
-                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">
+                        <label for="repoPath" class="block text-sm font-medium text-gray-400 mb-1">GitHub Repository Path (e.g., username/repo-name)</label>
+                        <input type="text" id="repoPath" value="${state.repoConfig.repoPath || ''}" required 
+                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="cracksoft-user/my-blog">
                     </div>
                     <div>
-                        <label for="siteOwner" class="block text-sm font-medium text-gray-400 mb-1">Site Owner / Organization</label>
-                        <input type="text" id="siteOwner" value="${state.siteConfig.siteOwner || ''}" required maxlength="50" ${disabledAttr}
-                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">
-                    </div>
-                    <div>
-                        <label for="siteDescription" class="block text-sm font-medium text-gray-400 mb-1">Site Description (Short tagline)</label>
-                        <textarea id="siteDescription" rows="3" required maxlength="200" ${disabledAttr}
-                            class="w-full p-3 rounded-lg input-style text-white disabled:opacity-70">${state.siteConfig.siteDescription || ''}</textarea>
+                        <label for="branchName" class="block text-sm font-medium text-gray-400 mb-1">Target Branch Name</label>
+                        <input type="text" id="branchName" value="${state.repoConfig.branchName || ''}" required
+                            class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="main or master">
                     </div>
                     
                     <div class="pt-4 flex justify-end">
-                        <button type="submit" id="saveSettingsBtn" ${disabledAttr}
-                            class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 flex items-center">
-                            <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> ${saveBtnText}
+                        <button type="submit" id="saveSettingsBtn"
+                            class="px-6 py-3 font-bold rounded-lg transition duration-200 bg-green-600 text-white hover:bg-green-500 flex items-center">
+                            <i data-lucide="save" class="w-5 h-5 inline mr-2"></i> Save Configuration
                         </button>
                     </div>
                 </form>
@@ -669,87 +614,71 @@
             const form = document.getElementById('siteSettingsForm');
             const saveBtn = document.getElementById('saveSettingsBtn');
             const message = document.getElementById('settingsSaveMessage');
-
-            if (form && !isSimulationMode) {
-                // Initial check for non-simulation mode to enable save button
-                saveBtn.disabled = false; 
-                
-                form.addEventListener('submit', handleSaveSiteSettings);
-                form.addEventListener('input', () => {
-                    saveBtn.disabled = false;
-                    message.textContent = 'Unsaved changes...';
-                    message.classList.remove('text-green-400', 'text-red-400');
-                    message.classList.add('text-yellow-400');
-                });
-            } else if (isSimulationMode) {
-                 saveBtn.disabled = false; // Enable button for visual consistency in sim mode
-                 form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    message.textContent = 'Data not saved (Simulation Mode).';
-                    message.className = 'text-yellow-400 mt-4 h-6 text-center';
-                 });
-            }
+            
+            form.addEventListener('submit', handleSaveSiteSettings);
+            
+            form.addEventListener('input', () => {
+                message.textContent = 'Unsaved changes...';
+                message.classList.remove('text-green-400', 'text-red-400');
+                message.classList.add('text-yellow-400');
+            });
         }
 
         async function handleSaveSiteSettings(e) {
             e.preventDefault();
-            if (isSimulationMode || !db) return;
             
-            const title = document.getElementById('siteTitle').value.trim();
-            const owner = document.getElementById('siteOwner').value.trim();
-            const description = document.getElementById('siteDescription').value.trim();
+            const repoPathInput = document.getElementById('repoPath').value.trim();
+            const branchName = document.getElementById('branchName').value.trim();
             const message = document.getElementById('settingsSaveMessage');
-            const saveBtn = document.getElementById('saveSettingsBtn');
 
-            if (!title || !owner || !description) {
-                message.textContent = 'All fields are required.';
+            if (!repoPathInput || repoPathInput.split('/').length !== 2 || !branchName) {
+                message.textContent = 'Repository path must be in "owner/repo-name" format and Branch is required.';
                 message.className = 'text-red-400 mt-4 h-6 text-center';
                 return;
             }
 
             try {
-                saveBtn.disabled = true;
                 message.textContent = 'Saving...';
                 message.className = 'text-yellow-400 mt-4 h-6 text-center';
 
-                const newConfig = {
-                    siteTitle: title,
-                    siteOwner: owner,
-                    siteDescription: description,
-                    lastUpdated: Date.now()
-                };
-
-                await setDoc(doc(db, `artifacts/${appId}/public/data/${SITE_CONFIG_PATH}`), newConfig);
+                state.repoConfig.repoPath = repoPathInput;
+                state.repoConfig.branchName = branchName;
                 
-                message.textContent = 'Configuration saved successfully!';
+                // Simulate persistence using localStorage since we have no database
+                localStorage.setItem('repoPath', repoPathInput);
+                localStorage.setItem('branchName', branchName);
+
+                dom.cmsUserId.textContent = `User: ${githubUser} | Repo: ${state.repoConfig.repoPath}`;
+                
+                // Immediately attempt to fetch content with new config
+                await fetchBlogPostsFromGithub();
+
+                message.textContent = 'Configuration saved and content re-fetched!';
                 message.className = 'text-green-400 mt-4 h-6 text-center';
-                saveBtn.disabled = true; // Disabled until next change
 
             } catch (error) {
                 console.error("Error saving site config:", error);
-                message.textContent = `Error saving: ${error.message}`;
+                message.textContent = `Error saving/fetching: ${error.message}`;
                 message.className = 'text-red-400 mt-4 h-6 text-center';
-                saveBtn.disabled = false;
             }
         }
 
         function renderBlogManager() {
-            const disabledAttr = isSimulationMode ? 'disabled' : '';
-            const postsHtml = state.blogPosts.map((post, index) => `
-                <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex items-center justify-between transition duration-200 hover:bg-gray-800 ${isSimulationMode ? 'opacity-80' : ''}" 
-                     draggable="${!isSimulationMode}" data-post-id="${post.id}" data-post-order="${post.order || 0}" data-index="${index}">
-                    <div class="flex items-center space-x-4 flex-1 min-w-0">
-                        <i data-lucide="grip-vertical" class="w-5 h-5 ${isSimulationMode ? 'text-gray-700' : 'text-gray-500 cursor-grab'} flex-shrink-0"></i>
+            const postsHtml = state.blogPosts.map((post) => `
+                <div class="blog-item bg-gray-900 p-4 rounded-lg shadow-md border-l-4 border-accent-secondary flex flex-col sm:flex-row items-start sm:items-center justify-between transition duration-200 hover:bg-gray-800" 
+                     data-post-id="${post.sha}">
+                    <div class="flex items-start sm:items-center space-x-4 flex-1 min-w-0 mb-2 sm:mb-0">
+                        <i data-lucide="file-text" class="w-5 h-5 text-gray-500 flex-shrink-0 mt-1 sm:mt-0"></i>
                         <div class="min-w-0">
                             <p class="text-white font-bold truncate">${post.title}</p>
-                            <p class="text-xs text-gray-500">By ${post.author} - ${formatDate(post.createdAt)}</p>
+                            <p class="text-xs text-gray-500 font-mono truncate">${post.name}</p>
                         </div>
                     </div>
-                    <div class="flex space-x-2 flex-shrink-0">
-                        <button onclick="editBlogPost('${post.id}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${disabledAttr}>
+                    <div class="flex space-x-2 flex-shrink-0 mt-2 sm:mt-0">
+                        <button onclick="editBlogPost('${post.sha}')" class="text-yellow-500 hover:text-yellow-400 p-1 rounded-full hover:bg-gray-700 transition">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteBlogPost('${post.id}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition ${isSimulationMode ? 'opacity-50 cursor-not-allowed' : ''}" ${disabledAttr}>
+                        <button onclick="deleteBlogPost('${post.sha}')" class="text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -760,88 +689,57 @@
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="newspaper" class="w-6 h-6 mr-3"></i> Blog Post Manager (${state.blogPosts.length} posts)
                 </h2>
-
-                ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
-                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
-                        <p class="text-sm mt-1">Editing, adding, deleting, and reordering are disabled because there is no database connection.</p>
-                    </div>
-                ` : ''}
                 
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-gray-400 text-sm">Drag and drop posts to reorder them on your site.</p>
-                    <button onclick="showBlogModal('new')" ${disabledAttr}
-                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 disabled:opacity-50 flex items-center">
+                <div class="p-4 mb-6 bg-orange-900 border border-orange-500 rounded-lg text-white">
+                    <p class="font-bold flex items-center"><i data-lucide="git-branch" class="w-5 h-5 mr-2 text-orange-400"></i> GIT NOTE</p>
+                    <p class="text-sm mt-1">Changes here result in direct commits to the **${state.repoConfig.branchName}** branch of **${state.repoConfig.repoPath}**.</p>
+                </div>
+                
+                <div class="flex justify-end items-center mb-4">
+                    <button onclick="showBlogModal('new')"
+                        class="px-4 py-2 font-bold rounded-lg transition duration-200 bg-accent-secondary text-bg-dark hover:opacity-80 flex items-center">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> New Blog Post
                     </button>
                 </div>
 
                 <div id="blogListContainer" class="space-y-3">
-                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found. Create your first post!</p>'}
+                    ${postsHtml || '<p class="text-center py-10 text-gray-500">No blog posts found in the configured repository and branch. Check settings or create one!</p>'}
                 </div>
+                
+                <button onclick="fetchBlogPostsFromGithub()" class="mt-6 w-full px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:bg-gray-800 transition">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-2"></i> Refresh Post List
+                </button>
             `;
-        }
-
-        window.handleImageUpload = async function() {
-            if (isSimulationMode) {
-                 dom.imageStatus.textContent = 'Image upload is disabled in Simulation Mode.';
-                 dom.imageStatus.className = 'text-red-500 mt-1';
-                 return;
-            }
-
-            const file = dom.imageFileInput.files[0];
-            if (!file) {
-                dom.imageStatus.textContent = 'Please select an image file first.';
-                dom.imageStatus.className = 'text-red-500 mt-1';
-                return;
-            }
-
-            dom.imageStatus.textContent = `Uploading "${file.name}" to /${IMAGE_PATH}/... (Simulated)`;
-            dom.imageStatus.className = 'text-yellow-600 mt-1';
-            document.getElementById('uploadImageBtn').disabled = true;
-
-            await new Promise(r => setTimeout(r, 1500)); 
-
-            const uniqueId = generateId().substring(0, 8); 
-            const fileName = `${uniqueId}-${slugify(file.name)}`;
-            // NOTE: Using a placeholder URL structure for the final link
-            const imageUrl = `https://your.blog.com/${IMAGE_PATH}/${fileName}`; 
-
-            dom.imageStatus.textContent = `Image uploaded successfully! Path: /${IMAGE_PATH}/${fileName}. Link inserted.`;
-            dom.imageStatus.className = 'text-green-400 mt-1';
-
-            const imageMarkdown = `\n![${file.name.replace(/\.[^/.]+$/, "")}](${imageUrl})\n`;
-            dom.postContent.value += imageMarkdown;
-            dom.imageFileInput.value = '';
-            document.getElementById('uploadImageBtn').disabled = false;
         }
 
         window.showBlogModal = function(mode) {
             
             dom.blogSaveMessage.textContent = '';
             dom.blogForm.reset();
-            dom.imageStatus.textContent = '';
             
             if (mode === 'new') {
                 state.editingPost = null;
                 dom.blogModalTitle.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i> Create New Post';
-                dom.submitBlogBtn.textContent = 'Create Post';
-            } else {
-                state.editingPost = state.blogPosts.find(p => p.id === mode);
-                if (!state.editingPost) {
-                    return;
-                }
-                dom.blogModalTitle.innerHTML = '<i data-lucide="pencil" class="w-5 h-5 mr-2"></i> Edit Post';
-                dom.submitBlogBtn.textContent = 'Update Post';
+                dom.submitBlogBtn.textContent = 'Create & Commit Post';
+                dom.postFilename.disabled = false;
+                dom.currentFilePath.textContent = `${state.repoConfig.repoPath}/${GITHUB_POSTS_PATH}/...`;
+
+            } else { // Edit mode
+                state.editingPost = state.blogPosts.find(p => p.sha === mode);
+                if (!state.editingPost) return;
                 
-                dom.postTitle.value = state.editingPost.title;
-                dom.postAuthor.value = state.editingPost.author;
+                dom.blogModalTitle.innerHTML = '<i data-lucide="pencil" class="w-5 h-5 mr-2"></i> Edit Post';
+                dom.submitBlogBtn.textContent = 'Update & Commit Changes';
+                
+                dom.postFilename.value = state.editingPost.name;
+                dom.postFilename.disabled = true; // Cannot change filename when editing
                 dom.postContent.value = state.editingPost.content;
+                dom.currentFilePath.textContent = state.editingPost.path;
             }
             
             dom.blogModal.classList.remove('hidden');
             dom.blogModal.classList.add('flex');
-            dom.postTitle.focus();
+            dom.postContent.focus();
             lucide.createIcons();
         }
 
@@ -855,79 +753,95 @@
         async function handleBlogFormSubmit(e) {
             e.preventDefault();
             
-            const postData = {
-                title: dom.postTitle.value.trim(),
-                author: dom.postAuthor.value.trim(),
-                content: dom.postContent.value,
-            };
-
-            if (!postData.title || !postData.author || !postData.content) {
+            const { repoPath, branchName } = state.repoConfig;
+            if (repoPath === 'owner/repo-name') {
+                 showCustomAlert("Configuration Error", "Please set your Repository Path in Site Settings first.", true);
+                 return;
+            }
+            
+            const filename = dom.postFilename.value.trim();
+            const content = dom.postContent.value;
+            const isEditing = !!state.editingPost;
+            
+            if (!filename || !content) {
                 dom.blogSaveMessage.textContent = 'All fields are required.';
                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
                 return;
             }
 
-            if (isSimulationMode) {
-                dom.blogSaveMessage.textContent = 'Post created/updated! (Not saved in offline mode)';
-                dom.blogSaveMessage.className = 'text-yellow-400 mt-2 h-6 text-center';
-                setTimeout(() => {
-                    hideBlogModal();
-                }, 1000);
-                return;
+            // Filename validation for new post
+            if (!isEditing && !filename.match(/^\d{4}-\d{2}-\d{2}-.*\.md$/)) {
+                 dom.blogSaveMessage.textContent = 'Filename must be in the format YYYY-MM-DD-slug.md.';
+                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
+                 return;
             }
 
             try {
                 dom.submitBlogBtn.disabled = true;
-                dom.blogSaveMessage.textContent = 'Processing...';
+                dom.blogSaveMessage.textContent = 'Committing to GitHub...';
                 dom.blogSaveMessage.className = 'text-yellow-400 mt-2 h-6 text-center';
 
-                if (state.editingPost) {
-                    const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, state.editingPost.id);
-                    await setDoc(postRef, {
-                        ...postData,
-                        updatedAt: Date.now()
-                    }, { merge: true });
-                    dom.blogSaveMessage.textContent = 'Post updated successfully!';
-                } else {
-                    // Determine the order for the new post (last in the array)
-                    const newOrder = state.blogPosts.length > 0 ? (state.blogPosts[state.blogPosts.length - 1].order || 0) + 1 : 0;
-                    const newPost = {
-                        ...postData,
-                        createdAt: Date.now(),
-                        order: newOrder
-                    };
-                    await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, generateId()), newPost);
-                    dom.blogSaveMessage.textContent = 'New post created successfully!';
+                const targetPath = `${GITHUB_POSTS_PATH}/${filename}`;
+                
+                const commitPayload = {
+                    message: isEditing ? `Update: ${filename}` : `Create: ${filename}`,
+                    content: base64Encode(content),
+                    branch: branchName,
+                };
+
+                if (isEditing) {
+                    commitPayload.sha = state.editingPost.sha; // Required for updates
                 }
 
-                dom.blogSaveMessage.className = 'text-green-400 mt-2 h-6 text-center';
-                
-                setTimeout(() => {
-                    hideBlogModal();
+                const result = await githubApi('PUT', `/repos/${repoPath}/contents/${targetPath}`, commitPayload);
+
+                if (result) {
+                    dom.blogSaveMessage.textContent = isEditing ? 'Post updated successfully on GitHub!' : 'New post committed successfully to GitHub!';
+                    dom.blogSaveMessage.className = 'text-green-400 mt-2 h-6 text-center';
+                    
+                    // Refresh the list
+                    await fetchBlogPostsFromGithub();
+                    
+                    setTimeout(() => {
+                        hideBlogModal();
+                        dom.submitBlogBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    // Error handled by githubApi function
                     dom.submitBlogBtn.disabled = false;
-                }, 1000);
+                }
 
             } catch (error) {
-                dom.blogSaveMessage.textContent = `Error: ${error.message}`;
+                dom.blogSaveMessage.textContent = `CRITICAL ERROR: ${error.message}`;
                 dom.blogSaveMessage.className = 'text-red-400 mt-2 h-6 text-center';
                 dom.submitBlogBtn.disabled = false;
             }
         }
         
-        window.editBlogPost = function(postId) {
-            if (isSimulationMode) return;
-            showBlogModal(postId);
+        window.editBlogPost = async function(sha) {
+            const post = state.blogPosts.find(p => p.sha === sha);
+            if (!post) {
+                showCustomAlert("Post Not Found", "The post data could not be retrieved.", true);
+                return;
+            }
+            // Ensure the content is available before showing the modal
+            if (!post.content) {
+                showCustomAlert("Content Missing", "The post content was not found. Try refreshing the list.", true);
+                return;
+            }
+            showBlogModal(sha);
         }
 
-        window.deleteBlogPost = async function(postId) {
-            if (isSimulationMode) return;
+        window.deleteBlogPost = async function(sha) {
+            const post = state.blogPosts.find(p => p.sha === sha);
+            if (!post) return;
             
             const confirmBox = document.createElement('div');
             confirmBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
             confirmBox.innerHTML = `
                 <div class="bg-gray-800 p-6 rounded-lg border border-red-500 shadow-xl max-w-sm w-full">
                     <p class="text-lg font-bold text-red-400 mb-4">Confirm Deletion</p>
-                    <p class="text-gray-300 mb-6">Are you sure you want to permanently delete this blog post? This action cannot be undone.</p>
+                    <p class="text-gray-300 mb-6">Are you sure you want to permanently delete the file <span class="font-mono text-white">${post.name}</span>? This will create a commit on GitHub.</p>
                     <div class="flex justify-end space-x-3">
                         <button id="cancelDelete" class="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700">Cancel</button>
                         <button id="confirmDelete" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
@@ -943,141 +857,43 @@
             document.getElementById('confirmDelete').onclick = async () => {
                 document.body.removeChild(confirmBox);
 
-                if (!db) return;
-
+                const { repoPath, branchName } = state.repoConfig;
+                
                 try {
-                    const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, postId);
-                    await deleteDoc(postRef);
-                    
-                    // Re-sort and update order for remaining posts after deletion
-                    const remainingPosts = state.blogPosts.filter(p => p.id !== postId)
-                        .map((p, index) => ({ id: p.id, order: index }));
+                    const commitPayload = {
+                        message: `Delete: ${post.name}`,
+                        sha: post.sha, // Required for deletion
+                        branch: branchName,
+                    };
 
-                    for (const post of remainingPosts) {
-                        // Use setDoc to update the order field
-                        await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: post.order }, { merge: true });
+                    const result = await githubApi('DELETE', `/repos/${repoPath}/contents/${post.path}`, commitPayload);
+
+                    if (result) {
+                        showCustomAlert("Deletion Successful", `File ${post.name} deleted and commit pushed.`, false);
+                        await fetchBlogPostsFromGithub(); // Refresh list
                     }
                 } catch (error) {
+                    showCustomAlert("Deletion Failed", `Could not delete file: ${error.message}`, true);
                     console.error("Error deleting blog post:", error);
                 }
             };
         }
         
-        let dragSrcEl = null;
+        // --- Security Tools (Kept for completeness, still simulated) ---
 
-        function attachBlogManagerListeners() {
-            dom.blogForm.removeEventListener('submit', handleBlogFormSubmit);
-            dom.blogForm.addEventListener('submit', handleBlogFormSubmit);
-            
-            const container = document.getElementById('blogListContainer');
-            if (!container) return;
-            
-            // Disable drag/drop listeners in simulation mode
-            if (!isSimulationMode) {
-                container.addEventListener('dragstart', handleDragStart);
-                container.addEventListener('dragover', handleDragOver);
-                container.addEventListener('dragleave', handleDragLeave);
-                container.addEventListener('drop', handleDrop);
-                container.addEventListener('dragend', handleDragEnd);
-            }
-        }
-
-        function handleDragStart(e) {
-            if (isSimulationMode) return;
-            
-            const target = e.target.closest('.blog-item');
-            if (!target) return;
-            
-            dragSrcEl = target;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', dragSrcEl.dataset.postId);
-            
-            setTimeout(() => {
-                dragSrcEl.classList.add('dragging');
-            }, 0);
-        }
-
-        function handleDragOver(e) {
-            if (isSimulationMode) return;
-            
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            const target = e.target.closest('.blog-item');
-            if (!target || target === dragSrcEl) return;
-
-            Array.from(target.parentNode.children).forEach(item => item.classList.remove('drag-over'));
-            
-            target.classList.add('drag-over');
-
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDragLeave(e) {
-            if (isSimulationMode) return;
-            
-            const target = e.target.closest('.blog-item');
-            if (target) {
-                target.classList.remove('drag-over');
-            }
-        }
-
-        async function handleDrop(e) {
-            if (isSimulationMode) return;
-            
-            e.stopPropagation();
-            
-            const targetEl = e.target.closest('.blog-item');
-            if (!dragSrcEl || !targetEl || dragSrcEl === targetEl) return false;
-
-            Array.from(targetEl.parentNode.children).forEach(item => item.classList.remove('drag-over'));
-            
-            const sourceIndex = parseInt(dragSrcEl.dataset.index);
-            const targetIndex = parseInt(targetEl.dataset.index);
-
-            const posts = [...state.blogPosts];
-            const [movedPost] = posts.splice(sourceIndex, 1);
-            posts.splice(targetIndex, 0, movedPost);
-            
-            try {
-                // Update the 'order' field for all affected posts
-                for (let i = 0; i < posts.length; i++) {
-                    const post = posts[i];
-                    // Only update if the order has changed to minimize writes
-                    if (post.order !== i) { 
-                        await setDoc(doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, post.id), { order: i }, { merge: true });
-                    }
-                }
-            } catch(error) {
-                console.error("Error updating post order:", error);
-            }
-            
-            return false;
-        }
-
-        function handleDragEnd(e) {
-            if (isSimulationMode) return;
-            
-            dragSrcEl.classList.remove('dragging');
-            dragSrcEl = null;
-
-            document.querySelectorAll('.blog-item').forEach(item => item.classList.remove('drag-over'));
-        }
-
+        let trafficChart = null;
+        let dosAnimationInterval = null;
+        
         function renderSecurityTools() {
              return `
                 <h2 class="text-3xl font-bold mb-6 text-accent-secondary flex items-center">
                     <i data-lucide="shield-half" class="w-6 h-6 mr-3"></i> Security & Traffic Tools
                 </h2>
-                
-                ${isSimulationMode ? `
-                    <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
-                        <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> OFFLINE SIMULATION MODE ACTIVE</p>
-                        <p class="text-sm mt-1">These tools run simulated animations only.</p>
-                    </div>
-                ` : ''}
-
+                <div class="p-4 mb-6 bg-yellow-900 border border-yellow-500 rounded-lg text-white">
+                    <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> SIMULATION MODE</p>
+                    <p class="text-sm mt-1">These tools run simulated animations only as they do not connect to a live monitoring service.</p>
+                </div>
+                <!-- ... (rest of the security tools HTML remains the same) ... -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-green-400">
@@ -1158,19 +974,7 @@
                 setTimeout(() => {
                     results.innerHTML = renderAnalyzerResults();
                     lucide.createIcons();
-                    const alertBox = document.createElement('div');
-                    alertBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
-                    alertBox.innerHTML = `
-                        <div class="bg-gray-800 p-6 rounded-lg border border-green-500 shadow-xl max-w-sm w-full">
-                            <p class="text-lg font-bold text-green-400 mb-4">Analysis Complete</p>
-                            <p class="text-gray-300 mb-6">Simulated analysis finished. Results updated on dashboard.</p>
-                            <div class="flex justify-end">
-                                <button id="closeAlert" class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">OK</button>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(alertBox);
-                    document.getElementById('closeAlert').onclick = () => document.body.removeChild(alertBox);
+                    showCustomAlert("Analysis Complete", "Simulated analysis finished. Results updated on dashboard.", false);
                 }, 2000);
             }
         }
@@ -1313,14 +1117,40 @@
             dosAnimationInterval = requestAnimationFrame(updateDosAnimation);
         }
 
+        // --- Initial Setup ---
+
         document.addEventListener('DOMContentLoaded', async () => {
             dom.loginForm.addEventListener('submit', attemptLogin);
+            dom.blogForm.addEventListener('submit', handleBlogFormSubmit); // Attach here once
 
             dom.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     switchTab(button.getAttribute('data-tab'));
                 });
             });
+
+            // If a PAT is already stored (from a previous session), skip the login screen
+            if (state.githubPat) {
+                document.getElementById('accessToken').value = state.githubPat;
+                const isVerified = await verifyGitHubToken(state.githubPat);
+                if (isVerified) {
+                    state.isAuthenticated = true;
+                    dom.loginScreen.classList.add('hidden');
+                    dom.cmsPanel.classList.remove('hidden');
+                    dom.cmsUserId.textContent = `User: ${githubUser} | Repo: ${state.repoConfig.repoPath}`;
+                    dom.loginStatus.innerHTML = `PAT accepted. GitHub User: <span class="text-green-500 font-bold">${githubUser}</span>.`;
+                    
+                    fetchBlogPostsFromGithub(); // Initial fetch
+                    renderContent('dashboard');
+                } else {
+                    // Stored PAT is invalid, force re-login
+                    localStorage.removeItem('githubPat');
+                    state.githubPat = '';
+                    dom.loginStatus.textContent = 'Stored PAT invalid. Please log in again.';
+                    dom.loginStatus.classList.add('text-red-400');
+                    document.getElementById('accessToken').value = '';
+                }
+            }
 
             lucide.createIcons();
         });
