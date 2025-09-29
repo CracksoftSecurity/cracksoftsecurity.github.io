@@ -8,7 +8,7 @@ layout: null
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cracksoft Security | Free Cyber Education Community</title>
     <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/"></script>
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -90,7 +90,8 @@ layout: null
             <nav class="hidden md:flex space-x-6 lg:space-x-10 text-sm font-medium items-center">
                 <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Home</a>
                 <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">About Us</a>
-                <a href="/blogs" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Blogs</a>
+                <!-- Updated link to point to the dedicated blogs section in this file -->
+                <a href="#blogs" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Blogs</a> 
                 <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Heroes</a>
                 <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Partners</a>
                 
@@ -274,21 +275,48 @@ layout: null
             </div>
         </section>
 
-        <!-- Placeholder for future blog content (Jekyll integration) -->
+        <!-- Blog Section: Updated to use Jekyll's Liquid templating -->
         <section id="blogs" class="pt-16 sm:pt-20 pb-40">
             <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
                 Latest <span class="neon-glow" style="color: var(--color-accent-primary);">Cyber Insights</span>
             </h2>
             <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
-                This area is ready to display your latest posts using Jekyll's Liquid templating.
+                Explore our recent articles, tutorials, and community news.
             </p>
 
+            <!-- START JEKYLL LIQUID TEMPLATING -->
+            <div class="grid md:grid-cols-3 gap-8">
+                {% assign posts_limit = 3 %}
+                {% for post in site.posts limit: posts_limit %}
+                <a href="{{ post.url | relative_url }}" class="block p-6 rounded-xl border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_rgba(78,240,228,0.3)] hover:border-[--color-accent-secondary]" style="background-color: rgba(5, 5, 20, 0.95);">
+                    <p class="text-xs uppercase font-mono mb-2" style="color: var(--color-accent-secondary);">
+                        {{ post.date | date: "%b %-d, %Y" }}
+                    </p>
+                    <h3 class="text-xl font-bold text-white mb-2 line-clamp-2">{{ post.title }}</h3>
+                    <p class="text-gray-400 text-sm line-clamp-3 mb-4">
+                        {% if post.excerpt %}
+                            {{ post.excerpt | strip_html | strip_newlines | truncate: 120 }}
+                        {% else %}
+                            This post is a valuable resource for the Cracksoft community. Click to read more.
+                        {% endif %}
+                    </p>
+                    <span class="inline-flex items-center text-sm font-semibold" style="color: var(--color-accent-primary);">
+                        Read Article <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Fallback message for when no posts exist -->
+            {% if site.posts.size == 0 %}
             <div class="text-center">
                 <div class="inline-block p-10 bg-black/50 border border-dashed border-[#1A1A40] rounded-xl text-gray-500 space-y-3">
                     <i data-lucide="server-off" class="w-8 h-8 mx-auto"></i>
                     <p>No blog content loaded yet. Start adding posts to your `_posts` folder!</p>
                 </div>
             </div>
+            {% endif %}
+            <!-- END JEKYLL LIQUID TEMPLATING -->
 
         </section>
         
