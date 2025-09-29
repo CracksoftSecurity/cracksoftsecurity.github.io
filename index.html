@@ -6,7 +6,7 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cracksoft Security | Elite Digital Defense</title>
+    <title>Cracksoft Security | Free Cyber Education Community</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
@@ -17,8 +17,8 @@ layout: null
         /* Custom Colors & Configuration based on Logo */
         :root {
             --color-bg-dark: #00030A; /* Deepest Black/Blue */
-            --color-accent-primary: #6C4EF0; /* Deep Purple from Logo */
-            --color-accent-secondary: #4EF0E4; /* Electric Cyan/Teal from Logo */
+            --color-accent-primary: #6C4EF0; /* Deep Purple (Focus/Action) */
+            --color-accent-secondary: #4EF0E4; /* Electric Cyan/Teal (Highlight) */
             --color-terminal-bg: rgba(5, 5, 20, 0.95); /* Very dark, slightly purple background */
             --color-text-light: #E9F0F4;
             --color-text-secondary: #9AA0A6;
@@ -34,20 +34,28 @@ layout: null
             background-size: 50px 50px;
         }
 
+        /* Neon Glow Effect - Using the Deep Purple */
+        .neon-glow {
+            text-shadow: 0 0 8px var(--color-accent-primary);
+        }
+
         /* Terminal Font - Adjusted base size for better mobile fit */
         .terminal-font {
             font-family: 'Space Mono', monospace;
             font-size: 0.85rem; 
         }
-
-        /* Neon Glow Effect - Using the Deep Purple */
-        .neon-glow {
-            text-shadow: 0 0 8px var(--color-accent-primary);
-        }
         
-        .border-neon {
-            border-color: var(--color-accent-primary);
-            box-shadow: 0 0 10px rgba(108, 78, 240, 0.5); 
+        /* Hero Background Overlay (subtle circuitry graphic) */
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' x2='0' y1='-1' y2='1'%3E%3Cstop offset='0' stop-color='%2300030A'/%E3%8E%3Cstop offset='1' stop-color='%2310081C'/%E3%8E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='800' height='800'/%E3%8E%3Cg opacity='.25'%E3%8E%3Cpath fill='%236C4EF0' d='M0 0h800v800H0z'/%E3%8E%3Cpath fill='%2300030A' d='M250 100h300v300H250z'/%E3%8E%3Cpath fill='url(%23a)' d='M300 150h200v200H300z'/%E3%8E%3C/g%E3%8E%3C/svg%E3%8E%3E");
+            opacity: 0.2;
+            z-index: -1;
         }
 
         /* Custom Scrollbar styling for terminal */
@@ -65,40 +73,38 @@ layout: null
         #terminal-input {
             caret-color: var(--color-accent-secondary);
         }
-
-        /* Hero Background Overlay (subtle circuitry graphic) */
-        #hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://placehold.co/1200x600/00030A/00030A?text=') center center no-repeat;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' x2='0' y1='-1' y2='1'%3E%3Cstop offset='0' stop-color='%2300030A'/%E3%8E%3Cstop offset='1' stop-color='%2310081C'/%E3%8E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='800' height='800'/%E3%8E%3Cg opacity='.25'%E3%8E%3Cpath fill='%236C4EF0' d='M0 0h800v800H0z'/%E3%8E%3Cpath fill='%2300030A' d='M250 100h300v300H250z'/%E3%8E%3Cpath fill='url(%23a)' d='M300 150h200v200H300z'/%E3%8E%3C/g%E3%8E%3C/svg%E3%8E%3E");
-            opacity: 0.2;
-            z-index: -1;
-        }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Navbar -->
-    <header class="sticky top-0 z-20 backdrop-blur-md bg-black/70 border-b border-[#10081C]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
-            <a href="#" class="flex items-center space-x-2 text-xl sm:text-2xl font-black tracking-widest text-[var(--color-accent-primary)] neon-glow">
-                <!-- Using Primary/Purple for the logo icon -->
+    <!-- Navbar - Ensured full width and proper mobile stacking -->
+    <header class="w-full sticky top-0 z-20 backdrop-blur-md bg-black/70 border-b border-[#10081C]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#hero" class="flex items-center space-x-2 text-xl sm:text-2xl font-black tracking-widest text-[var(--color-accent-primary)] neon-glow">
                 <i data-lucide="lock-keyhole" class="w-6 h-6 sm:w-7 sm:h-7 stroke-[3px]" style="color: var(--color-accent-primary);"></i>
                 <span class="text-white">CRACKSOFT</span>
             </a>
-            <nav class="hidden md:flex space-x-10 text-sm font-medium">
+            
+            <!-- Desktop Navigation Links (Updated) -->
+            <nav class="hidden md:flex space-x-6 lg:space-x-10 text-sm font-medium items-center">
                 <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Home</a>
-                <a href="#terminal" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">CLI Portal</a>
-                <a href="#services" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Services</a>
-                <a href="#team" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Team</a>
-                <a href="#" class="px-5 py-2 border rounded-full text-xs tracking-wider font-bold hover:bg-[--color-accent-secondary]/10 transition duration-300" style="border-color: var(--color-accent-secondary); color: var(--color-accent-secondary);">GET STARTED</a>
+                <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">About Us</a>
+                <a href="/blogs" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Blogs</a>
+                <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Heroes</a>
+                <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200">Partners</a>
+                
+                <!-- WhatsApp Button (No Change) -->
+                <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" rel="noopener noreferrer" 
+                   class="px-5 py-2 border rounded-full text-xs tracking-wider font-bold hover:bg-[--color-accent-secondary]/10 transition duration-300 flex items-center space-x-2" 
+                   style="border-color: var(--color-accent-secondary); color: var(--color-accent-secondary);">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Join the Cyber Guild</span>
+                </a>
             </nav>
-            <button class="md:hidden text-white">
+            
+            <!-- Mobile Menu Toggle (Simplified for this single-file layout) -->
+            <button class="md:hidden text-white" aria-label="Toggle Navigation">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
         </div>
@@ -106,38 +112,44 @@ layout: null
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
 
-        <!-- Hero Section & Terminal -->
+        <!-- Hero Section (Terminal Restored) -->
         <section id="hero" class="relative pt-6 pb-20">
-            <!-- Adjusted grid to allow text to breathe on mobile -->
+            <!-- Grid layout adjusted for mobile stacking -->
             <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                
+                <!-- Primary Call to Action -->
                 <div class="space-y-4 sm:space-y-6">
                     <p class="text-sm sm:text-lg font-mono uppercase tracking-wider" style="color: var(--color-accent-secondary);">
-                        // ELITE CYBER DEFENSE
+                        // FREE CYBER EDUCATION FOR ALL
                     </p>
-                    <!-- Adjusted font sizing for better mobile display -->
                     <h1 class="text-4xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight leading-tight">
-                        <span class="block text-gray-100">Zero-Day</span>
-                        <span class="block neon-glow" style="color: var(--color-accent-primary);">Security Experts</span>
+                        <span class="block text-gray-100">Open-Source</span>
+                        <span class="block neon-glow" style="color: var(--color-accent-primary);">Digital Defense</span>
                     </h1>
                     <p class="text-base sm:text-xl text-gray-400 max-w-lg pt-2">
-                        We empower digital defenders with threat intelligence, deep-dive forensics, and proactive vulnerability hunting.
+                        We are a global community committed to democratizing cybersecurity knowledge. Join us to learn, share, and secure the digital world together.
                     </p>
+                    
+                    <!-- Call to Action Buttons -->
                     <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 sm:pt-8">
-                        <!-- Adjusted padding and size for buttons on mobile -->
-                        <button class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-black text-sm font-extrabold rounded-lg shadow-2xl transition transform hover:scale-105 duration-300" style="background-color: var(--color-accent-primary); box-shadow: 0 0 20px var(--color-accent-primary);">
-                            <i data-lucide="scan" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-                            <span>Request a Demo</span>
-                        </button>
-                        <a href="#team" class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-sm font-semibold rounded-lg transition duration-300" style="border: 2px solid var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;">
-                            <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                            <span>Meet The Team</span>
+                        <!-- WhatsApp Link -->
+                        <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" rel="noopener noreferrer" 
+                           class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-black text-sm font-extrabold rounded-lg shadow-2xl transition transform hover:scale-105 duration-300" 
+                           style="background-color: var(--color-accent-primary); box-shadow: 0 0 20px var(--color-accent-primary);">
+                            <i data-lucide="zap" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                            <span>Join the Cyber Guild</span>
+                        </a>
+                        <!-- Blogs Link -->
+                        <a href="#blogs" class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-sm font-semibold rounded-lg transition duration-300" 
+                           style="border: 2px solid var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;">
+                            <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                            <span>Explore Free Training</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- Terminal Component - RESPONSIVENESS TWEAKS APPLIED HERE -->
-                <div id="terminal-container" class="w-full mt-10 lg:mt-0 mx-auto max-w-lg lg:max-w-none lg:scale-105 transition-all duration-500 hover:z-30" style="box-shadow: 0 0 40px rgba(108, 78, 240, 0.4);">
-                    <!-- Reduced padding on mobile (p-4) and adjusted height -->
+                <!-- Terminal Component (Restored) -->
+                <div id="terminal-container" class="w-full mt-10 lg:mt-0 mx-auto max-w-lg lg:max-w-none transition-all duration-500 hover:z-30" style="box-shadow: 0 0 40px rgba(108, 78, 240, 0.4);">
                     <div id="terminal" class="p-4 sm:p-6 rounded-xl border-2 shadow-2xl" style="background-color: var(--color-terminal-bg); border-color: var(--color-accent-primary)/70;">
                         <div class="flex space-x-2 pb-4 border-b border-[#1A1A40]">
                             <div class="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -145,7 +157,7 @@ layout: null
                             <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                         </div>
                         
-                        <!-- Terminal Output Area (Reduced height on mobile: h-64) -->
+                        <!-- Terminal Output Area (Responsive Height) -->
                         <div id="terminal-output" class="terminal-font h-64 lg:h-80 overflow-y-auto pt-4 pb-2 text-white/90">
                             <!-- Initial messages injected here by JS -->
                         </div>
@@ -161,164 +173,126 @@ layout: null
             </div>
         </section>
 
-        <!-- Services Section -->
-        <section id="services" class="pt-16 sm:pt-20 pb-20">
+        <!-- About Us Section (Moved from Hero) -->
+        <section id="about" class="pt-16 sm:pt-20 pb-20">
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center">
+                Our <span class="neon-glow" style="color: var(--color-accent-primary);">Mission</span>
+            </h2>
+            <div class="mx-auto max-w-4xl p-6 sm:p-8 rounded-xl border-2 shadow-2xl" 
+                 style="background-color: rgba(5, 5, 20, 0.95); border-color: var(--color-accent-secondary)/50; box-shadow: 0 0 40px rgba(78, 240, 228, 0.2);">
+                
+                <h3 class="text-xl sm:text-2xl font-bold mb-4 flex items-center space-x-2" style="color: var(--color-accent-secondary);">
+                    <i data-lucide="users-2" class="w-6 h-6"></i>
+                    <span>Cracksoft: The Free Cyber Guild</span>
+                </h3>
+                
+                <!-- Rephrased Community Mission -->
+                <p class="text-lg text-gray-300 leading-relaxed mb-4">
+                    We are <span class="font-bold neon-glow" style="color: var(--color-accent-primary);">Cracksoft Security</span>, an **open, guiding community** built on the radical idea that digital defense shouldn't have a paywall.
+                </p>
+                <p class="text-gray-400 leading-relaxed mb-4">
+                    We dismantle the barriers to entry by providing **free, high-quality cybersecurity education** for everyone—from the curious beginner taking their first ethical hacking steps to the seasoned professional seeking advanced resources.
+                </p>
+                <p class="text-gray-400 leading-relaxed">
+                    Our core mission is to empower individuals and businesses with the knowledge to thrive securely online. We are here to make the internet a safer, more informed place, one free lesson at a time.
+                </p>
+                <div class="mt-6 text-sm font-mono" style="color: var(--color-accent-secondary);">
+                    // ACCESS GRANTED. EDUCATION IS THE BEST DEFENSE.
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Heroes Section (New) -->
+        <section id="heroes" class="pt-16 sm:pt-20 pb-20">
             <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
-                Our <span class="neon-glow" style="color: var(--color-accent-primary);">Offerings</span>
+                Community <span class="neon-glow" style="color: var(--color-accent-primary);">Heroes</span>
             </h2>
             <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
-                Comprehensive security solutions spanning offensive testing, defensive strategy, and continuous monitoring.
+                Recognizing the top contributors, educators, and vulnerability researchers who make our community strong.
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div class="p-6 sm:p-8 bg-black/50 border border-[#1A1A40] rounded-xl transition duration-300 space-y-3 sm:space-y-4 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <i data-lucide="fingerprint" class="w-8 h-8 sm:w-10 sm:h-10 neon-glow" style="color: var(--color-accent-secondary);"></i>
-                    <h3 class="text-xl sm:text-2xl font-semibold text-white">Vulnerability Scanning</h3>
-                    <p class="text-gray-400 text-sm">Automated and manual penetration testing to identify and exploit weaknesses before attackers do.</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
+                <!-- Hero 1 -->
+                <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                    <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                    <h3 class="text-lg font-bold text-white">Ethical_Fox</h3>
+                    <p class="text-xs font-mono text-gray-500">Top Educator</p>
                 </div>
-                <div class="p-6 sm:p-8 bg-black/50 border border-[#1A1A40] rounded-xl transition duration-300 space-y-3 sm:space-y-4 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <i data-lucide="shield-alert" class="w-8 h-8 sm:w-10 sm:h-10 neon-glow" style="color: var(--color-accent-secondary);"></i>
-                    <h3 class="text-xl sm:text-2xl font-semibold text-white">Incident Response</h3>
-                    <p class="text-gray-400 text-sm">24/7 rapid deployment team for containment, eradication, and post-incident forensic analysis.</p>
+                <!-- Hero 2 -->
+                <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                    <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                    <h3 class="text-lg font-bold text-white">ZeroDay_Hunter</h3>
+                    <p class="text-xs font-mono text-gray-500">Vulnerability Researcher</p>
                 </div>
-                <div class="p-6 sm:p-8 bg-black/50 border border-[#1A1A40] rounded-xl transition duration-300 space-y-3 sm:space-y-4 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <i data-lucide="brain-circuit" class="w-8 h-8 sm:w-10 sm:h-10 neon-glow" style="color: var(--color-accent-secondary);"></i>
-                    <h3 class="text-xl sm:text-2xl font-semibold text-white">Threat Intelligence</h3>
-                    <p class="text-gray-400 text-sm">Leveraging AI to predict attack vectors and provide actionable, real-time threat feeds.</p>
+                <!-- Hero 3 -->
+                <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                    <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                    <h3 class="text-lg font-bold text-white">Crypto_Guard</h3>
+                    <p class="text-xs font-mono text-gray-500">Blockchain Security</p>
+                </div>
+                <!-- Hero 4 -->
+                <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                    <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                    <h3 class="text-lg font-bold text-white">Sentinel_X</h3>
+                    <p class="text-xs font-mono text-gray-500">Content Contributor</p>
+                </div>
+                <!-- Hero 5 -->
+                <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                    <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                    <h3 class="text-lg font-bold text-white">Admin_Guru</h3>
+                    <p class="text-xs font-mono text-gray-500">Forum Moderator</p>
                 </div>
             </div>
+        </section>
+
+        <!-- Community Partners Section (New) -->
+        <section id="partners" class="pt-16 sm:pt-20 pb-40">
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                Community <span class="neon-glow" style="color: var(--color-accent-primary);">Partners</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
+                Collaborating with organizations that share our commitment to free, accessible cybersecurity knowledge.
+            </p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                <!-- Partner 1 -->
+                <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                    <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300" style="color: var(--color-accent-secondary);">CyberLabs</span>
+                </div>
+                <!-- Partner 2 -->
+                <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                    <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">DefendX</span>
+                </div>
+                <!-- Partner 3 -->
+                <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                    <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">SecEducate</span>
+                </div>
+                <!-- Partner 4 -->
+                <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                    <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">HackHub</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Placeholder for future blog content (Jekyll integration) -->
+        <section id="blogs" class="pt-16 sm:pt-20 pb-40">
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                Latest <span class="neon-glow" style="color: var(--color-accent-primary);">Cyber Insights</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
+                This area is ready to display your latest posts using Jekyll's Liquid templating.
+            </p>
+
+            <div class="text-center">
+                <div class="inline-block p-10 bg-black/50 border border-dashed border-[#1A1A40] rounded-xl text-gray-500 space-y-3">
+                    <i data-lucide="server-off" class="w-8 h-8 mx-auto"></i>
+                    <p>No blog content loaded yet. Start adding posts to your `_posts` folder!</p>
+                </div>
+            </div>
+
         </section>
         
-        <!-- Team Section -->
-        <section id="team" class="pt-16 sm:pt-20 pb-20">
-            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
-                The <span class="neon-glow" style="color: var(--color-accent-primary);">Elite Team</span>
-            </h2>
-            <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
-                Meet the highly-specialized human element behind our advanced defense systems.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                <!-- Team Member 1 -->
-                <div class="group bg-black/50 rounded-xl p-6 border border-[#1A1A40] transition duration-300 transform hover:-translate-y-2 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <div class="flex justify-center mb-4 sm:mb-6">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-800/50 overflow-hidden border-4 border-gray-700 group-hover:border-[--color-accent-primary] transition duration-300 flex items-center justify-center">
-                            <i data-lucide="user-check" class="w-12 h-12 sm:w-14 sm:h-14 group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-center text-white group-hover:neon-glow" style="color: var(--color-accent-primary);">Alex Chen</h3>
-                    <p class="text-xs font-mono text-center mb-3" style="color: var(--color-accent-secondary);">// Chief Architect</p>
-                    <p class="text-xs text-gray-500 text-center mb-4 sm:mb-6">
-                        Cloud security, zero-trust implementation, and compliance.
-                    </p>
-                    <button class="w-full py-2 rounded-full text-xs sm:text-sm font-medium border hover:bg-white/10 transition" style="background-color: var(--color-accent-primary)/10; color: var(--color-accent-secondary); border-color: var(--color-accent-secondary);">
-                        Connect (PGP)
-                    </button>
-                </div>
-
-                <!-- Team Member 2 -->
-                <div class="group bg-black/50 rounded-xl p-6 border border-[#1A1A40] transition duration-300 transform hover:-translate-y-2 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <div class="flex justify-center mb-4 sm:mb-6">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-800/50 overflow-hidden border-4 border-gray-700 group-hover:border-[--color-accent-primary] transition duration-300 flex items-center justify-center">
-                            <i data-lucide="code-square" class="w-12 h-12 sm:w-14 sm:h-14 group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-center text-white group-hover:neon-glow" style="color: var(--color-accent-primary);">Dr. K Mira</h3>
-                    <p class="text-xs font-mono text-center mb-3" style="color: var(--color-accent-secondary);">// Lead AI Analyst</p>
-                    <p class="text-xs text-gray-500 text-center mb-4 sm:mb-6">
-                        Developing ML models for predictive threat analysis.
-                    </p>
-                    <button class="w-full py-2 rounded-full text-xs sm:text-sm font-medium border hover:bg-white/10 transition" style="background-color: var(--color-accent-primary)/10; color: var(--color-accent-secondary); border-color: var(--color-accent-secondary);">
-                        Connect (PGP)
-                    </button>
-                </div>
-
-                <!-- Team Member 3 -->
-                <div class="group bg-black/50 rounded-xl p-6 border border-[#1A1A40] transition duration-300 transform hover:-translate-y-2 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <div class="flex justify-center mb-4 sm:mb-6">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-800/50 overflow-hidden border-4 border-gray-700 group-hover:border-[--color-accent-primary] transition duration-300 flex items-center justify-center">
-                            <i data-lucide="activity-square" class="w-12 h-12 sm:w-14 sm:h-14 group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-center text-white group-hover:neon-glow" style="color: var(--color-accent-primary);">Jesse Lira</h3>
-                    <p class="text-xs font-mono text-center mb-3" style="color: var(--color-accent-secondary);">// Incident Response</p>
-                    <p class="text-xs text-gray-500 text-center mb-4 sm:mb-6">
-                        Forensics, containment, and rapid disaster recovery.
-                    </p>
-                    <button class="w-full py-2 rounded-full text-xs sm:text-sm font-medium border hover:bg-white/10 transition" style="background-color: var(--color-accent-primary)/10; color: var(--color-accent-secondary); border-color: var(--color-accent-secondary);">
-                        Connect (PGP)
-                    </button>
-                </div>
-
-                <!-- Team Member 4 -->
-                <div class="group bg-black/50 rounded-xl p-6 border border-[#1A1A40] transition duration-300 transform hover:-translate-y-2 hover:shadow-[0_0_20px_var(--color-accent-primary)]" style="hover:border: var(--color-accent-primary);">
-                    <div class="flex justify-center mb-4 sm:mb-6">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-800/50 overflow-hidden border-4 border-gray-700 group-hover:border-[--color-accent-primary] transition duration-300 flex items-center justify-center">
-                            <i data-lucide="globe-lock" class="w-12 h-12 sm:w-14 sm:h-14 group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-center text-white group-hover:neon-glow" style="color: var(--color-accent-primary);">W. R. Teijou</h3>
-                    <p class="text-xs font-mono text-center mb-3" style="color: var(--color-accent-secondary);">// Web App Security</p>
-                    <p class="text-xs text-gray-500 text-center mb-4 sm:mb-6">
-                        Modern framework defense and API security hardening.
-                    </p>
-                    <button class="w-full py-2 rounded-full text-xs sm:text-sm font-medium border hover:bg-white/10 transition" style="background-color: var(--color-accent-primary)/10; color: var(--color-accent-secondary); border-color: var(--color-accent-secondary);">
-                        Connect (PGP)
-                    </button>
-                </div>
-
-            </div>
-        </section>
-
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-black border-t-8 border-t-[#10081C] py-10 sm:py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 text-xs sm:text-sm">
-            
-            <div class="space-y-3 sm:space-y-4 col-span-2 md:col-span-1">
-                <a href="#" class="flex items-center space-x-2 text-xl sm:text-2xl font-black tracking-widest text-[var(--color-accent-primary)] neon-glow">
-                    <i data-lucide="lock-keyhole" class="w-6 h-6 sm:w-7 sm:h-7 stroke-[3px]" style="color: var(--color-accent-primary);"></i>
-                    <span class="text-white">CRACKSOFT</span>
-                </a>
-                <p class="text-xs text-gray-500 pr-4 pt-1 sm:pt-2">
-                    Protecting the digital frontier. Always one step ahead.
-                </p>
-                <div class="flex space-x-3 sm:space-x-4 pt-2 sm:pt-4">
-                    <a href="#" class="p-2 border border-transparent rounded-full text-gray-400 hover:text-[--color-accent-secondary] hover:border-[--color-accent-secondary] transition"><i data-lucide="github" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
-                    <a href="#" class="p-2 border border-transparent rounded-full text-gray-400 hover:text-[--color-accent-secondary] hover:border-[--color-accent-secondary] transition"><i data-lucide="twitter" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
-                    <a href="#" class="p-2 border border-transparent rounded-full text-gray-400 hover:text-[--color-accent-secondary] hover:border-[--color-accent-secondary] transition"><i data-lucide="linkedin" class="w-4 h-4 sm:w-5 sm:h-5"></i></a>
-                </div>
-            </div>
-
-            <div class="space-y-2 sm:space-y-3">
-                <h4 class="font-bold mb-2 sm:mb-3 uppercase tracking-wider" style="color: var(--color-accent-secondary);">Services</h4>
-                <a href="#services" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Penetration Testing</a>
-                <a href="#services" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Forensic Analysis</a>
-                <a href="#services" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Security Audits</a>
-                <a href="#services" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">CTO Consulting</a>
-            </div>
-
-            <div class="space-y-2 sm:space-y-3">
-                <h4 class="font-bold mb-2 sm:mb-3 uppercase tracking-wider" style="color: var(--color-accent-secondary);">Company</h4>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">About Us</a>
-                <a href="#team" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Our Specialists</a>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Partnerships</a>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Privacy Policy</a>
-            </div>
-
-            <div class="space-y-2 sm:space-y-3">
-                <h4 class="font-bold mb-2 sm:mb-3 uppercase tracking-wider" style="color: var(--color-accent-secondary);">Resources</h4>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Blog & Insights</a>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Case Studies</a>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Documentation</a>
-                <a href="#" class="block text-gray-400 hover:text-[--color-accent-secondary] transition">Support</a>
-            </div>
-        </div>
-        <div class="text-center text-xs text-gray-700 mt-10 sm:mt-16 border-t border-[#10081C] pt-6 sm:pt-8">
-            &copy; 2025 CRACKSOFT Security | All Rights Reserved. | System Status: <span style="color: var(--color-accent-secondary);">Secure</span>
-        </div>
-    </footer>
 
     <!-- JavaScript for Terminal Functionality -->
     <script>
@@ -328,6 +302,9 @@ layout: null
 
             const output = document.getElementById('terminal-output');
             const input = document.getElementById('terminal-input');
+            // Check if terminal elements exist before initializing terminal logic
+            if (!output || !input) return; 
+
             const prompt = '<span style="color: var(--color-accent-secondary);" class="pr-2">cracksoft@defender:~$</span>';
             const primaryColor = 'var(--color-accent-primary)'; // Purple
             const secondaryColor = 'var(--color-accent-secondary)'; // Cyan/Teal
@@ -380,39 +357,34 @@ layout: null
                             response = `
                                 <span style="color: ${primaryColor}; font-weight: bold;">AVAILABLE COMMANDS:</span>
                                 <br><span style="color: ${secondaryColor};">help</span> - Display this guide.
-                                <br><span style="color: ${secondaryColor};">team</span> - List Core Security Specialists.
-                                <br><span style="color: ${secondaryColor};">services</span> - Detail our security offerings.
-                                <br><span style="color: ${secondaryColor};">status</span> - Check current system health.
+                                <br><span style="color: ${secondaryColor};">mission</span> - Display community mission statement.
+                                <br><span style="color: ${secondaryColor};">resources</span> - Check free educational links.
+                                <br><span style="color: ${secondaryColor};">status</span> - Check community system health.
                                 <br><span style="color: ${secondaryColor};">clear</span> - Clear terminal history.
-                                <br><span style="color: ${secondaryColor};">ping [target]</span> - Simulated network latency check.
                             `;
                             break;
-                        case 'team':
+                        case 'mission':
                             response = `
-                                <span style="color: ${primaryColor}; font-weight: bold;">CRACKSOFT SPECIALISTS:</span>
-                                <br>- Alex Chen: Chief Security Architect
-                                <br>- Dr. K Mira: Lead AI & Threat Analyst
-                                <br>- Jesse Lira: Incident Response Specialist
-                                <br>- W. R. Teijou: Web App Security Engineer
-                                <br><br>Navigate to the <a href="#team" class="underline hover:text-white" style="color: ${secondaryColor};">Team Section</a> for bios and PGP keys.
+                                <span style="color: ${primaryColor}; font-weight: bold;">CRACKSOFT MISSION:</span>
+                                <br>To dismantle paywalls in digital defense. We provide free, high-quality cyber education for everyone.
+                                <br>We empower security researchers, beginners, and businesses alike.
+                                <br><br>Find our full mission in the <a href="#about" class="underline hover:text-white" style="color: ${secondaryColor};">About Us Section</a>.
                             `;
                             break;
-                        case 'services':
+                        case 'resources':
                             response = `
-                                <span style="color: ${primaryColor}; font-weight: bold;">SECURITY OFFERINGS:</span>
-                                <br>1. Penetration Testing (Black/Grey/White Box)
-                                <br>2. Incident Response & Forensics (24/7)
-                                <br>3. Predictive Threat Intelligence (AI-driven)
-                                <br>4. Custom Security Architecture Design
+                                <span style="color: ${primaryColor}; font-weight: bold;">COMMUNITY RESOURCES:</span>
+                                <br>[+] <a href="#blogs" class="underline hover:text-white" style="color: ${secondaryColor};">/blogs</a> - Latest educational articles.
+                                <br>[+] <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" class="underline hover:text-white" style="color: ${secondaryColor};">/guild</a> - Join the WhatsApp Discussion Group.
+                                <br>[+] <a href="#heroes" class="underline hover:text-white" style="color: ${secondaryColor};">/heroes</a> - Meet our top contributors.
                             `;
                             break;
                         case 'status':
                             response = `
-                                <span style="color: ${primaryColor}; font-weight: bold;">SYSTEM DIAGNOSTICS [v2.1]:</span>
-                                <br>[+] Primary Firewall: <span style="color: #00FF00;">ACTIVE/SECURE</span>
-                                <br>[+] Threat Database: <span style="color: #00FF00;">SYNCED</span> (99.9% coverage)
-                                <br>[+] Compute Load: 14% (Normal)
-                                <br>[!] Vulnerability Score: <span style="color: #00FF00;">A+</span>
+                                <span style="color: ${primaryColor}; font-weight: bold;">COMMUNITY DIAGNOSTICS [v1.0]:</span>
+                                <br>[+] Core Servers: <span style="color: #00FF00;">ONLINE</span> (Global Access)
+                                <br>[+] Education DB: <span style="color: #00FF00;">SYNCHRONIZED</span> (100% Free)
+                                <br>[+] Community Health: <span style="color: #00FF00;">OPTIMAL</span>
                             `;
                             break;
                         case 'clear':
@@ -457,7 +429,7 @@ layout: null
             function showWelcome() {
                 const welcomeMessage = `
                     <span style="color: ${primaryColor}; font-weight: bold;">CRACKSOFT OS v4.1 | DIGITAL DEFENDER INITIALIZED</span>
-                    <br>Establishing Secure Shell... <span style="color: ${secondaryColor};">[ SUCCESS ]</span>
+                    <br>Connecting to Community Network... <span style="color: ${secondaryColor};">[ SUCCESS ]</span>
                     <br>System ready for query.
                     <br>----------------------------------------
                     <br>Type '<span style="color: ${secondaryColor};">help</span>' for a list of commands.
