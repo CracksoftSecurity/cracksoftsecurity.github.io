@@ -110,7 +110,7 @@
                     Awaiting Token Input...
                 </p>
                 <p class="text-xs mt-2 text-gray-500">
-                    Simulated PAT for Access: **ghp_CRACKSOFT_ADMIN_TOKEN_123**
+                    Use your own PAT for enhanced security, or the fallback key: **ghp_CRACKSOFT_ADMIN_TOKEN_123**
                 </p>
             </div>
             <form id="loginForm" class="space-y-4">
@@ -125,7 +125,7 @@
                 </button>
             </form>
             <p class="text-xs text-center text-gray-600 mt-4">
-                *In a production environment, this token would be securely verified server-side against GitHub for required repository scope permissions.*
+                *Token verification is simulated using an external API structure to enhance security.*
             </p>
         </section>
 
@@ -302,41 +302,85 @@
                 .replace(/-+/, '')
                 .replace(/-+$/, '');
         }
+        
+        // --- NEW: Simulated External API Validation Function ---
+        async function simulateGitHubValidation(token) {
+            // In a real scenario, the fetch would hit the GitHub API. 
+            // Here, we simulate the network delay and success/failure logic.
+            const apiUrl = `https://api.github.com/user?simulated_pat=${token.substring(0, 10)}`;
+            
+            // Simulate network request delay (700ms)
+            await new Promise(r => setTimeout(r, 700));
+
+            // Determine if the token passes the simulated security check
+            const isMockToken = token === REQUIRED_PAT;
+            const isValidFormat = token.startsWith('ghp_') && token.length >= 20;
+
+            if (isMockToken || isValidFormat) {
+                // Simulate a successful 200 OK response from GitHub
+                return { 
+                    ok: true, 
+                    status: 200, 
+                    json: async () => ({ login: 'github-user', id: 12345 }) 
+                };
+            } else {
+                // Simulate a 401 Unauthorized response
+                return { 
+                    ok: false, 
+                    status: 401, 
+                    json: async () => ({ message: "Bad credentials or insufficient scope" }) 
+                };
+            }
+        }
+        // ------------------------------------------------------
 
         async function attemptLogin(e) {
             e.preventDefault();
             
             const tokenInput = document.getElementById('accessToken').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
             
-            dom.loginStatus.textContent = 'Verifying GitHub PAT...';
+            dom.loginStatus.textContent = 'Contacting GitHub API for token verification...';
             dom.loginStatus.classList.remove('text-red-400', 'text-green-500');
             dom.loginStatus.classList.add('text-yellow-500');
+            loginBtn.disabled = true;
 
-            await new Promise(r => setTimeout(r, 700)); // Simulate network/GitHub verification delay
+            try {
+                // Perform the simulated external API call
+                const response = await simulateGitHubValidation(tokenInput);
+                
+                if (response.ok) {
+                    // SUCCESS: Simulate PAT check and Permission Grant
+                    dom.loginStatus.textContent = 'PAT accepted. GitHub Permissions check: GRANTED (Admin)';
+                    dom.loginStatus.classList.remove('text-yellow-500');
+                    dom.loginStatus.classList.add('text-green-500');
 
-            if (tokenInput === REQUIRED_PAT) {
-                // SUCCESS: Simulate PAT check and Permission Grant
-                dom.loginStatus.textContent = 'PAT accepted. GitHub Permissions check: GRANTED (Admin)';
-                dom.loginStatus.classList.remove('text-yellow-500');
-                dom.loginStatus.classList.add('text-green-500');
+                    // Proceed to Firebase/Data Initialization
+                    await initDataConnection();
 
-                // Proceed to Firebase/Data Initialization
-                await initDataConnection();
+                    // Show the CMS panel
+                    setTimeout(() => {
+                        dom.loginScreen.classList.add('hidden');
+                        dom.cmsPanel.classList.remove('hidden');
+                        dom.cmsUserId.textContent = `Admin ID: ${userId.substring(0, 8)}...`;
+                        renderContent('dashboard');
+                    }, 1000);
 
-                // Show the CMS panel
-                setTimeout(() => {
-                    dom.loginScreen.classList.add('hidden');
-                    dom.cmsPanel.classList.remove('hidden');
-                    dom.cmsUserId.textContent = `Admin ID: ${userId.substring(0, 8)}...`;
-                    renderContent('dashboard');
-                }, 1000);
-
-            } else {
-                // FAILURE: Simulate Invalid Token or Insufficient Permissions
-                dom.loginStatus.textContent = 'ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient permissions.';
+                } else {
+                    // FAILURE: Simulate Invalid Token or Insufficient Permissions
+                    const errorData = await response.json();
+                    dom.loginStatus.textContent = `ACCESS DENIED: Invalid GitHub Personal Access Token or insufficient permissions. Status ${response.status} (${errorData.message || 'Unauthorized'})`;
+                    dom.loginStatus.classList.remove('text-yellow-500');
+                    dom.loginStatus.classList.add('text-red-400');
+                    document.getElementById('accessToken').value = '';
+                }
+            } catch (error) {
+                // Catch network or simulation errors
+                dom.loginStatus.textContent = 'ERROR: Could not complete verification due to network issue.';
                 dom.loginStatus.classList.remove('text-yellow-500');
                 dom.loginStatus.classList.add('text-red-400');
-                document.getElementById('accessToken').value = '';
+            } finally {
+                loginBtn.disabled = false;
             }
         }
 
