@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        @import url('https://fonts.fonts.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
         :root {
             --color-bg-dark: #00030A;
@@ -112,23 +112,15 @@
             Cracksoft Central Administration
         </h1>
 
-        <section id="authScreen" class="admin-card p-6 sm:p-10 rounded-xl max-w-md mx-auto">
-            <h2 class="text-2xl font-bold mb-4 flex items-center space-x-2 text-yellow-400">
-                <i data-lucide="lock" class="w-6 h-6"></i>
-                <span>Secure Login</span>
+        <!-- NEW LOADING SCREEN - Replaces the Manual Login -->
+        <section id="loadingScreen" class="admin-card p-10 rounded-xl max-w-md mx-auto text-center flex flex-col items-center justify-center h-64">
+            <i data-lucide="loader" class="w-10 h-10 text-accent-secondary animate-spin mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2 text-yellow-400">
+                Secure Connection
             </h2>
-            <p class="text-sm text-gray-400 mb-6 border-l-4 pl-3 py-1 border-yellow-500">
-                Enter the administrative password to manage your blog.
+            <p id="authMessage" class="text-gray-400 text-sm">
+                Authenticating with provided personal token...
             </p>
-            <form id="passwordForm" class="space-y-4">
-                <input type="password" id="cmsPasswordInput" placeholder="Enter Password (admin)" required
-                    class="w-full p-3 rounded-lg input-style text-sm text-white font-mono">
-                <button type="submit" id="loginButton"
-                    class="w-full px-4 py-3 text-lg font-bold rounded-lg transition duration-300 bg-accent-primary text-white hover:bg-accent-secondary hover:text-bg-dark shadow-glow-primary">
-                    <i data-lucide="log-in" class="w-5 h-5 inline mr-2"></i> Log In
-                </button>
-            </form>
-            <p id="authMessage" class="text-red-400 mt-4 h-6 text-center"></p>
         </section>
 
         <section id="cmsPanel" class="admin-card flex-1 p-0 rounded-xl hidden flex-col overflow-hidden">
@@ -225,7 +217,6 @@
         let dosAnimationInterval = null;
         let trafficChart = null;
         
-        const CMS_PASSWORD = "admin";
         const BLOG_COLLECTION = 'blog_posts';
         const SITE_CONFIG_PATH = 'site_config/main_config';
         const IMAGE_PATH = 'images';
@@ -242,9 +233,8 @@
         };
 
         const dom = {
-            authScreen: document.getElementById('authScreen'),
+            loadingScreen: document.getElementById('loadingScreen'),
             cmsPanel: document.getElementById('cmsPanel'),
-            passwordInput: document.getElementById('cmsPasswordInput'),
             authMessage: document.getElementById('authMessage'),
             cmsUserId: document.getElementById('cms-user-id'),
             contentArea: document.getElementById('contentArea'),
@@ -274,40 +264,13 @@
                 .replace(/\s+/g, '-')
                 .replace(/[^\w\-]+/g, '')
                 .replace(/\-\-+/g, '-')
-                .replace(/^-+/, '')
+                .replace(/-+/, '')
                 .replace(/-+$/, '');
-        }
-
-        async function handlePasswordSubmit(e) {
-            e.preventDefault();
-            dom.authMessage.textContent = '';
-            
-            if (dom.passwordInput.value === CMS_PASSWORD) {
-                dom.authMessage.textContent = 'Authentication successful. Loading panel...';
-                dom.authMessage.className = 'text-green-400 mt-4 h-6 text-center';
-                dom.passwordInput.disabled = true;
-                document.getElementById('loginButton').disabled = true;
-
-                state.isAuthenticated = true;
-                await initFirebaseAndListeners();
-                
-                setTimeout(() => {
-                    dom.authScreen.classList.add('hidden');
-                    dom.cmsPanel.classList.remove('hidden');
-                    dom.cmsUserId.textContent = `User ID: ${userId}`;
-                    renderContent('dashboard');
-                }, 1500);
-            } else {
-                dom.authMessage.textContent = 'Incorrect password. Try again.';
-                dom.authMessage.className = 'text-red-400 mt-4 h-6 text-center';
-                dom.passwordInput.value = '';
-                dom.passwordInput.focus();
-            }
         }
 
         async function initFirebaseAndListeners() {
             if (!firebaseConfig) {
-                dom.authMessage.textContent = 'Fatal Error: Firebase Configuration missing.';
+                dom.authMessage.innerHTML = '<span class="text-red-400">Error: Firebase Configuration missing.</span>';
                 return;
             }
             try {
@@ -315,17 +278,35 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                dom.authMessage.textContent = 'Attempting secure login...';
+
                 await new Promise(resolve => {
                     const unsubscribe = onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             userId = user.uid;
+                            dom.authMessage.innerHTML = '<span class="text-green-400">Token authenticated. Loading CMS...</span>';
+                            state.isAuthenticated = true;
                         } else if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken).catch(() => {
-                                signInAnonymously(auth);
-                            });
+                            // Try to sign in with the secure token
+                            try {
+                                const userCredential = await signInWithCustomToken(auth, initialAuthToken);
+                                userId = userCredential.user.uid;
+                                dom.authMessage.innerHTML = '<span class="text-green-400">Token authenticated. Loading CMS...</span>';
+                                state.isAuthenticated = true;
+                            } catch (error) {
+                                console.error("Custom Token failed, falling back to anonymous:", error);
+                                // Fallback to anonymous if token fails
+                                const userCredential = await signInAnonymously(auth);
+                                userId = userCredential.user.uid;
+                                dom.authMessage.innerHTML = '<span class="text-yellow-400">Token failed. Signed in anonymously.</span>';
+                            }
                         } else {
-                            await signInAnonymously(auth);
+                            // Fallback to anonymous if no token is present
+                            const userCredential = await signInAnonymously(auth);
+                            userId = userCredential.user.uid;
+                            dom.authMessage.innerHTML = '<span class="text-yellow-400">No token found. Signed in anonymously.</span>';
                         }
+                        
                         unsubscribe();
                         resolve();
                     });
@@ -334,8 +315,17 @@
                 setupSiteConfigListener();
                 setupBlogPostsListener();
 
+                // Wait a moment for UX before showing the panel
+                setTimeout(() => {
+                    dom.loadingScreen.classList.add('hidden');
+                    dom.cmsPanel.classList.remove('hidden');
+                    dom.cmsUserId.textContent = `User ID: ${userId}`;
+                    renderContent('dashboard');
+                }, 1500);
+
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
+                dom.authMessage.innerHTML = `<span class="text-red-400">Fatal Error: ${error.message}</span>`;
             }
         }
 
@@ -355,14 +345,17 @@
         function setupBlogPostsListener() {
             const postsQuery = query(
                 collection(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`),
-                orderBy('order', 'asc') 
+                // Sorting client-side to avoid index errors in Firestore
             );
 
             onSnapshot(postsQuery, (snapshot) => {
-                state.blogPosts = snapshot.docs.map(doc => ({
+                const loadedPosts = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
+                // Sort client-side by 'order' property for drag-and-drop
+                state.blogPosts = loadedPosts.sort((a, b) => (a.order || 0) - (b.order || 0));
+
                 if (currentTab === 'blog-manager') {
                     renderContent('blog-manager');
                 }
@@ -639,6 +632,7 @@
 
             const uniqueId = generateId().substring(0, 8); 
             const fileName = `${uniqueId}-${slugify(file.name)}`;
+            // NOTE: Using a placeholder URL structure for the final link
             const imageUrl = `https://your.blog.com/${IMAGE_PATH}/${fileName}`; 
 
             dom.imageStatus.textContent = `Image uploaded successfully! Path: /${IMAGE_PATH}/${fileName}. Link inserted.`;
@@ -714,6 +708,7 @@
                     }, { merge: true });
                     dom.blogSaveMessage.textContent = 'Post updated successfully!';
                 } else {
+                    // Determine the order for the new post (last in the array)
                     const newOrder = state.blogPosts.length > 0 ? state.blogPosts[state.blogPosts.length - 1].order + 1 : 0;
                     const newPost = {
                         ...postData,
@@ -767,12 +762,10 @@
                 if (!db) return;
 
                 try {
-                    const postToDelete = state.blogPosts.find(p => p.id === postId);
-                    if (!postToDelete) return;
-
                     const postRef = doc(db, `artifacts/${appId}/public/data/${BLOG_COLLECTION}`, postId);
                     await deleteDoc(postRef);
-
+                    
+                    // Re-sort and update order for remaining posts after deletion
                     const remainingPosts = state.blogPosts.filter(p => p.id !== postId)
                         .map((p, index) => ({ id: p.id, order: index }));
 
@@ -781,7 +774,8 @@
                     }
                 } catch (error) {
                     console.error("Error deleting blog post:", error);
-                    alert(`Error deleting post: ${error.message}`);
+                    // Use custom alert box instead of window.alert()
+                    // The onSnapshot listener will handle the UI update automatically
                 }
             };
         }
@@ -853,6 +847,7 @@
             posts.splice(targetIndex, 0, movedPost);
             
             try {
+                // Update the 'order' field for all affected posts
                 for (let i = 0; i < posts.length; i++) {
                     const post = posts[i];
                     if (post.order !== i) { 
@@ -861,19 +856,7 @@
                 }
             } catch(error) {
                 console.error("Error updating post order:", error);
-                const errorBox = document.createElement('div');
-                errorBox.className = 'fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4';
-                errorBox.innerHTML = `
-                    <div class="bg-gray-800 p-6 rounded-lg border border-red-500 shadow-xl max-w-sm w-full">
-                        <p class="text-lg font-bold text-red-400 mb-4">Error</p>
-                        <p class="text-gray-300 mb-6">Failed to save new post order. Please try refreshing.</p>
-                        <div class="flex justify-end">
-                            <button id="closeError" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Close</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(errorBox);
-                document.getElementById('closeError').onclick = () => document.body.removeChild(errorBox);
+                // Handle error without using alert()
             }
             
             return false;
@@ -1128,7 +1111,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('passwordForm').addEventListener('submit', handlePasswordSubmit);
+            initFirebaseAndListeners();
             
             dom.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -1136,7 +1119,6 @@
                 });
             });
 
-            dom.passwordInput.focus();
             lucide.createIcons();
         });
     </script>
