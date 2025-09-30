@@ -3,4 +3,4 @@ email: cracksoftsec@gmail.com
 description: >- # this means “fold newlines”
   A secure blog powered by Jekyll, Netlify, and Decap CMS.
 baseurl: "" # leave empty for root
-url: "https://cracksoftsecurity.netlify.app" # your Netlify URL later
+url: "https://cracksoftsecurity.github.io" 
