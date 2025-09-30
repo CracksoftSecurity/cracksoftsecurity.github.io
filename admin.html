@@ -7,9 +7,6 @@
     <script src="https://cdn.tailwindcss.com/"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <!-- TinyMCE Rich Text Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> 
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -78,21 +75,7 @@
             color: var(--color-bg-dark);
             font-weight: bold;
         }
-        /* TinyMCE Dark Mode Styling */
-        .tox .tox-menubar, .tox .tox-toolbar, .tox .tox-statusbar, .tox .tox-toolbar__group, .tox .tox-edit-area, .tox .tox-dialog {
-            background-color: #1f2937 !important; /* Tailwind gray-800 */
-            color: #E9F0F4 !important; /* Light Text */
-        }
-        .tox .tox-tbtn, .tox .tox-icon, .tox .tox-label, .tox .tox-button {
-            color: #E9F0F4 !important;
-        }
-        .tox .tox-menu {
-             background-color: #1f2937 !important;
-             border-color: var(--color-accent-secondary) !important;
-        }
-        .tox .tox-collection__item--active {
-            background-color: #4f46e5 !important; /* Tailwind indigo-600 */
-        }
+        /* REMOVED: TinyMCE Dark Mode Styling */
     </style>
 </head>
 <body class="p-4">
@@ -102,10 +85,8 @@
             Cracksoft Central Administration
         </h1>
 
-        <!-- Login Screen -->
         <section id="loginScreen" class="admin-card p-8 rounded-xl max-w-md mx-auto h-auto">
             <div class="text-center mb-6">
-                <!-- Inline GitHub Icon SVG -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto mb-2" fill="var(--color-github-logo)" viewBox="0 0 24 24" style="color: var(--color-accent-secondary);">
                     <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.805 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.082-.742.082-.727.082-.727 1.205.084 1.839 1.237 1.839 1.237 1.07 1.838 2.809 1.305 3.492.998.108-.77.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.046.138 3.003.404 2.293-1.552 3.301-1.23 3.301-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.61.8.577 4.768-1.581 8.205-6.085 8.205-11.386 0-6.627-5.373-12-12-12z"/>
                 </svg>
@@ -121,7 +102,6 @@
             </div>
             <form id="loginForm" class="space-y-4">
                 <div>
-                    <!-- UPDATED TEXT -->
                     <label for="accessToken" class="block text-sm font-medium text-gray-400 mb-1">Your GitHub Secret Token (PAT)</label>
                     <input type="password" id="accessToken" required
                         class="w-full p-3 rounded-lg input-style text-white font-mono" placeholder="Enter full PAT (e.g., ghp_...)">
@@ -139,7 +119,6 @@
             </p>
         </section>
 
-        <!-- CMS Panel -->
         <section id="cmsPanel" class="admin-card flex-1 p-0 rounded-xl hidden flex-col overflow-hidden">
             <nav class="bg-gray-900 border-b border-accent-primary p-3 flex flex-wrap md:flex-nowrap justify-center md:justify-start space-x-2 md:space-x-4">
                 <button data-tab="dashboard" class="tab-button tab-active px-4 py-2 rounded-lg text-sm md:text-base transition duration-200 hover:bg-accent-primary/70 flex items-center">
@@ -165,7 +144,6 @@
             </div>
         </section>
         
-        <!-- Blog Modal -->
         <div id="blogModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 items-center justify-center p-4">
             <div class="bg-gray-900 border border-accent-secondary rounded-lg w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
                 <div class="p-4 bg-gray-800 border-b border-accent-secondary flex justify-between items-center">
@@ -204,10 +182,9 @@
                     </div>
 
                     <div>
-                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Rich Content Editor (WYSIWYG)</label>
-                        <!-- TinyMCE will initialize on this textarea -->
+                        <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Markdown Content Editor</label>
                         <textarea id="postContent" rows="15" required
-                            class="w-full p-3 rounded-lg input-style text-white"></textarea>
+                            class="w-full p-3 rounded-lg input-style text-white h-[500px] resize-none"></textarea>
                     </div>
 
                     <p id="blogSaveMessage" class="text-sm h-6 text-center"></p>
@@ -234,7 +211,8 @@
 
         let githubUser = 'N/A';
         let currentTab = 'dashboard';
-        let tinymceInitialized = false;
+        // TinyMCE is removed, so this flag is no longer strictly needed but kept for minimal change
+        let tinymceInitialized = false; 
 
         // State to hold application data and configuration
         const state = {
@@ -258,7 +236,7 @@
             postTitle: document.getElementById('postTitle'),
             postAuthor: document.getElementById('postAuthor'),
             postTags: document.getElementById('postTags'),
-            postContent: document.getElementById('postContent'), // The textarea where TinyMCE is attached
+            postContent: document.getElementById('postContent'), // The standard textarea now
             currentFilePath: document.getElementById('currentFilePath'),
             currentFilePathContainer: document.getElementById('currentFilePathContainer'),
             autoFilenameNotice: document.getElementById('autoFilenameNotice'),
@@ -306,59 +284,19 @@
             document.getElementById('closeAlert').onclick = () => document.body.removeChild(confirmBox);
         }
 
-        // --- TinyMCE Initialization ---
+        // --- TinyMCE Replacement Functions ---
 
         function initializeTinyMCE(content) {
-            if (tinymceInitialized) {
-                // Editor already exists, just set content
-                const editor = tinymce.get('postContent');
-                if (editor) {
-                    editor.setContent(content || '');
-                    editor.setMode('design'); // Ensure editor is writable on re-use
-                    editor.focus();
-                }
-                return;
-            }
-
-            // Initialize editor for the first time
-            tinymce.init({
-                selector: '#postContent',
-                height: 500,
-                // FIX: Explicitly set readonly to false to prevent the [CONSOLE_ERROR] read-only error
-                readonly: false, 
-                // Full featured toolbar for WordPress-like experience
-                plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
-                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image media | code fullscreen help',
-                
-                // Content Style for Dark Mode
-                content_css: false,
-                content_style: `
-                    body { font-family: Inter, sans-serif; background-color: #1f2937; color: #E9F0F4; padding: 15px; }
-                    .mce-content-body { color: #E9F0F4; }
-                    /* Add Jekyll-specific styling if needed, e.g., for code blocks */
-                `,
-                skin: 'oxide-dark', // Dark theme for TinyMCE UI
-                theme: 'silver',
-
-                setup: function (editor) {
-                    editor.on('init', function (e) {
-                        tinymceInitialized = true;
-                        // Set content after initialization
-                        editor.setContent(content || '');
-                        // **FIX: Explicitly set editor mode to writable 'design' to resolve read-only console error**
-                        editor.setMode('design'); 
-                        editor.focus();
-                    });
-                }
-            });
+            // TinyMCE is removed, so we just set the content of the standard textarea.
+            dom.postContent.value = content || '';
+            // We set the flag to true just to satisfy the original logic structure, 
+            // though it does nothing now.
+            tinymceInitialized = true; 
         }
         
         function destroyTinyMCE() {
-            const editor = tinymce.get('postContent');
-            if (editor) {
-                editor.remove();
-                tinymceInitialized = false;
-            }
+            // TinyMCE is removed, so this function is now empty.
+            tinymceInitialized = false;
         }
 
         // --- GitHub API Integration ---
@@ -648,7 +586,6 @@
                     <i data-lucide="layout-dashboard" class="w-6 h-6 mr-3"></i> Dashboard Overview
                 </h2>
                 
-                <!-- Connection Status Message -->
                 <div class="p-3 mb-6 bg-green-900 border border-green-500 rounded-lg text-white">
                     <p class="font-bold flex items-center">
                         <i data-lucide="cloud-check" class="w-5 h-5 mr-2 text-green-400"></i> 
@@ -775,7 +712,7 @@
                 dom.autoFilenameNotice.classList.remove('hidden');
                 dom.currentFilePathContainer.classList.add('flex-1');
                 
-                // Initialize TinyMCE with empty content
+                // Set content via replacement function
                 initializeTinyMCE('');
 
             } else { // Edit mode
@@ -793,7 +730,7 @@
                 dom.autoFilenameNotice.classList.add('hidden');
                 dom.currentFilePathContainer.classList.remove('flex-1');
                 
-                // Initialize TinyMCE with post content (which is the HTML/Markdown content without front matter)
+                // Set content via replacement function
                 initializeTinyMCE(state.editingPost.content);
             }
             
@@ -807,7 +744,7 @@
             dom.blogModal.classList.remove('flex');
             state.editingPost = null;
             dom.blogForm.reset();
-            // Destroy TinyMCE instance when modal closes to prevent conflicts
+            // Destroy TinyMCE instance replacement function
             destroyTinyMCE(); 
         }
 
@@ -816,8 +753,8 @@
             
             const { repoPath, branchName } = state.repoConfig;
             
-            const editor = tinymce.get('postContent');
-            const htmlContent = editor ? editor.getContent() : dom.postContent.value;
+            // MODIFIED: Get content directly from the textarea
+            const htmlContent = dom.postContent.value;
             
             const title = dom.postTitle.value.trim();
             const author = dom.postAuthor.value.trim();
@@ -981,7 +918,6 @@ tags: [${tagsFormatted}]
                     <p class="font-bold flex items-center"><i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-yellow-400"></i> SIMULATION MODE</p>
                     <p class="text-sm mt-1">These tools run simulated animations only as they do not connect to a live monitoring service.</p>
                 </div>
-                <!-- ... (rest of the security tools HTML remains the same) ... -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-md border border-gray-700">
                         <h3 class="text-xl font-bold mb-4 flex items-center text-green-400">
