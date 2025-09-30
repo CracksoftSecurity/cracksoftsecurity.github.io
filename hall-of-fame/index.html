@@ -1,102 +1,671 @@
-```html
-<section id="responsible-disclosure" class="content-section pt-16 sm:pt-20 pb-20 hidden">
-    <h2 class="text-3xl sm:text-4xl font-extrabold mb-6 text-center">
-        Responsible <span class="neon-glow" style="color: var(--color-accent-primary);">Disclosure</span>
-    </h2>
-    <p class="text-center text-gray-400 mb-12 max-w-3xl mx-auto text-sm sm:text-base">
-        CrackSoftSecurity welcomes ethical hackers and security researchers to help us strengthen our applications. 
-        We are an open community—your contributions will be recognized even though we cannot provide monetary bounties.
-    </p>
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cracksoft Security | Free Cyber Education Community</title>
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-    <div class="mx-auto max-w-5xl p-6 sm:p-10 rounded-xl border-2 shadow-2xl space-y-6"
-         style="background-color: rgba(5, 5, 20, 0.95); border-color: var(--color-accent-secondary)/50; box-shadow: 0 0 40px rgba(78, 240, 228, 0.2);">
+        /* Custom Colors & Configuration based on Logo */
+        :root {
+            --color-bg-dark: #00030A; /* Deepest Black/Blue */
+            --color-accent-primary: #6C4EF0; /* Deep Purple (Focus/Action) */
+            --color-accent-secondary: #4EF0E4; /* Electric Cyan/Teal (Highlight) */
+            --color-terminal-bg: rgba(5, 5, 20, 0.95); /* Very dark, slightly purple background */
+            --color-text-light: #E9F0F4;
+            --color-text-secondary: #9AA0A6;
+        }
+        
+        /* Apply custom font and background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-light);
+            /* Grid Pattern Background for Cyber Aesthetic */
+            background-image: linear-gradient(to right, #10081C 1px, transparent 1px), linear-gradient(to bottom, #10081C 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
 
-        <!-- Rewards -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2" style="color: var(--color-accent-secondary);">
-            <i data-lucide="gift" class="w-6 h-6"></i>
-            <span>What We Offer</span>
-        </h3>
-        <ul class="list-disc list-inside text-gray-300 space-y-2 pl-2">
-            <li>Official <strong>Appreciation Letter</strong> for your CV/resume.</li>
-            <li>Your name (or anonymous handle) on our <strong>Heroes Wall</strong>.</li>
-            <li>Optional recognition on our <strong>social media handles</strong>.</li>
-        </ul>
+        /* Neon Glow Effect - Using the Deep Purple */
+        .neon-glow {
+            text-shadow: 0 0 8px var(--color-accent-primary);
+        }
 
-        <!-- Submission -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2 pt-6" style="color: var(--color-accent-secondary);">
-            <i data-lucide="mail" class="w-6 h-6"></i>
-            <span>How to Submit</span>
-        </h3>
-        <p class="text-gray-400 mb-4">Please send both a <strong>POC video</strong> and a <strong>text report</strong> to:</p>
-        <div class="bg-black/50 rounded-lg p-4 border border-[#1A1A40] text-sm font-mono text-gray-300">
-            cracksoftsec@gmail.com<br>
-            cc: shlok.k3sarwani@gmail.com
+        /* Terminal Font - Adjusted base size for better mobile fit */
+        .terminal-font {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem; 
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class="w-full sticky top-0 z-20 backdrop-blur-md bg-black/70 border-b border-[#10081C]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex justify-between items-center">
+            <a href="#hero" class="flex items-center space-x-2 text-xl sm:text-2xl font-black tracking-widest text-[var(--color-accent-primary)] neon-glow" onclick="showSection('hero')">
+                <i data-lucide="lock-keyhole" class="w-6 h-6 sm:w-7 sm:h-7 stroke-[3px]" style="color: var(--color-accent-primary);"></i>
+                <span class="text-white">CRACKSOFT</span>
+            </a>
+            
+            <nav class="hidden md:flex space-x-6 lg:space-x-10 text-sm font-medium items-center">
+                <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('hero')">Home</a>
+                <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('about')">About Us</a>
+                <a href="#blog" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('blog')">Blogs</a> 
+                <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('heroes')">Heroes</a>
+                <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('partners')">Partners</a>
+                <a href="#disclosure" class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200" onclick="showSection('disclosure')">Disclosure</a>
+                
+                <a href="/admin" 
+                   class="text-gray-300 hover:text-[--color-accent-secondary] transition duration-200 flex items-center space-x-1">
+                   <i data-lucide="log-in" class="w-4 h-4"></i>
+                   <span>Login</span>
+                </a>
+                
+                <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" rel="noopener noreferrer" 
+                   class="px-5 py-2 border rounded-full text-xs tracking-wider font-bold hover:bg-[--color-accent-secondary]/10 transition duration-300 flex items-center space-x-2" 
+                   style="border-color: var(--color-accent-secondary); color: var(--color-accent-secondary);">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Join the Cyber Guild</span>
+                </a>
+            </nav>
+            
+            <button id="mobile-menu-button" class="md:hidden text-white" aria-label="Toggle Navigation">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
         </div>
 
-        <!-- Report Template -->
-        <h4 class="text-lg sm:text-xl font-bold mt-6 mb-3" style="color: var(--color-accent-primary);">Report Template</h4>
-        <ul class="list-decimal list-inside text-gray-300 space-y-1 pl-2">
-            <li>Title &amp; short description</li>
-            <li>Affected asset(s) / endpoint(s)</li>
-            <li>Severity &amp; potential impact</li>
-            <li>Steps to reproduce</li>
-            <li>Expected vs actual result</li>
-            <li>Proof of Concept (video/screenshots/logs)</li>
-            <li>Suggested mitigation</li>
-            <li>Disclosure preference (credit or anonymous)</li>
-        </ul>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <nav class="flex flex-col px-4 pt-2 pb-4 space-y-2 text-base font-medium border-t border-[#10081C]">
+                <a href="#hero" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('hero')">Home</a>
+                <a href="#about" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('about')">About Us</a>
+                <a href="#blog" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('blog')">Blogs</a> 
+                <a href="#heroes" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('heroes')">Heroes</a>
+                <a href="#partners" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('partners')">Partners</a>
+                <a href="#disclosure" class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200" onclick="document.getElementById('mobile-menu').classList.add('hidden'); showSection('disclosure')">Responsible Disclosure</a>
 
-        <!-- Scope -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2 pt-6" style="color: var(--color-accent-secondary);">
-            <i data-lucide="scope" class="w-6 h-6"></i>
-            <span>Scope</span>
-        </h3>
-        <p class="text-gray-400 mb-2">In Scope:</p>
-        <ul class="list-disc list-inside text-gray-300 pl-2 mb-4">
-            <li><a href="https://cracksoftsecurity.github.io/" class="underline hover:text-white" style="color: var(--color-accent-secondary);">https://cracksoftsecurity.github.io/</a></li>
-            <li>Any subdomains or apps explicitly listed on this site</li>
-        </ul>
-        <p class="text-gray-400 mb-2">Out of Scope:</p>
-        <ul class="list-disc list-inside text-gray-300 pl-2">
-            <li>Third-party services (payment, CDN, analytics)</li>
-            <li>Social engineering, phishing, or staff/user attacks</li>
-            <li>Physical security tests</li>
-        </ul>
+                <a href="/admin" 
+                   class="text-gray-300 hover:text-[--color-accent-secondary] py-2 transition duration-200 flex items-center space-x-1"
+                   onclick="document.getElementById('mobile-menu').classList.add('hidden')">
+                   <i data-lucide="log-in" class="w-5 h-5"></i>
+                   <span>Login (Admin)</span>
+                </a>
 
-        <!-- Rules -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2 pt-6" style="color: var(--color-accent-secondary);">
-            <i data-lucide="shield-check" class="w-6 h-6"></i>
-            <span>Safe Testing Rules</span>
-        </h3>
-        <ul class="list-disc list-inside text-gray-300 space-y-1 pl-2">
-            <li>Test only authorized, in-scope targets.</li>
-            <li>Do not delete, modify, or exfiltrate real user data.</li>
-            <li>Avoid destructive attacks (DDoS, mass deletion, ransomware, etc.).</li>
-            <li>Use your own test accounts.</li>
-            <li>No public disclosure until the issue is fixed.</li>
-        </ul>
+                <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" rel="noopener noreferrer" 
+                   class="mt-3 px-5 py-2 border rounded-full text-sm font-bold text-center transition duration-300" 
+                   style="border-color: var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;"
+                   onclick="document.getElementById('mobile-menu').classList.add('hidden')">
+                    Join the Cyber Guild
+                </a>
+            </nav>
+        </div>
+    </header>
 
-        <!-- Prohibited -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2 pt-6" style="color: var(--color-accent-secondary);">
-            <i data-lucide="ban" class="w-6 h-6"></i>
-            <span>Prohibited Actions</span>
-        </h3>
-        <ul class="list-disc list-inside text-gray-300 space-y-1 pl-2">
-            <li>Exploiting vulnerabilities for personal gain.</li>
-            <li>Accessing or sharing private data without consent.</li>
-            <li>Selling or leaking vulnerabilities outside disclosure process.</li>
-            <li>DDoS or malware deployment.</li>
-            <li>Persistent unauthorized access attempts.</li>
-        </ul>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
 
-        <!-- Legal -->
-        <h3 class="text-xl sm:text-2xl font-bold flex items-center space-x-2 pt-6" style="color: var(--color-accent-secondary);">
-            <i data-lucide="scale" class="w-6 h-6"></i>
-            <span>Legal Safe Harbor</span>
-        </h3>
-        <p class="text-gray-400">
-            If you act in <strong>good faith</strong> and follow this policy, CrackSoftSecurity will not pursue or support legal action against you.
-        </p>
-    </div>
-</section>
-```
+        <div id="content-container">
+            <section id="hero" class="content-section relative pt-6 pb-20">
+                <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                    
+                    <div class="space-y-4 sm:space-y-6">
+                        <p class="text-sm sm:text-lg font-mono uppercase tracking-wider" style="color: var(--color-accent-secondary);">
+                            // FREE CYBER EDUCATION FOR ALL
+                        </p>
+                        <h1 class="text-4xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight leading-tight">
+                            <span class="block text-gray-100">Open-Source</span>
+                            <span class="block neon-glow" style="color: var(--color-accent-primary);">Digital Defense</span>
+                        </h1>
+                        <p class="text-base sm:text-xl text-gray-400 max-w-lg pt-2">
+                            We are a global community committed to democratizing cybersecurity knowledge. Join us to learn, share, and secure the digital world together.
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-3 sm:gap-4 pt-4 sm:pt-8">
+                            <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" rel="noopener noreferrer" 
+                               class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-black text-sm font-extrabold rounded-lg shadow-2xl transition transform hover:scale-105 duration-300" 
+                               style="background-color: var(--color-accent-primary); box-shadow: 0 0 20px var(--color-accent-primary);">
+                                <i data-lucide="zap" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                                <span>Join the Cyber Guild</span>
+                            </a>
+                            <a href="#blog" class="flex items-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-sm font-semibold rounded-lg transition duration-300" 
+                               style="border: 2px solid var(--color-accent-secondary); color: var(--color-accent-secondary); hover:background-color: var(--color-accent-secondary)/10;"
+                               onclick="showSection('blog')">
+                                <i data-lucide="book-open-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                <span>Explore Free Training</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="terminal-container" class="w-full mt-10 lg:mt-0 mx-auto max-w-lg lg:max-w-none transition-all duration-500 hover:z-30" style="box-shadow: 0 0 40px rgba(108, 78, 240, 0.4);">
+                        <div id="terminal" class="p-4 sm:p-6 rounded-xl border-2 shadow-2xl" style="background-color: var(--color-terminal-bg); border-color: var(--color-accent-primary)/70;">
+                            <div class="flex space-x-2 pb-4 border-b border-[#1A1A40]">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                            
+                            <div id="terminal-output" class="terminal-font h-64 lg:h-80 overflow-y-auto pt-4 pb-2 text-white/90">
+                                </div>
+
+                            <div class="flex items-center border-t border-[#1A1A40] pt-2">
+                                <span class="terminal-font pr-2 whitespace-nowrap" style="color: var(--color-accent-secondary);">cracksoft@defender:~$</span>
+                                <input type="text" id="terminal-input" class="flex-grow bg-transparent border-none focus:outline-none terminal-font text-white min-w-0" autofocus autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+            </section>
+
+            <section id="about" class="content-section pt-16 sm:pt-20 pb-20 hidden">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-8 text-center">
+                    Our <span class="neon-glow" style="color: var(--color-accent-primary);">Mission</span>
+                </h2>
+                <div class="mx-auto max-w-4xl p-6 sm:p-8 rounded-xl border-2 shadow-2xl" 
+                     style="background-color: rgba(5, 5, 20, 0.95); border-color: var(--color-accent-secondary)/50; box-shadow: 0 0 40px rgba(78, 240, 228, 0.2);">
+                    
+                    <h3 class="text-xl sm:text-2xl font-bold mb-4 flex items-center space-x-2" style="color: var(--color-accent-secondary);">
+                        <i data-lucide="users-2" class="w-6 h-6"></i>
+                        <span>Cracksoft: The Free Cyber Guild</span>
+                    </h3>
+                    
+                    <p class="text-lg text-gray-300 leading-relaxed mb-4">
+                        We are <span class="font-bold neon-glow" style="color: var(--color-accent-primary);">Cracksoft Security</span>, an <strong>open, guiding community</strong> built on the radical idea that digital defense shouldn't have a paywall.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        We dismantle the barriers to entry by providing <strong>free, high-quality cybersecurity education</strong> for everyone—from the curious beginner taking their first ethical hacking steps to the seasoned professional seeking advanced resources.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed">
+                        Our core mission is to empower individuals and businesses with the knowledge to thrive securely online. We are here to make the internet a safer, more informed place, one free lesson at a time.
+                    </p>
+                    <div class="mt-6 text-sm font-mono" style="color: var(--color-accent-secondary);">
+                        // ACCESS GRANTED. EDUCATION IS THE BEST DEFENSE.
+                    </div>
+                </div>
+            </section>
+
+            <section id="blog" class="content-section pt-16 sm:pt-20 pb-40 hidden">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                    Latest <span class="neon-glow" style="color: var(--color-accent-primary);">Cyber Insights</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
+                    Browse free educational content, vulnerability disclosures, and security tutorials.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    
+                    {% for post in site.posts limit: 6 %}
+                    <a href="{{ post.url }}" class="block p-6 bg-gray-800 rounded-xl shadow-2xl transition duration-300 transform hover:scale-[1.02] hover:shadow-indigo-500/50 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-indigo-400 mb-2 leading-snug line-clamp-2">{{ post.title }}</h3>
+                            <p class="text-sm text-gray-400 mb-4">{{ post.date | date: "%B %d, %Y" }}</p>
+                            <p class="text-gray-300 line-clamp-3">{{ post.excerpt | strip_html | strip_newlines | truncate: 150 }}</p>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between">
+                            <span class="text-indigo-400 font-semibold text-sm">Read Article →</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+
+                    {% if site.posts.size == 0 %}
+                    <div class="col-span-full text-center p-10 text-gray-500 bg-gray-800 rounded-xl">
+                        No blog posts found. Add Markdown files to your `_posts` directory.
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+            
+            <section id="disclosure" class="content-section pt-16 sm:pt-20 pb-40 hidden">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                    Responsible <span class="neon-glow" style="color: var(--color-accent-primary);">Disclosure Policy</span>
+                </h2>
+                <div class="max-w-4xl mx-auto p-8 rounded-xl border-2 shadow-2xl space-y-8" 
+                    style="background-color: rgba(5, 5, 20, 0.95); border-color: var(--color-accent-secondary)/50; box-shadow: 0 0 40px rgba(108, 78, 240, 0.2);">
+                    
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        We welcome <strong>security researchers and bug hunters</strong> to help make our application more secure. We are an open security community and do not offer monetary bounties, but we do recognize and reward contributors with:
+                    </p>
+
+                    <h3 class="text-2xl font-bold flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                        <span>Recognition and Rewards</span>
+                    </h3>
+                    <ul class="list-disc list-inside space-y-2 pl-4 text-gray-300">
+                        <li>An official <strong>Appreciation Letter</strong> you can add to your resume.</li>
+                        <li>A permanent listing on our <strong>Heroes Wall</strong> (option to remain publicly anonymous if you prefer).</li>
+                        <li>Social recognition on our channels (<strong>with your consent</strong>).</li>
+                    </ul>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="mail-check" class="w-6 h-6"></i>
+                        <span>How to Submit (Email)</span>
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        Please share your <strong>POC video</strong> and <strong>text report</strong> by email to:
+                    </p>
+                    <div class="terminal-font p-4 rounded-lg text-center font-bold" style="background-color: var(--color-bg-dark); border: 1px dashed var(--color-accent-secondary);">
+                        <p class="text-lg" style="color: var(--color-accent-secondary);">cracksoftsec@gmail.com</p>
+                        <p class="text-sm text-gray-400">cc: shlok.k3sarwani@gmail.com</p>
+                    </div>
+                    <p class="text-gray-400 text-sm italic">
+                        We aim to respond quickly and fix vulnerabilities as soon as possible.
+                    </p>
+                    <p class="text-gray-400 text-sm">
+                        If you need additional access (staging credentials, test accounts, VPN), request access in your first email and we’ll provide it where appropriate.
+                    </p>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="target" class="w-6 h-6"></i>
+                        <span>Scope — What you’re invited to test</span>
+                    </h3>
+                    <p class="text-gray-400 text-sm italic">
+                        (Tests are allowed only within the scope below and under the Safe Testing Rules.)
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-xl mb-2" style="color: var(--color-accent-secondary);">In Scope:</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4 text-gray-300">
+                                <li><strong>https://cracksoftsecurity.github.io/</strong></li>
+                                <li>Any subdomains or apps <strong>explicitly listed</strong> on this site</li>
+                                <li><span class="text-yellow-400"><strong>[Placeholder]</strong></span> Replace with your specific app/API domains (e.g., <code>https://app.example.com</code>)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xl mb-2 text-red-400">Out of Scope:</h4>
+                            <ul class="list-disc list-inside space-y-1 pl-4 text-gray-300">
+                                <li>Internal-only/admin-only networks or services unless explicitly authorized.</li>
+                                <li>Third-party services (payment processors, analytics, CDNs) that you do not have explicit permission to test.</li>
+                                <li>Social engineering, phishing, or any attempts to access other users’ accounts by guessing or brute force without prior written permission.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        <span>Safe Testing Rules (Must Follow)</span>
+                    </h3>
+                    <ul class="list-disc list-inside space-y-2 pl-4 text-gray-300">
+                        <li>Do not exploit vulnerabilities for personal gain or to damage data/systems.</li>
+                        <li>Test only the assets explicitly listed as in scope.</li>
+                        <li>Do not attempt to access, modify, or exfiltrate <strong>real user data</strong>. If you discover user data, stop and report immediately.</li>
+                        <li>Do not perform destructive tests (mass deletion, ransomware-style encryption, <strong>DDOS/traffic flooding</strong>).</li>
+                        <li>Do not <strong>publicly disclose</strong> vulnerabilities until they are fixed or you have explicit permission from us.</li>
+                        <li>Use only test accounts or accounts you own. Do not attempt privilege escalation into other users’ accounts.</li>
+                        <li>Keep a clear, reproducible <strong>proof-of-concept (POC)</strong> that demonstrates the vulnerability without leaking private data.</li>
+                        <li>Avoid automated scraping or crawling that can affect system performance. <strong>Notify us first</strong> if you plan heavy automated testing.</li>
+                    </ul>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                        <span>Report & POC Requirements</span>
+                    </h3>
+                    
+                    <h4 class="font-bold text-xl" style="color: var(--color-accent-secondary);">Report Template (Plain Text)</h4>
+                    <div class="terminal-font p-4 rounded-lg overflow-x-auto" style="background-color: var(--color-bg-dark); border: 1px solid #1A1A40;">
+                        <ul class="list-disc list-inside space-y-1 text-gray-300">
+                            <li><b>Subject:</b> [Responsible Disclosure] Short title — affected asset</li>
+                            <li><b>Title:</b> Short, clear vulnerability title</li>
+                            <li><b>Affected asset(s):</b> exact URL(s) / app version / endpoint / IPs</li>
+                            <li><b>Severity:</b> (e.g., Low / Medium / High / Critical) and brief rationale</li>
+                            <li><b>Impact:</b> What an attacker could do (data exposure, account takeover, RCE, etc.)</li>
+                            <li><b>Steps to reproduce:</b> numbered steps that we can follow exactly (include requests, parameters, headers, example payloads)</li>
+                            <li><b>Proof of concept:</b> short explanation plus timestamps/logs</li>
+                            <li><b>Mitigation suggestion:</b> what fix you recommend</li>
+                            <li><b>Disclosure preference:</b> public name or anonymous, permission to share on our social handles, or remain private</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="font-bold text-xl mt-6" style="color: var(--color-accent-secondary);">POC Video Guidance</h4>
+                    <ul class="list-disc list-inside space-y-1 pl-4 text-gray-300">
+                        <li>Keep it short and focused (<strong>1–3 minutes recommended</strong>).</li>
+                        <li>Show only the steps needed to reproduce — <strong>do not display or exfiltrate real user data</strong>.</li>
+                        <li>Narrate or caption the steps, include timestamps and target URLs.</li>
+                        <li>Export as <strong>mp4</strong> or share a secure link (Drive/Dropbox) with viewing permissions.</li>
+                    </ul>
+                    
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                        <span>Response & Triage Timeline</span>
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        We will acknowledge receipt of your report by email (within our operational capacity).
+                    </p>
+                    <div class="space-y-3 text-gray-300 bg-black/30 p-4 rounded-lg border border-[#1A1A40]">
+                        <p><b>1. Acknowledgement:</b> We confirm receipt and assign a tracking number.</p>
+                        <p><b>2. Triage:</b> We review and classify severity; we may ask for clarification.</p>
+                        <p><b>3. Fix:</b> We prioritize and fix based on severity and impact.</p>
+                        <p><b>4. Close:</b> After fix verification, we close the issue and issue recognition.</p>
+                    </div>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-primary);">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                        <span>Severity Guidance (Example)</span>
+                    </h3>
+                    <ul class="list-disc list-inside space-y-2 pl-4 text-gray-300">
+                        <li><span class="font-bold text-green-400"><b>Low:</b></span> Minor info leak, UI issues, missing security headers.</li>
+                        <li><span class="font-bold text-yellow-400"><b>Medium:</b></span> Authentication logic flaws with limited impact, insufficient access control in non-sensitive areas.</li>
+                        <li><span class="font-bold text-orange-400"><b>High:</b></span> Sensitive data exposure, account takeover vectors, injection that can modify data.</li>
+                        <li><span class="font-bold text-red-500"><b>Critical:</b></span> Remote code execution, full database access, or other flaws that can cause irreversible damage or mass data breach.</li>
+                    </ul>
+                    <p class="text-gray-400 text-sm italic">
+                        We may adjust severity after internal verification.
+                    </p>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2 text-red-400">
+                        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                        <span>Prohibited Actions & Consequences</span>
+                    </h3>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        We take abuse very seriously. If you intentionally misuse any discovered vulnerability or attempt to harm our users or systems, we will take appropriate action. This is a non-exhaustive list of actions that may lead to consequences:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 pl-4 text-gray-300">
+                        <li><strong>Accessing, modifying, deleting, or exfiltrating real user data.</strong></li>
+                        <li><strong>Performing distributed denial-of-service (DDoS) attacks</strong> or flooding services.</li>
+                        <li>Deploying or running malware, ransomware, or persistence mechanisms.</li>
+                        <li>Selling access to our systems, data, or vulnerabilities to third parties.</li>
+                        <li>Social engineering of our staff, users, or contractors.</li>
+                        <li><strong>Publicly disclosing unpatched vulnerabilities</strong> (full technical details) before we have fixed them or given permission.</li>
+                    </ul>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        <strong>Possible consequences</strong> include immediate revocation of access, permanent exclusion from our community, and referral to law enforcement where required.
+                    </p>
+
+                    <h3 class="text-2xl font-bold pt-4 flex items-center space-x-2" style="color: var(--color-accent-secondary);">
+                        <i data-lucide="gavel" class="w-6 h-6"></i>
+                        <span>Legal Safe Harbor</span>
+                    </h3>
+                    <p class="text-lg text-gray-300 leading-relaxed bg-black/30 p-4 rounded-lg border border-[#1A1A40]">
+                        We welcome security research in <strong>good faith</strong>. If you follow this policy and act in good faith to avoid privacy invasion, data theft, and system harm, <strong>we will not pursue civil action against you</strong> for those good-faith actions.
+                    </p>
+                    <p class="text-gray-400 text-sm italic">
+                        Note: This is a clear policy statement. Consult legal counsel if you require a legally binding agreement.
+                    </p>
+
+                </div>
+            </section>
+            
+            <section id="heroes" class="content-section pt-16 sm:pt-20 pb-20 hidden">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                    Community <span class="neon-glow" style="color: var(--color-accent-primary);">Heroes</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
+                    Recognizing the top contributors, educators, and vulnerability researchers who make our community strong.
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
+                    <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                        <h3 class="text-lg font-bold text-white">Ethical_Fox</h3>
+                        <p class="text-xs font-mono text-gray-500">Top Educator</p>
+                    </div>
+                    <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                        <h3 class="text-lg font-bold text-white">ZeroDay_Hunter</h3>
+                        <p class="text-xs font-mono text-gray-500">Vulnerability Researcher</p>
+                    </div>
+                    <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                        <h3 class="text-lg font-bold text-white">Crypto_Guard</h3>
+                        <p class="text-xs font-mono text-gray-500">Blockchain Security</p>
+                    </div>
+                    <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                        <h3 class="text-lg font-bold text-white">Sentinel_X</h3>
+                        <p class="text-xs font-mono text-gray-500">Content Contributor</p>
+                    </div>
+                    <div class="group bg-black/50 rounded-xl p-4 sm:p-6 border border-[#1A1A40] transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-primary)] text-center space-y-2">
+                        <i data-lucide="award" class="w-6 h-6 sm:w-8 sm:h-8 mx-auto group-hover:neon-glow transition" style="color: var(--color-accent-secondary);"></i>
+                        <h3 class="text-lg font-bold text-white">Admin_Guru</h3>
+                        <p class="text-xs font-mono text-gray-500">Forum Moderator</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="partners" class="content-section pt-16 sm:pt-20 pb-40 hidden">
+                <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-center">
+                    Community <span class="neon-glow" style="color: var(--color-accent-primary);">Partners</span>
+                </h2>
+                <p class="text-center text-gray-400 mb-12 sm:mb-16 max-w-3xl mx-auto text-sm sm:text-base">
+                    Collaborating with organizations that share our commitment to free, accessible cybersecurity knowledge.
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                    <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                        <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300" style="color: var(--color-accent-secondary);">CyberLabs</span>
+                    </div>
+                    <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                        <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">DefendX</span>
+                    </div>
+                    <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                        <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">SecEducate</span>
+                    </div>
+                    <div class="flex items-center justify-center p-6 bg-black/50 rounded-xl border border-[#1A1A40] h-28 sm:h-32 transition duration-300 hover:shadow-[0_0_20px_var(--color-accent-secondary)]">
+                        <span class="text-xl sm:text-2xl font-bold uppercase text-gray-300">HackHub</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+    </main>
+    
+    <script>
+        // --- Core Section Display Logic (SPA Router) ---
+        
+        // This function handles showing only the requested section
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Update URL hash for sharing/bookmarking
+            const hashToSet = sectionId === 'hero' ? window.location.pathname : '#' + sectionId;
+            history.pushState(null, '', hashToSet);
+
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+                // Reset icon
+                const icon = document.getElementById('mobile-menu-button').querySelector('svg');
+                icon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            }
+        }
+
+        // --- Initial Load and History Handling ---
+        function handleInitialLoad() {
+            const hash = window.location.hash.substring(1);
+            let targetSectionId = 'hero';
+            
+            // Check if the hash matches any section ID
+            const targetSection = document.getElementById(hash);
+            if (targetSection && targetSection.classList.contains('content-section')) {
+                targetSectionId = hash;
+            }
+
+            showSection(targetSectionId);
+            lucide.createIcons();
+        }
+
+        window.addEventListener('popstate', handleInitialLoad);
+        document.addEventListener('DOMContentLoaded', handleInitialLoad);
+
+        
+        // --- Mobile Menu Toggle Logic ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                
+                // Change the icon from 'menu' to 'x' when open
+                const icon = mobileMenuButton.querySelector('svg');
+                if (mobileMenu.classList.contains('hidden')) {
+                    icon.setAttribute('data-lucide', 'menu');
+                } else {
+                    icon.setAttribute('data-lucide', 'x');
+                }
+                lucide.createIcons(); 
+            });
+        }
+
+        // --- Terminal Functionality Logic (Updated 'resources' command) ---
+        const output = document.getElementById('terminal-output');
+        const input = document.getElementById('terminal-input');
+            
+        if (output && input) { 
+            const prompt = '<span style="color: var(--color-accent-secondary);" class="pr-2">cracksoft@defender:~$</span>';
+            const primaryColor = 'var(--color-accent-primary)'; 
+            const secondaryColor = 'var(--color-accent-secondary)'; 
+            const history = [];
+            let historyIndex = -1;
+
+            function printLine(text, color = 'white') {
+                const p = document.createElement('p');
+                p.classList.add('terminal-font', 'text-[0.85rem]', 'leading-relaxed');
+                if (color !== 'white') {
+                    p.style.color = color;
+                }
+                p.innerHTML = text; 
+                output.appendChild(p);
+                output.scrollTop = output.scrollHeight;
+            }
+
+            function handleCommand(command) {
+                const originalCommand = command.trim();
+                const trimmedCommand = originalCommand.toLowerCase();
+                
+                if (originalCommand !== '') {
+                    const echoLine = document.createElement('p');
+                    echoLine.classList.add('terminal-font', 'text-[0.85rem]', 'leading-relaxed');
+                    echoLine.innerHTML = prompt;
+                    const commandSpan = document.createElement('span');
+                    commandSpan.textContent = originalCommand;
+                    echoLine.appendChild(commandSpan);
+                    output.appendChild(echoLine);
+                    output.scrollTop = output.scrollHeight;
+
+                    history.unshift(originalCommand);
+                    historyIndex = -1;
+                } else {
+                    return;
+                }
+
+                let response = '';
+
+                if (trimmedCommand.startsWith('ping')) {
+                    const parts = trimmedCommand.split(' ');
+                    const target = parts[1] || '127.0.0.1'; 
+                    response = `
+                        <span style="color: ${primaryColor}; font-weight: bold;">[ NETWORK TRACE ]</span>
+                        <br>Pinging ${target} with 32 bytes of data:
+                        <br>Reply from ${target}: bytes=32 time=0.4ms TTL=64
+                        <br>Reply from ${target}: bytes=32 time=0.8ms TTL=64
+                        <br>Reply from ${target}: bytes=32 time=0.6ms TTL=64
+                        <br>--- ${target} PING STATISTICS ---
+                        <br>3 packets transmitted, 3 received, 0% packet loss.
+                    `;
+                } else {
+                    switch (trimmedCommand) {
+                        case 'help':
+                            response = `
+                                <span style="color: ${primaryColor}; font-weight: bold;">AVAILABLE COMMANDS:</span>
+                                <br><span style="color: ${secondaryColor};">help</span> - Display this guide.
+                                <br><span style="color: ${secondaryColor};">mission</span> - Display community mission statement.
+                                <br><span style="color: ${secondaryColor};">resources</span> - Check free educational links.
+                                <br><span style="color: ${secondaryColor};">status</span> - Check community system health.
+                                <br><span style="color: ${secondaryColor};">clear</span> - Clear terminal history.
+                            `;
+                            break;
+                        case 'mission':
+                            response = `
+                                <span style="color: ${primaryColor}; font-weight: bold;">CRACKSOFT MISSION:</span>
+                                <br>To dismantle paywalls in digital defense. We provide free, high-quality cyber education for everyone.
+                                <br>We empower security researchers, beginners, and businesses alike.
+                                <br><br>Find our full mission in the <a href="#about" onclick="showSection('about')" class="underline hover:text-white" style="color: ${secondaryColor};">About Us Section</a>.
+                            `;
+                            break;
+                        case 'resources':
+                            response = `
+                                <span style="color: ${primaryColor}; font-weight: bold;">COMMUNITY RESOURCES:</span>
+                                <br>[+] <a href="#blog" onclick="showSection('blog')" class="underline hover:text-white" style="color: ${secondaryColor};">/blogs</a> - Latest educational articles.
+                                <br>[+] <a href="https://chat.whatsapp.com/FK1VRXdfuGoDJje1ONVcbx" target="_blank" class="underline hover:text-white" style="color: ${secondaryColor};">/guild</a> - Join the WhatsApp Discussion Group.
+                                <br>[+] <a href="#heroes" onclick="showSection('heroes')" class="underline hover:text-white" style="color: ${secondaryColor};">/heroes</a> - Meet our top contributors.
+                                <br>[+] <a href="#disclosure" onclick="showSection('disclosure')" class="underline hover:text-white" style="color: ${secondaryColor};">/disclosure</a> - Read the Responsible Disclosure Policy.
+                            `;
+                            break;
+                        case 'status':
+                            response = `
+                                <span style="color: ${primaryColor}; font-weight: bold;">COMMUNITY DIAGNOSTICS [v1.0]:</span>
+                                <br>[+] Core Servers: <span style="color: #00FF00;">ONLINE</span> (Global Access)
+                                <br>[+] Education DB: <span style="color: #00FF00;">SYNCHRONIZED</span> (100% Free)
+                                <br>[+] Community Health: <span style="color: #00FF00;">OPTIMAL</span>
+                            `;
+                            break;
+                        case 'clear':
+                            output.innerHTML = '';
+                            response = 'Terminal session cleared.';
+                            break;
+                        default:
+                            response = `<span style="color: red;">ERROR: Invalid command: ${originalCommand}</span>
+                                        <br>Type '<span style="color: ${secondaryColor};">help</span>' for command list.`;
+                    }
+                }
+                
+                setTimeout(() => {
+                    printLine(response);
+                }, 100);
+
+                input.value = '';
+            }
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCommand(input.value);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (history.length > 0) {
+                        historyIndex = (historyIndex < history.length - 1) ? historyIndex + 1 : history.length - 1;
+                        input.value = history[historyIndex];
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex >= 0) {
+                        historyIndex = (historyIndex > 0) ? historyIndex - 1 : -1;
+                        input.value = (historyIndex === -1) ? '' : history[historyIndex];
+                    }
+                }
+            });
+
+            // Initial welcome message
+            function showWelcome() {
+                const welcomeMessage = `
+                    <span style="color: ${primaryColor}; font-weight: bold;">CRACKSOFT OS v4.1 | DIGITAL DEFENDER INITIALIZED</span>
+                    <br>Connecting to Community Network... <span style="color: ${secondaryColor};">[ SUCCESS ]</span>
+                    <br>System ready for query.
+                    <br>----------------------------------------
+                    <br>Type '<span style="color: ${secondaryColor};">help</span>' for a list of commands.
+                `;
+                printLine(welcomeMessage);
+            }
+
+            if (!window.location.hash.startsWith('#/')) {
+                 showWelcome();
+            }
+        }
+    </script>
+</body>
+</html>
