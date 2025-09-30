@@ -75,7 +75,32 @@
             color: var(--color-bg-dark);
             font-weight: bold;
         }
-        /* REMOVED: TinyMCE Dark Mode Styling */
+        /* Custom Editor Styles for Drag-and-Drop and Buttons */
+        .custom-editor-container {
+            border: 1px solid rgba(108, 78, 240, 0.4);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .editor-toolbar {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid rgba(108, 78, 240, 0.4);
+        }
+        .editor-button {
+            color: #E9F0F4;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .editor-button:hover {
+            background-color: rgba(78, 240, 228, 0.1);
+            color: var(--color-accent-secondary);
+        }
+        .dropzone-active {
+            border: 2px dashed var(--color-accent-secondary);
+            background-color: rgba(78, 240, 228, 0.05);
+        }
     </style>
 </head>
 <body class="p-4">
@@ -183,8 +208,13 @@
 
                     <div>
                         <label for="postContent" class="block text-sm font-medium text-gray-400 mb-1">Markdown Content Editor</label>
-                        <textarea id="postContent" rows="15" required
-                            class="w-full p-3 rounded-lg input-style text-white h-[500px] resize-none"></textarea>
+                        <div id="customEditor" class="custom-editor-container">
+                            <div id="editorToolbar" class="editor-toolbar flex space-x-1 p-1">
+                                </div>
+                            <textarea id="postContent" rows="15" required
+                                class="w-full p-3 text-white font-mono h-[500px] resize-none focus:outline-none"></textarea>
+                        </div>
+                        <p id="imageUploadStatus" class="text-sm mt-2 hidden"></p>
                     </div>
 
                     <p id="blogSaveMessage" class="text-sm h-6 text-center"></p>
@@ -206,13 +236,14 @@
             branchName: 'main',
         };
         const GITHUB_POSTS_PATH = '_posts';
+        // NEW: Folder for image assets
+        const GITHUB_ASSETS_PATH = 'assets/img/posts'; 
         const API_BASE_URL = 'https://api.github.com';
         // --- END CONFIG ---
 
         let githubUser = 'N/A';
         let currentTab = 'dashboard';
-        // TinyMCE is removed, so this flag is no longer strictly needed but kept for minimal change
-        let tinymceInitialized = false; 
+        let customEditorSetup = false; 
 
         // State to hold application data and configuration
         const state = {
@@ -237,6 +268,9 @@
             postAuthor: document.getElementById('postAuthor'),
             postTags: document.getElementById('postTags'),
             postContent: document.getElementById('postContent'), // The standard textarea now
+            customEditor: document.getElementById('customEditor'), // NEW
+            editorToolbar: document.getElementById('editorToolbar'), // NEW
+            imageUploadStatus: document.getElementById('imageUploadStatus'), // NEW
             currentFilePath: document.getElementById('currentFilePath'),
             currentFilePathContainer: document.getElementById('currentFilePathContainer'),
             autoFilenameNotice: document.getElementById('autoFilenameNotice'),
@@ -249,6 +283,19 @@
 
         function base64Encode(str) {
             return btoa(unescape(encodeURIComponent(str)));
+        }
+        
+        // NEW: Function to convert a File object to a Base64 string for GitHub
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    // Remove the data URL prefix (e.g., "data:image/png;base64,")
+                    resolve(reader.result.split(',')[1]);
+                };
+                reader.onerror = error => reject(error);
+            });
         }
 
         function base64Decode(str) {
@@ -284,19 +331,191 @@
             document.getElementById('closeAlert').onclick = () => document.body.removeChild(confirmBox);
         }
 
-        // --- TinyMCE Replacement Functions ---
+        // --- CUSTOM EDITOR FUNCTIONS ---
+
+        function renderCustomEditorToolbar() {
+            if (!dom.editorToolbar) return;
+            dom.editorToolbar.innerHTML = `
+                <button type="button" class="editor-button" title="Bold (**b**)" onclick="applyFormatting('bold')">
+                    <i data-lucide="bold" class="w-5 h-5"></i>
+                </button>
+                <button type="button" class="editor-button" title="Italic (*i*)" onclick="applyFormatting('italic')">
+                    <i data-lucide="italic" class="w-5 h-5"></i>
+                </button>
+                <button type="button" class="editor-button" title="Code (\`code\`)" onclick="applyFormatting('code')">
+                    <i data-lucide="code" class="w-5 h-5"></i>
+                </button>
+                <div class="border-l border-gray-700 h-6 my-auto"></div>
+                <button type="button" class="editor-button" title="Insert Image (Upload to GitHub)" onclick="document.getElementById('imageFileInput').click()">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                </button>
+                <input type="file" id="imageFileInput" accept="image/*" class="hidden" />
+            `;
+            lucide.createIcons();
+            
+            // Attach file selection listener
+            document.getElementById('imageFileInput').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    uploadImageToGithub(e.target.files[0]);
+                    e.target.value = ''; // Reset input to allow re-uploading the same file
+                }
+            });
+        }
+        
+        window.applyFormatting = function(format) {
+            const textarea = dom.postContent;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            let wrap = '';
+            
+            switch(format) {
+                case 'bold':
+                    wrap = '**';
+                    break;
+                case 'italic':
+                    wrap = '*';
+                    break;
+                case 'code':
+                    wrap = '`';
+                    break;
+            }
+            
+            const newText = textarea.value.substring(0, start) + wrap + selectedText + wrap + textarea.value.substring(end);
+            textarea.value = newText;
+            
+            // Restore selection state
+            if (selectedText.length > 0) {
+                textarea.selectionStart = start;
+                textarea.selectionEnd = end + (wrap.length * 2);
+            } else {
+                 textarea.selectionStart = start + wrap.length;
+                 textarea.selectionEnd = start + wrap.length;
+            }
+            textarea.focus();
+        }
+
+        function setupEditorInteractions() {
+            if (customEditorSetup || !dom.customEditor) return;
+
+            const editor = dom.customEditor;
+            const textarea = dom.postContent;
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                editor.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            // Highlight drop zone
+            ['dragenter', 'dragover'].forEach(eventName => {
+                editor.addEventListener(eventName, () => {
+                    editor.classList.add('dropzone-active');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                editor.addEventListener(eventName, () => {
+                    editor.classList.remove('dropzone-active');
+                }, false);
+            });
+            
+            // Handle drop event
+            editor.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    uploadImageToGithub(files[0]);
+                } else if (files.length > 0) {
+                    dom.imageUploadStatus.textContent = `Dropped file is not a supported image type.`;
+                    dom.imageUploadStatus.className = 'text-sm mt-2 text-red-400';
+                    dom.imageUploadStatus.classList.remove('hidden');
+                }
+            }, false);
+
+            customEditorSetup = true;
+        }
+
+        async function uploadImageToGithub(file) {
+            dom.imageUploadStatus.classList.remove('hidden', 'text-red-400', 'text-green-400');
+            dom.imageUploadStatus.className = 'text-sm mt-2 text-yellow-400';
+            dom.imageUploadStatus.textContent = `Uploading ${file.name} to GitHub... Please wait.`;
+            
+            const { repoPath, branchName } = state.repoConfig;
+            
+            // 1. Generate filename and path
+            const timestamp = Date.now();
+            const originalName = file.name;
+            const safeName = originalName.replace(/[^a-z0-9.]/gi, '_');
+            const filename = `${timestamp}_${safeName}`;
+            const targetPath = `${GITHUB_ASSETS_PATH}/${filename}`;
+            
+            try {
+                // 2. Convert file to Base64
+                const base64Content = await fileToBase64(file);
+                
+                // 3. Prepare Commit Payload
+                const commitPayload = {
+                    message: `Add image: ${filename}`,
+                    content: base64Content,
+                    branch: branchName,
+                };
+                
+                // 4. Execute the commit (PUT request)
+                const result = await githubApi('PUT', `/repos/${repoPath}/contents/${targetPath}`, commitPayload);
+                
+                if (result && result.content && result.content.html_url) {
+                    // Success - Image is now committed to the repo
+                    
+                    // Create the raw content URL for the image
+                    // GitHub content API URLs (html_url) are not the raw file URL.
+                    // We must construct the raw URL: 
+                    // https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}
+                    const rawUrl = `https://raw.githubusercontent.com/${repoPath}/${branchName}/${targetPath}`;
+
+                    // 5. Insert Markdown into the editor
+                    const markdownTag = `\n\n![${file.name}](${rawUrl})\n\n`;
+                    const textarea = dom.postContent;
+                    const start = textarea.selectionStart;
+                    const newText = textarea.value.substring(0, start) + markdownTag + textarea.value.substring(start);
+                    textarea.value = newText;
+                    
+                    dom.imageUploadStatus.textContent = `Image uploaded and inserted! Path: ${rawUrl}`;
+                    dom.imageUploadStatus.className = 'text-sm mt-2 text-green-400';
+                    
+                    // Move cursor after the inserted tag
+                    textarea.selectionStart = start + markdownTag.length;
+                    textarea.selectionEnd = start + markdownTag.length;
+                    textarea.focus();
+
+                } else {
+                    throw new Error("Commit failed or response was incomplete.");
+                }
+                
+            } catch (error) {
+                console.error("Image Upload Error:", error);
+                dom.imageUploadStatus.textContent = `Upload FAILED: ${error.message}. Check console and PAT scope.`;
+                dom.imageUploadStatus.className = 'text-sm mt-2 text-red-400';
+            }
+        }
+        
+        // --- TinyMCE Replacement/Wrapper Functions (Now managing the Custom Editor) ---
 
         function initializeTinyMCE(content) {
-            // TinyMCE is removed, so we just set the content of the standard textarea.
+            // Setup the custom editor and its toolbar
+            if (!customEditorSetup) {
+                renderCustomEditorToolbar();
+                setupEditorInteractions();
+            }
+            
+            // Set content of the standard textarea.
             dom.postContent.value = content || '';
-            // We set the flag to true just to satisfy the original logic structure, 
-            // though it does nothing now.
-            tinymceInitialized = true; 
         }
         
         function destroyTinyMCE() {
-            // TinyMCE is removed, so this function is now empty.
-            tinymceInitialized = false;
+            // Only hide status message on modal close
+            dom.imageUploadStatus.classList.add('hidden');
         }
 
         // --- GitHub API Integration ---
@@ -676,6 +895,7 @@
                 <div class="p-4 mb-6 bg-orange-900 border border-orange-500 rounded-lg text-white">
                     <p class="font-bold flex items-center"><i data-lucide="git-branch" class="w-5 h-5 mr-2 text-orange-400"></i> GIT NOTE</p>
                     <p class="text-sm mt-1">Changes here result in direct commits to the **${state.repoConfig.branchName}** branch of **${state.repoConfig.repoPath}**.</p>
+                    <p class="text-sm mt-1">Images are uploaded to: **${GITHUB_ASSETS_PATH}**</p>
                 </div>
                 
                 <div class="flex justify-end items-center mb-4">
@@ -712,7 +932,7 @@
                 dom.autoFilenameNotice.classList.remove('hidden');
                 dom.currentFilePathContainer.classList.add('flex-1');
                 
-                // Set content via replacement function
+                // Set content via replacement function (initializes custom editor)
                 initializeTinyMCE('');
 
             } else { // Edit mode
@@ -730,7 +950,7 @@
                 dom.autoFilenameNotice.classList.add('hidden');
                 dom.currentFilePathContainer.classList.remove('flex-1');
                 
-                // Set content via replacement function
+                // Set content via replacement function (initializes custom editor)
                 initializeTinyMCE(state.editingPost.content);
             }
             
@@ -753,7 +973,7 @@
             
             const { repoPath, branchName } = state.repoConfig;
             
-            // MODIFIED: Get content directly from the textarea
+            // MODIFIED: Get content directly from the custom textarea
             const htmlContent = dom.postContent.value;
             
             const title = dom.postTitle.value.trim();
