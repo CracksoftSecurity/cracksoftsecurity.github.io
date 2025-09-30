@@ -101,6 +101,11 @@
             border: 2px dashed var(--color-accent-secondary);
             background-color: rgba(78, 240, 228, 0.05);
         }
+        /* FIX: Ensure textarea background is dark for readability */
+        #postContent {
+            background-color: rgba(0, 0, 0, 0.9); /* Darker background for visibility */
+            color: var(--color-text-light);
+        }
     </style>
 </head>
 <body class="p-4">
@@ -162,9 +167,9 @@
             
             <div class="p-3 bg-gray-900 border-t border-accent-primary flex justify-between items-center text-xs text-gray-500">
                 <span id="cms-user-id">User: N/A</span>
-                <button onclick="window.location.href = '../index.html'" type="button" 
+                <button onclick="window.open('https://cracksoftsecurity.github.io', '_blank')" type="button" 
                     class="px-3 py-1 text-xs font-semibold rounded-md text-gray-400 border border-gray-700 hover:bg-gray-800 transition duration-200 flex items-center">
-                    <i data-lucide="arrow-left" class="w-3 h-3 inline mr-1"></i> Back to Terminal
+                    <i data-lucide="external-link" class="w-3 h-3 inline mr-1"></i> View Live Blog
                 </button>
             </div>
         </section>
@@ -235,8 +240,9 @@
             repoPath: 'CracksoftSecurity/cracksoftsecurity.github.io',
             branchName: 'main',
         };
+        // BLOG_URL: Changed from netlify to your GitHub Pages URL.
+        const BLOG_URL = 'https://cracksoftsecurity.github.io'; 
         const GITHUB_POSTS_PATH = '_posts';
-        // NEW: Folder for image assets
         const GITHUB_ASSETS_PATH = 'assets/img/posts'; 
         const API_BASE_URL = 'https://api.github.com';
         // --- END CONFIG ---
@@ -1401,6 +1407,12 @@ tags: [${tagsFormatted}]
                     switchTab(button.getAttribute('data-tab'));
                 });
             });
+            
+            // FIX: Update the URL in the CMS footer on load
+            document.querySelector('.p-3.bg-gray-900.border-t.border-accent-primary button').onclick = () => {
+                window.open(BLOG_URL, '_blank');
+            };
+
 
             // If a PAT is already stored (from a previous session), attempt to verify and log in
             if (state.githubPat) {
